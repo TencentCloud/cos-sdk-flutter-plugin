@@ -1,0 +1,22 @@
+//1、文件名称由config.template修改为config.dart
+//2、修改以下常量值为真实内容
+//3、COS_SECRET_ID和COS_SECRET_KEY仅在本地永久秘钥调试时使用，使用临时秘钥的话可以不填
+
+class TestConst {
+  // 腾讯云APP ID
+  late String COS_APP_ID="XXXXXXXX";
+  // 是否使用临时密钥请求 COS
+  late bool USE_SESSION_TOKEN_CREDENTIAL = true;
+  // 腾讯云永久密钥 SecretID
+  late String SECRET_ID="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  // 腾讯云永久密钥 SecretKey
+  late String SECRET_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+  // STS 临时密钥服务器地址
+  late String STS_URL = "http://stsservice.com/sts";
+  // 存储桶所在地域
+  late String PERSIST_BUCKET_REGION="ap-guangzhou";
+
+  TestConst._internal();
+  factory TestConst() => _instance;
+  static final TestConst _instance = TestConst._internal();
+}

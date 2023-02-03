@@ -1,0 +1,93 @@
+PODS:
+  - DKImagePickerController/Core (4.3.4):
+    - DKImagePickerController/ImageDataManager
+    - DKImagePickerController/Resource
+  - DKImagePickerController/ImageDataManager (4.3.4)
+  - DKImagePickerController/PhotoGallery (4.3.4):
+    - DKImagePickerController/Core
+    - DKPhotoGallery
+  - DKImagePickerController/Resource (4.3.4)
+  - DKPhotoGallery (0.0.17):
+    - DKPhotoGallery/Core (= 0.0.17)
+    - DKPhotoGallery/Model (= 0.0.17)
+    - DKPhotoGallery/Preview (= 0.0.17)
+    - DKPhotoGallery/Resource (= 0.0.17)
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Core (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Preview
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Model (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Preview (0.0.17):
+    - DKPhotoGallery/Model
+    - DKPhotoGallery/Resource
+    - SDWebImage
+    - SwiftyGif
+  - DKPhotoGallery/Resource (0.0.17):
+    - SDWebImage
+    - SwiftyGif
+  - file_picker (0.0.1):
+    - DKImagePickerController/PhotoGallery
+    - Flutter
+  - Flutter (1.0.0)
+  - path_provider_ios (0.0.1):
+    - Flutter
+  - QCloudCore (6.1.7):
+    - QCloudCore/Default (= 6.1.7)
+  - QCloudCore/Default (6.1.7)
+  - QCloudCOSXML (6.1.7):
+    - QCloudCOSXML/Default (= 6.1.7)
+  - QCloudCOSXML/Default (6.1.7):
+    - QCloudCore (= 6.1.7)
+  - SDWebImage (5.13.5):
+    - SDWebImage/Core (= 5.13.5)
+  - SDWebImage/Core (5.13.5)
+  - SwiftyGif (5.4.3)
+  - tencentcloud_cos_sdk_plugin (1.0.0):
+    - Flutter
+    - QCloudCOSXML (>= 6.1.7)
+
+DEPENDENCIES:
+  - file_picker (from `.symlinks/plugins/file_picker/ios`)
+  - Flutter (from `Flutter`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - tencentcloud_cos_sdk_plugin (from `.symlinks/plugins/tencentcloud_cos_sdk_plugin/ios`)
+
+SPEC REPOS:
+  trunk:
+    - DKImagePickerController
+    - DKPhotoGallery
+    - QCloudCore
+    - QCloudCOSXML
+    - SDWebImage
+    - SwiftyGif
+
+EXTERNAL SOURCES:
+  file_picker:
+    :path: ".symlinks/plugins/file_picker/ios"
+  Flutter:
+    :path: Flutter
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  tencentcloud_cos_sdk_plugin:
+    :path: ".symlinks/plugins/tencentcloud_cos_sdk_plugin/ios"
+
+SPEC CHECKSUMS:
+  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
+  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
+  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  QCloudCore: cbf7f1140ef71c6cc372af0ded71c9188ea8c5b1
+  QCloudCOSXML: 9c208ae9311d62d02c1a34f9f40f4c5aec817100
+  SDWebImage: 23d714cd599354ee7906dbae26dff89b421c4370
+  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
+  tencentcloud_cos_sdk_plugin: 1eb4c3b29584dead25a76e3f8633e715c201c5c5
+
+PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
+
+COCOAPODS: 1.11.3
