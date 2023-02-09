@@ -60,6 +60,7 @@ class _BucketListPageState extends State<BucketListPage> {
                 if(isAdd == true){
                   _refreshController.requestRefresh();
                 }
+                // await MyRouterDelegate.of(context).push(name: "/test");
               },
               icon: const Icon(Icons.add),
             ),

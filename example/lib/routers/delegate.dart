@@ -4,6 +4,7 @@ import '../bucket/bucket_add_page.dart';
 import '../bucket/bucket_list_page.dart';
 import '../bucket/region_list_page.dart';
 import '../object/object_list_page.dart';
+import '../test/test_page.dart';
 import '../transfer/download_page.dart';
 import '../transfer/upload_page.dart';
 import '../common/toast_utils.dart';
@@ -105,6 +106,9 @@ class MyRouterDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
         break;
       case '/upload':
         child = UploadPage(routeSettings.arguments! as Map<String, String?>);
+        break;
+      case '/test':
+        child = TestPage();
         break;
       default:
         child = const NotFoundPage();

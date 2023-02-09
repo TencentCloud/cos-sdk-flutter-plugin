@@ -1,11 +1,11 @@
 name: tencentcloud_cos_sdk_plugin
 description: Tencent Cloud Flutter Plugin COS SDK.
-version: 1.0.0+1
-homepage: https://cloud.tencent.com/document/product/436/6474
+version: 1.0.0
+homepage: https://cloud.tencent.com/document/product/436/86294
 repository: https://github.com/TencentCloud/cos-sdk-flutter-plugin
 
 environment:
-  sdk: '>=2.12.0'
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ">=2.5.0"
 
 dependencies:

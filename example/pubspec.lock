@@ -360,10 +360,10 @@ packages:
   tencentcloud_cos_sdk_plugin:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "1.0.0+1"
+      name: tencentcloud_cos_sdk_plugin
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   term_glyph:
     dependency: transitive
     description:

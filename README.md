@@ -4,13 +4,14 @@
 - [SDK 源码下载](https://github.com/TencentCloud/cos-sdk-flutter-plugin)
 - [示例 Demo](https://github.com/TencentCloud/cos-sdk-flutter-plugin/tree/main/example)
 - [SDK 更新日志](https://github.com/TencentCloud/cos-sdk-flutter-plugin/blob/master/CHANGELOG.md)
+- [更多使用方式](https://cloud.tencent.com/document/product/436/86294)
 
 ## 准备工作
 
 1. 您需要一个纯 Flutter 项目或 Flutter 原生混合项目，这个应用可以是您现有的工程，也可以是您新建的一个空的工程。
 2. Flutter 版本要求：
 ```
-  sdk: '>=2.12.0'
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ">=2.5.0"
 ```
 
@@ -27,7 +28,7 @@ flutter pub add tencentcloud_cos_sdk_plugin
 dependencies:
   tencentcloud_cos_sdk_plugin: ^1.0.0
 ```
-3. 在你的 Dart 代码中，你可以使用 import 进行导入，然后开始使用：
+3. 在您的 Dart 代码中，您可以使用 import 进行导入，然后开始使用：
 ```
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 ```
@@ -38,7 +39,7 @@ import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 > - 建议用户 [使用临时密钥](https://cloud.tencent.com/document/product/436/14048) 调用 SDK，通过临时授权的方式进一步提高 SDK 使用的安全性。申请临时密钥时，请遵循 [最小权限指引原则](https://cloud.tencent.com/document/product/436/38618)，防止泄漏目标存储桶或对象之外的资源。
 > - 如果您一定要使用永久密钥，建议遵循 [最小权限指引原则](https://cloud.tencent.com/document/product/436/38618) 对永久密钥的权限范围进行限制。
 
-### 1. 初始化秘钥
+### 1. 初始化密钥
 
 #### 实现获取临时密钥
 
@@ -57,7 +58,7 @@ class FetchCredentials implements IFetchCredentials{
     // 首先从您的临时密钥服务器获取包含了密钥信息的响应，例如：
     var httpClient = HttpClient();
     try {
-      // 临时密钥服务器url
+      // 临时密钥服务器 url
       var stsUrl = "http://stsservice.com/sts";
       var request = await httpClient.getUrl(Uri.parse(stsUrl));
       var response = await request.close();
@@ -116,24 +117,50 @@ CosXmlServiceConfig serviceConfig = CosXmlServiceConfig(
 Cos().registerDefaultService(serviceConfig);
 
 // 创建 TransferConfig 对象，根据需要修改默认的配置参数
+// TransferConfig 可以设置智能分块阈值 默认对大于或等于2M的文件自动进行分块上传，可以通过如下代码修改分块阈值
 TransferConfig transferConfig = TransferConfig(
     forceSimpleUpload: false,
     enableVerification: true,
-    divisionForUpload: 2097152, //2M
-    sliceSizeForUpload: 1048576, //1M
+    divisionForUpload: 2097152, // 设置大于等于 2M 的文件进行分块上传
+    sliceSizeForUpload: 1048576, //设置默认分块大小为 1M
 );
 // 注册默认 COS TransferManger
 Cos().registerDefaultTransferManger(serviceConfig, transferConfig);
 
-// 也可以通过registerService和registerTransferManger注册其他实例， 用于后续调用
-// 一般用region作为注册的key
+// 也可以通过 registerService 和 registerTransferManger 注册其他实例， 用于后续调用
+// 一般用 region 作为注册的key
 String newRegion = "NEW_COS_REGION";
 Cos().registerService(newRegion, serviceConfig..region = newRegion);
 Cos().registerTransferManger(newRegion, serviceConfig..region = newRegion, transferConfig);
 ```
 
->? 关于存储桶不同地域的简称请参考 [地域和访问域名](https://cloud.tencent.com/document/product/436/6224)。
->
+#### 参数说明
+
+CosXmlServiceConfig 用于配置 COS 服务，其主要成员说明如下：
+
+| 参数名称   | 描述                                                         | 类型   | 默认值 | 支持平台 |
+| ---------- | ------------------------------------------------------------ | ------ | ------ |------ |
+| region | 存储桶地域 [地域和访问域名](https://cloud.tencent.com/document/product/436/6224) | String | null | Android和iOS |
+| connectionTimeout | 连接超时时间（单位是毫秒） | Int | Android(15000) iOS(30000) | Android和iOS |
+| socketTimeout | 读写超时时间（单位是毫秒） | Int | 30000 | Android |
+| isHttps | 是否使用https协议 | Bool | true | Android和iOS |
+| host | 设置除了 GetService 请求外的 host | String | null | Android和iOS |
+| hostFormat | 设置 host 的格式化字符串，sdk 会将 \$\{bucket\} 替换为真正的 bucket，\$\{region\} 替换为真正的 region<br>例如将 hostFormat 设置为  \$\{bucket\}.\$\{region\}.tencent.com，并且您的存储桶和地域分别为 bucket-1250000000 和 ap-shanghai，那么最终的请求地址为 `bucket-1250000000.ap-shanghai.tencent.com`<br><li>注意，这个设置不会影响 GetService 请求 | String | null | Android |
+| port | 设置请求的端口 | Int | null | Android |
+| isDebuggable | 是否是 debug 模式（debug 模式会打印 debug 日志） | Bool | false | Android |
+| signInUrl | 是否将签名放在 URL 中，默认放在 Header 中 | Bool | false | Android |
+| userAgent | ua 拓展参数 | String | null | Android和iOS |
+| dnsCache | 是否开启 DNS 解析缓存，开启后，将 DNS 解析的结果缓存在本地，当系统 DNS 解析失败后，会使用本地缓存的 DNS 结果 | Bool | true | Android |
+| accelerate | 是否使用全球加速域名 | Bool | false | Android和iOS |
+
+TransferConfig 用于配置 COS 上传服务，其主要成员说明如下：
+
+| 参数名称   | 描述                                                         | 类型   | 默认值 | 支持平台 |
+| ---------- | ------------------------------------------------------------ | ------ | ------ |------ |
+| divisionForUpload | 设置启用分块上传的最小对象大小 | Int | 2097152 | Android和iOS |
+| sliceSizeForUpload | 设置分块上传时的分块大小 | Int | 1048576 | Android和iOS |
+| enableVerification | 分片上传时是否整体校验 | Bool | true | Android和iOS |
+| forceSimpleUpload | 是否强制使用简单上传 | Bool | false | Android |
 
 ## 第四步：访问 COS 服务
 
@@ -202,6 +229,9 @@ SDK 支持上传本地文件、二进制数据。下面以上传本地文件为�
 ```dart
     // 高级下载接口支持断点续传，所以会在下载前先发起 HEAD 请求获取文件信息。
     // 如果您使用的是临时密钥或者使用子账号访问，请确保权限列表中包含 HeadObject 的权限。
+
+    // TransferManager 支持断点下载，您只需要保证 bucket、cosPath、savePath
+    // 参数一致，SDK 便会从上次已经下载的位置继续下载。
 
     // 获取 TransferManager
     CosTransferManger transferManager = Cos().getDefaultTransferManger();

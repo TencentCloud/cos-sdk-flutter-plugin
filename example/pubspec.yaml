@@ -26,6 +26,8 @@ dependencies:
     # the parent directory to use the current plugin's version.
     path: ../
 
+#  tencentcloud_cos_sdk_plugin: ^1.0.0
+
 #  tencentcloud_cos_sdk_plugin:
 #    git: https://github.com/TencentCloud/cos-sdk-flutter-plugin.git
 
