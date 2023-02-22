@@ -53,17 +53,17 @@ class Cos {
   }
 
   Future<CosService> registerDefaultService(CosXmlServiceConfig config) async {
-    await _cosApi.registerDefaultService(config);
-    var cosService = CosService(DEFAULT_KEY);
-    _cosServices[DEFAULT_KEY] = cosService;
+    String key = await _cosApi.registerDefaultService(config);
+    var cosService = CosService(key);
+    _cosServices[key] = cosService;
     return cosService;
   }
 
   Future<CosTransferManger> registerDefaultTransferManger(
       CosXmlServiceConfig config, TransferConfig transferConfig) async {
-    await _cosApi.registerDefaultTransferManger(config, transferConfig);
-    var cosTransferManger = CosTransferManger(DEFAULT_KEY);
-    _cosTransferMangers[DEFAULT_KEY] = cosTransferManger;
+    String key = await _cosApi.registerDefaultTransferManger(config, transferConfig);
+    var cosTransferManger = CosTransferManger(key);
+    _cosTransferMangers[key] = cosTransferManger;
     return cosTransferManger;
   }
 
@@ -73,9 +73,9 @@ class Cos {
       throw IllegalArgumentException("register key cannot be empty");
     }
 
-    await _cosApi.registerService(serviceKey, config);
-    var cosService = CosService(serviceKey);
-    _cosServices[serviceKey] = cosService;
+    String key = await _cosApi.registerService(serviceKey, config);
+    var cosService = CosService(key);
+    _cosServices[key] = cosService;
     return cosService;
   }
 
@@ -85,9 +85,9 @@ class Cos {
       throw IllegalArgumentException("register key cannot be empty");
     }
 
-    await _cosApi.registerTransferManger(serviceKey, config, transferConfig);
-    var cosTransferManger = CosTransferManger(serviceKey);
-    _cosTransferMangers[serviceKey] = cosTransferManger;
+    String key = await _cosApi.registerTransferManger(serviceKey, config, transferConfig);
+    var cosTransferManger = CosTransferManger(key);
+    _cosTransferMangers[key] = cosTransferManger;
     return cosTransferManger;
   }
 

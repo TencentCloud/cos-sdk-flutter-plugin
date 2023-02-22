@@ -8,14 +8,18 @@ abstract class CosApi {
 
   void setCloseBeacon(bool isCloseBeacon);
 
-  void registerDefaultService(CosXmlServiceConfig config);
+  @async
+  String registerDefaultService(CosXmlServiceConfig config);
 
-  void registerDefaultTransferManger(
+  @async
+  String registerDefaultTransferManger(
       CosXmlServiceConfig config, TransferConfig? transferConfig);
 
-  void registerService(String key, CosXmlServiceConfig config);
+  @async
+  String registerService(String key, CosXmlServiceConfig config);
 
-  void registerTransferManger(String key, CosXmlServiceConfig config,
+  @async
+  String registerTransferManger(String key, CosXmlServiceConfig config,
       TransferConfig? transferConfig);
 }
 

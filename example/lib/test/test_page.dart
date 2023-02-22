@@ -140,13 +140,13 @@ class _TestPageState extends State<TestPage> {
               onPressed: () async {
                 // // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
                 // String bucket = "examplebucket-1250000000";
-                // // prevPageResult 是上一页的返回结果，这里的 nextMarker 表示下一页的起始位置
-                // String nextMarker = prevPageResult.listBucket.nextMarker;
+                // // prevPageBucketContents 是上一页的返回结果，这里的 nextMarker 表示下一页的起始位置
+                // String prevPageMarker = prevPageBucketContents.nextMarker;
                 // try {
                 //   BucketContents bucketContents = await Cos().getDefaultService().getBucket(
                 //       bucket,
                 //       prefix: "dir/", // 前缀匹配，用来规定返回的对象前缀地址
-                //       marker: nextMarker, // 起始位置
+                //       marker: prevPageMarker, // 起始位置
                 //       maxKeys: 100 // 单次返回最大的条目数量，默认1000
                 //   );
                 //   // 表示数据被截断，需要拉取下一页数据
@@ -225,13 +225,14 @@ class _TestPageState extends State<TestPage> {
               onPressed: () async {
                 // 存储桶region可以在COS控制台指定存储桶的概览页查看 https://console.cloud.tencent.com/cos5/bucket/ ，关于地域的详情见 https://cloud.tencent.com/document/product/436/6224
                 String region = "ap-beijing"; // 您的存储桶地域
+                bool accelerate = true; // 使能全球加速域名
 
                 // 创建 CosXmlServiceConfig 对象，根据需要修改默认的配置参数
                 CosXmlServiceConfig serviceConfig = CosXmlServiceConfig(
                     region: region,
                     isDebuggable: false,
                     isHttps: true,
-                    accelerate: true // 使能全球加速域名
+                    accelerate: accelerate
                 );
                 // 注册默认 COS Service
                 Cos().registerDefaultService(serviceConfig);

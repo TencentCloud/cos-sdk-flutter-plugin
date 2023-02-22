@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,7 +12,6 @@ import com.tencent.cos.xml.CosXmlBaseService;
 import com.tencent.cos.xml.CosXmlService;
 import com.tencent.cos.xml.CosXmlServiceConfig;
 import com.tencent.cos.xml.common.COSStorageClass;
-import com.tencent.cos.xml.common.ClientErrorCode;
 import com.tencent.cos.xml.exception.CosXmlClientException;
 import com.tencent.cos.xml.exception.CosXmlServiceException;
 import com.tencent.cos.xml.listener.CosXmlBooleanListener;
@@ -52,24 +50,18 @@ import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.InitMultipleUploadListener;
 import com.tencent.cos.xml.transfer.TransferConfig;
 import com.tencent.cos.xml.transfer.TransferManager;
-import com.tencent.qcloud.core.auth.BasicLifecycleCredentialProvider;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
-import com.tencent.qcloud.core.auth.QCloudLifecycleCredentials;
-import com.tencent.qcloud.core.auth.SessionQCloudCredentials;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import java8.util.concurrent.CompletableFuture;
 
 /**
  * CosPlugin
@@ -131,7 +123,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void registerDefaultService(@NonNull Pigeon.CosXmlServiceConfig config) {
+    public void registerDefaultService(@NonNull Pigeon.CosXmlServiceConfig config, Pigeon.Result<String> result) {
         COMMAND_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -140,6 +132,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                     @Override
                     public void run() {
                         cosServices.put(DEFAULT_KEY, service);
+                        result.success(DEFAULT_KEY);
                     }
                 });
             }
@@ -147,7 +140,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void registerDefaultTransferManger(@NonNull Pigeon.CosXmlServiceConfig config, @Nullable Pigeon.TransferConfig transferConfig) {
+    public void registerDefaultTransferManger(@NonNull Pigeon.CosXmlServiceConfig config, @Nullable Pigeon.TransferConfig transferConfig, Pigeon.Result<String> result) {
         COMMAND_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
@@ -156,6 +149,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                     @Override
                     public void run() {
                         transferManagers.put(DEFAULT_KEY, transferManager);
+                        result.success(DEFAULT_KEY);
                     }
                 });
             }
@@ -163,9 +157,9 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void registerService(@NonNull String key, @NonNull Pigeon.CosXmlServiceConfig config) {
+    public void registerService(@NonNull String key, @NonNull Pigeon.CosXmlServiceConfig config, Pigeon.Result<String> result) {
         if (key.isEmpty()) {
-            throw new IllegalArgumentException("register key cannot be empty");
+            result.error(new IllegalArgumentException("register key cannot be empty"));
         }
         COMMAND_EXECUTOR.execute(new Runnable() {
             @Override
@@ -175,6 +169,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                     @Override
                     public void run() {
                         cosServices.put(key, service);
+                        result.success(key);
                     }
                 });
             }
@@ -182,9 +177,9 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void registerTransferManger(@NonNull String key, @NonNull Pigeon.CosXmlServiceConfig config, @Nullable Pigeon.TransferConfig transferConfig) {
+    public void registerTransferManger(@NonNull String key, @NonNull Pigeon.CosXmlServiceConfig config, @Nullable Pigeon.TransferConfig transferConfig, Pigeon.Result<String> result) {
         if (key.isEmpty()) {
-            throw new IllegalArgumentException("register key cannot be empty");
+            result.error(new IllegalArgumentException("register key cannot be empty"));
         }
         COMMAND_EXECUTOR.execute(new Runnable() {
             @Override
@@ -194,6 +189,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                     @Override
                     public void run() {
                         transferManagers.put(key, transferManager);
+                        result.success(key);
                     }
                 });
             }

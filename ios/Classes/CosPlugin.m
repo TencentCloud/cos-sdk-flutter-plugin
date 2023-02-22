@@ -196,26 +196,30 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     
 }
 
-- (void)registerDefaultServiceConfig:(nonnull CosXmlServiceConfig *)config error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSXMLService registerDefaultCOSXMLWithConfiguration: [self buildConfiguration: config]];
+    completion(DEFAULT_KEY, nil);
 }
 
-- (void)registerDefaultTransferMangerConfig:(nonnull CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (void)registerDefaultTransferMangerConfig:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSTransferMangerService registerDefaultCOSTransferMangerWithConfiguration: [self buildConfiguration: config]];
     if(transferConfig){
         [QCloudCOSTransferConfigCache() setObject:transferConfig forKey:DEFAULT_KEY];
     }
+    completion(DEFAULT_KEY, nil);
 }
 
-- (void)registerServiceKey:(nonnull NSString *)key config:(nonnull CosXmlServiceConfig *)config error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (void)registerServiceKey:(NSString *)key config:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSXMLService registerCOSXMLWithConfiguration: [self buildConfiguration: config] withKey: key];
+    completion(key, nil);
 }
 
-- (void)registerTransferMangerKey:(nonnull NSString *)key config:(nonnull CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (void)registerTransferMangerKey:(NSString *)key config:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSTransferMangerService registerCOSTransferMangerWithConfiguration: [self buildConfiguration: config] withKey: key];
     if(transferConfig){
         [QCloudCOSTransferConfigCache() setObject:transferConfig forKey:key];
     }
+    completion(key, nil);
 }
 
 - (void)setCloseBeaconIsCloseBeacon:(nonnull NSNumber *)isCloseBeacon error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
@@ -418,7 +422,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     [request setFinishBlock:^(id outputObject,NSError*error) {
         if(outputObject){
-            completion((NSDictionary *)outputObject, nil);
+            completion([[outputObject __originHTTPURLResponse__] allHeaderFields], nil);
         } else {
             completion(nil, [self buildFlutterError:error]);
         }
@@ -439,7 +443,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     [request setFinishBlock:^(id outputObject,NSError*error) {
         if(outputObject){
-            completion((NSDictionary *)outputObject, nil);
+            completion([[outputObject __originHTTPURLResponse__] allHeaderFields], nil);
         } else {
             completion(nil, [self buildFlutterError:error]);
         }
@@ -449,6 +453,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 
 - (void)preBuildConnectionBucket:(nonnull NSString *)bucket serviceKey:(nonnull NSString *)serviceKey completion:(void(^)(FlutterError *_Nullable))completion {
     //iOS不支持预连接
+    NSLog(@"iOS does not support");
     completion(nil);
 }
 
@@ -897,7 +902,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 -(FlutterError *)buildFlutterError:(nonnull NSError *) error {
     NSDictionary *userinfoDic = error.userInfo;
     NSString *details = @"";
-    NSString *errorCode = [NSError qcloud_networkErrorCodeTransferToString:error.code];
+    NSString *errorCode = [NSError qcloud_networkErrorCodeTransferToString:(QCloudNetworkErrorCode)error.code];
     if([errorCode isEqualToString:@""]){
         errorCode = [@(error.code) stringValue];
     }
@@ -914,7 +919,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 
 -(NSString *)errorType:(nonnull NSError *) error{
     NSDictionary *userinfoDic = error.userInfo;
-    NSString *errorCode = [NSError qcloud_networkErrorCodeTransferToString:error.code];
+    NSString *errorCode = [NSError qcloud_networkErrorCodeTransferToString:(QCloudNetworkErrorCode)error.code];
     NSString *requestID = @"";
     NSString *error_name = @"Client";
     NSString *errorMsg = userinfoDic[NSLocalizedDescriptionKey];

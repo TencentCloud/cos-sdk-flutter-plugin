@@ -214,7 +214,7 @@ class _UploadPageState extends State<UploadPage> {
       //初始化分块完成回调
       initMultipleUploadCallback(
           String bucket, String cosKey, String uploadId) {
-        uploadId = uploadId;
+        _uploadId = uploadId;
       }
       //开始上传
       _transferTask = await cosTransferManger.upload(widget.bucketName, cosPath,
