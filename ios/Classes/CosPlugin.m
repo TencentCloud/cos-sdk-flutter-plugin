@@ -387,9 +387,52 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [service GetBucketVersioning:request];
 }
 
-- (nullable NSString *)getObjectUrlBucket:(nonnull NSString *)bucket region:(nonnull NSString *)region key:(nonnull NSString *)key serviceKey:(nonnull NSString *)serviceKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)getObjectUrlBucket:(nonnull NSString *)bucket region:(nonnull NSString *)region cosPath:(nonnull NSString *)cosPath serviceKey:(nonnull NSString *)serviceKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     QCloudCOSXMLService * service = [self getQCloudCOSXMLService:serviceKey];
-    return [service getURLWithBucket:bucket object:key withAuthorization:false regionName:region];
+    return [service getURLWithBucket:bucket object:cosPath withAuthorization:false regionName:region];
+}
+
+- (void)getPresignedUrlServiceKey:(nonnull NSString *)serviceKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath signValidTime:(nullable NSNumber *)signValidTime signHost:(nullable NSNumber *)signHost parameters:(nullable NSDictionary<NSString *,NSString *> *)parameters region:(nullable NSString *)region completion:(nonnull void (^)(NSString * _Nullable, FlutterError * _Nullable))completion {
+    QCloudCOSXMLService * service = [self getQCloudCOSXMLService:serviceKey];
+    QCloudGetPresignedURLRequest* getPresignedURLRequest = [[QCloudGetPresignedURLRequest alloc] init];
+
+    // 存储桶名称，由BucketName-Appid 组成，可以在COS控制台查看 https://console.cloud.tencent.com/cos5/bucket
+    getPresignedURLRequest.bucket = bucket;
+    // 对象键，是对象在 COS 上的完整路径，如果带目录的话，格式为 "video/xxx/movie.mp4"
+    getPresignedURLRequest.object = cosPath;
+    getPresignedURLRequest.HTTPMethod = @"GET";
+
+    if(signValidTime){
+        getPresignedURLRequest.expires = [NSDate dateWithTimeIntervalSinceNow:[signValidTime intValue]];
+    }
+    
+    if(signHost){
+        // 获取预签名函数，默认签入Header Host；您也可以选择不签入Header Host，但可能导致请求失败或安全漏洞
+        getPresignedURLRequest.signHost = [signHost boolValue];
+    }
+    
+    if(parameters){
+        // http 请求参数，传入的请求参数需与实际请求相同，能够防止用户篡改此HTTP请求的参数
+        for (NSString *parametersKey in parameters) {
+            [getPresignedURLRequest setValue:[parameters objectForKey:parametersKey] forRequestParameter:parametersKey];
+        }
+    }
+
+    if(region){
+        getPresignedURLRequest.regionName = region;
+    }
+
+    [getPresignedURLRequest setFinishBlock:^(QCloudGetPresignedURLResult * _Nonnull result,
+                                             NSError * _Nonnull error) {
+        if(error == nil){
+            // 预签名 URL
+            completion(result.presienedURL, nil);
+        } else {
+            completion(nil, [self buildFlutterError:error]);
+        }
+    }];
+
+    [service getPresignedURL:getPresignedURLRequest];
 }
 
 - (void)getServiceServiceKey:(nonnull NSString *)serviceKey completion:(nonnull void (^)(ListAllMyBuckets * _Nullable, FlutterError * _Nullable))completion {
@@ -422,7 +465,12 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     [request setFinishBlock:^(id outputObject,NSError*error) {
         if(outputObject){
-            completion([[outputObject __originHTTPURLResponse__] allHeaderFields], nil);
+            NSDictionary* headerAll = [[outputObject __originHTTPURLResponse__] allHeaderFields];
+            NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
+            for (NSString *key in headerAll) {
+                [resultDictionary setObject:[headerAll objectForKey:key] forKey:[key lowercaseString]];
+            }
+            completion(resultDictionary, nil);
         } else {
             completion(nil, [self buildFlutterError:error]);
         }
@@ -443,7 +491,12 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     [request setFinishBlock:^(id outputObject,NSError*error) {
         if(outputObject){
-            completion([[outputObject __originHTTPURLResponse__] allHeaderFields], nil);
+            NSDictionary* headerAll = [[outputObject __originHTTPURLResponse__] allHeaderFields];
+            NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
+            for (NSString *key in headerAll) {
+                [resultDictionary setObject:[headerAll objectForKey:key] forKey:[key lowercaseString]];
+            }
+            completion(resultDictionary, nil);
         } else {
             completion(nil, [self buildFlutterError:error]);
         }
@@ -543,6 +596,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [service PutBucketVersioning:request];
 }
 
+
 - (nullable NSString *)downloadTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region savePath:(nonnull NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     return [self downloadInternalTransferKey:transferKey
                                       bucket:bucket
@@ -600,9 +654,15 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         
         if(resultCallbackKey){
             if(error == nil){
+                NSDictionary* headerAll = [[outputObject __originHTTPURLResponse__] allHeaderFields];
+                NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
+                for (NSString *key in headerAll) {
+                    [resultDictionary setObject:[headerAll objectForKey:key] forKey:[key lowercaseString]];
+                }
+
                 [flutterCosApi resultSuccessCallbackTransferKey:transferKey
                                                             key:resultCallbackKey
-                                                         header:(NSDictionary *)outputObject
+                                                         header:resultDictionary
                                                      completion:^(NSError * _Nullable error) {}
                 ];
             } else {
@@ -827,9 +887,18 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         
         if(resultCallbackKey){
             if(error == nil){
+                NSDictionary* headerAll = [[result __originHTTPURLResponse__] allHeaderFields];
+                NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
+                NSString* encodedAccessUrl = [result.location stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+                [resultDictionary setObject:encodedAccessUrl forKey:@"accessUrl"];
+                [resultDictionary setObject:result.eTag forKey:@"eTag"];
+                NSString* crc64ecma = [headerAll objectForKey: @"x-cos-hash-crc64ecma"];
+                if(crc64ecma){
+                    [resultDictionary setObject:crc64ecma forKey:@"crc64ecma"];
+                }
                 [flutterCosApi resultSuccessCallbackTransferKey:transferKey
                                                             key:resultCallbackKey
-                                                         header:nil
+                                                         header:resultDictionary
                                                      completion:^(NSError * _Nullable error) {}
                 ];
             } else {

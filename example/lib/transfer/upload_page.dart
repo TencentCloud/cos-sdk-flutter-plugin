@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
@@ -14,6 +16,7 @@ import '../common/toast_utils.dart';
 import '../common/utils.dart';
 import '../routers/delegate.dart';
 import '../config/config.dart';
+import 'dart:io';
 
 class UploadPage extends StatefulWidget {
   final String bucketName;
@@ -168,6 +171,7 @@ class _UploadPageState extends State<UploadPage> {
       CosTransferManger cosTransferManger = await getTransferManger();
       // 上传成功回调
       successCallBack(result) {
+        print(result);
         if (mounted) {
           setState(() {
             _resultString = "文件已上传到COS：$cosPath";
@@ -216,9 +220,13 @@ class _UploadPageState extends State<UploadPage> {
           String bucket, String cosKey, String uploadId) {
         _uploadId = uploadId;
       }
+
+      File file = File(_pickFilePath!);
+      Uint8List bytes = file.readAsBytesSync();
       //开始上传
       _transferTask = await cosTransferManger.upload(widget.bucketName, cosPath,
           filePath: _pickFilePath,
+          // byteArr: bytes,
           uploadId: _uploadId,
           resultListener: ResultListener(successCallBack, failCallBack),
           stateCallback: stateCallback,

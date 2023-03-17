@@ -827,12 +827,39 @@ class CosServiceApi {
     }
   }
 
-  Future<String> getObjectUrl(String arg_bucket, String arg_region, String arg_key, String arg_serviceKey) async {
+  Future<String> getObjectUrl(String arg_bucket, String arg_region, String arg_cosPath, String arg_serviceKey) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getObjectUrl', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_bucket, arg_region, arg_key, arg_serviceKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_bucket, arg_region, arg_cosPath, arg_serviceKey]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as String?)!;
+    }
+  }
+
+  Future<String> getPresignedUrl(String arg_serviceKey, String arg_bucket, String arg_cosPath, int? arg_signValidTime, bool? arg_signHost, Map<String?, String?>? arg_parameters, String? arg_region) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosServiceApi.getPresignedUrl', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_cosPath, arg_signValidTime, arg_signHost, arg_parameters, arg_region]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',

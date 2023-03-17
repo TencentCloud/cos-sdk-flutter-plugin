@@ -19,6 +19,7 @@ import com.tencent.cos.xml.listener.CosXmlResultListener;
 import com.tencent.cos.xml.listener.CosXmlResultSimpleListener;
 import com.tencent.cos.xml.model.CosXmlRequest;
 import com.tencent.cos.xml.model.CosXmlResult;
+import com.tencent.cos.xml.model.PresignedUrlRequest;
 import com.tencent.cos.xml.model.bucket.DeleteBucketRequest;
 import com.tencent.cos.xml.model.bucket.GetBucketAccelerateRequest;
 import com.tencent.cos.xml.model.bucket.GetBucketAccelerateResult;
@@ -267,6 +268,31 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     public String getObjectUrl(@NonNull String bucket, @NonNull String region, @NonNull String key, @NonNull String serviceKey) {
         CosXmlService service = getCosXmlService(serviceKey);
         return service.getObjectUrl(bucket, region, key);
+    }
+
+    @Override
+    public void getPresignedUrl(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, @Nullable Long signValidTime,
+                                @Nullable Boolean signHost, @Nullable Map<String, String> parameters,
+                                @Nullable String region, com.tencent.cos.flutter.plugin.Pigeon.Result<String> result) {
+        CosXmlService service = getCosXmlService(serviceKey);
+        PresignedUrlRequest presignedUrlRequest = new PresignedUrlRequest(bucket, cosPath);
+        presignedUrlRequest.setRequestMethod("GET");
+        if(signValidTime != null){
+            presignedUrlRequest.setSignKeyTime(Math.toIntExact(signValidTime));
+        }
+        if(signHost != null && !signHost){
+            presignedUrlRequest.addNoSignHeader("Host");
+        }
+        if(parameters != null){
+            presignedUrlRequest.setQueryParameters(parameters);
+        }
+        try {
+            String urlWithSign = service.getPresignedURL(presignedUrlRequest);
+            result.success(urlWithSign);
+        } catch (CosXmlClientException e) {
+            e.printStackTrace();
+            result.error(e);
+        }
     }
 
     @Override
@@ -973,10 +999,19 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
                 if (resultCallbackKey != null) {
                     runMainThread(() ->{
+                                Map<String, String> header = simplifyHeader(cosXmlResult.headers);
                                 if(task instanceof COSXMLUploadTask){
-                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, null, getVoidReply());
+                                    Map<String, String> uploadResultMap = new HashMap<>();
+                                    COSXMLUploadTask.COSXMLUploadTaskResult uploadResult =
+                                            (COSXMLUploadTask.COSXMLUploadTaskResult) cosXmlResult;
+                                    uploadResultMap.put("accessUrl", cosXmlResult.accessUrl);
+                                    uploadResultMap.put("eTag", uploadResult.eTag);
+                                    if(header.containsKey("x-cos-hash-crc64ecma")){
+                                        uploadResultMap.put("crc64ecma", header.get("x-cos-hash-crc64ecma"));
+                                    }
+                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, uploadResultMap, getVoidReply());
                                 } else {
-                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, simplifyHeader(cosXmlResult.headers), getVoidReply());
+                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, header, getVoidReply());
                                 }
                             }
                     );

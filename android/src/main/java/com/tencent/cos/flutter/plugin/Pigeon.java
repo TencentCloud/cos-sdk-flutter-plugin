@@ -1528,7 +1528,8 @@ public class Pigeon {
   public interface CosServiceApi {
     void headObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Result<Map<String, String>> result);
     void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Result<Void> result);
-    @NonNull String getObjectUrl(@NonNull String bucket, @NonNull String region, @NonNull String key, @NonNull String serviceKey);
+    @NonNull String getObjectUrl(@NonNull String bucket, @NonNull String region, @NonNull String cosPath, @NonNull String serviceKey);
+    void getPresignedUrl(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, @Nullable Long signValidTime, @Nullable Boolean signHost, @Nullable Map<String, String> parameters, @Nullable String region, Result<String> result);
     void preBuildConnection(@NonNull String bucket, @NonNull String serviceKey, Result<Void> result);
     void getService(@NonNull String serviceKey, Result<ListAllMyBuckets> result);
     void getBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable String prefix, @Nullable String delimiter, @Nullable String encodingType, @Nullable String marker, @Nullable Long maxKeys, Result<BucketContents> result);
@@ -1656,15 +1657,15 @@ public class Pigeon {
               if (regionArg == null) {
                 throw new NullPointerException("regionArg unexpectedly null.");
               }
-              String keyArg = (String)args.get(2);
-              if (keyArg == null) {
-                throw new NullPointerException("keyArg unexpectedly null.");
+              String cosPathArg = (String)args.get(2);
+              if (cosPathArg == null) {
+                throw new NullPointerException("cosPathArg unexpectedly null.");
               }
               String serviceKeyArg = (String)args.get(3);
               if (serviceKeyArg == null) {
                 throw new NullPointerException("serviceKeyArg unexpectedly null.");
               }
-              String output = api.getObjectUrl(bucketArg, regionArg, keyArg, serviceKeyArg);
+              String output = api.getObjectUrl(bucketArg, regionArg, cosPathArg, serviceKeyArg);
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {
@@ -1672,6 +1673,53 @@ public class Pigeon {
               wrapped = wrappedError;
             }
             reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosServiceApi.getPresignedUrl", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String serviceKeyArg = (String)args.get(0);
+              if (serviceKeyArg == null) {
+                throw new NullPointerException("serviceKeyArg unexpectedly null.");
+              }
+              String bucketArg = (String)args.get(1);
+              if (bucketArg == null) {
+                throw new NullPointerException("bucketArg unexpectedly null.");
+              }
+              String cosPathArg = (String)args.get(2);
+              if (cosPathArg == null) {
+                throw new NullPointerException("cosPathArg unexpectedly null.");
+              }
+              Number signValidTimeArg = (Number)args.get(3);
+              Boolean signHostArg = (Boolean)args.get(4);
+              Map<String, String> parametersArg = (Map<String, String>)args.get(5);
+              String regionArg = (String)args.get(6);
+              Result<String> resultCallback = new Result<String>() {
+                public void success(String result) {
+                  wrapped.add(0, result);
+                  reply.reply(wrapped);
+                }
+                public void error(Throwable error) {
+                  ArrayList<Object> wrappedError = wrapError(error);
+                  reply.reply(wrappedError);
+                }
+              };
+
+              api.getPresignedUrl(serviceKeyArg, bucketArg, cosPathArg, (signValidTimeArg == null) ? null : signValidTimeArg.longValue(), signHostArg, parametersArg, regionArg, resultCallback);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              reply.reply(wrappedError);
+            }
           });
         } else {
           channel.setMessageHandler(null);

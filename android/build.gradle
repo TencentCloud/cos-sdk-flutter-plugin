@@ -35,6 +35,6 @@ android {
 }
 
 dependencies {
-    implementation 'com.qcloud.cos:cos-android:5.9.8'
+    implementation 'com.qcloud.cos:cos-android:5.9.9'
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
 }

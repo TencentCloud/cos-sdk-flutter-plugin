@@ -34,7 +34,18 @@ abstract class CosServiceApi {
       String cosPath, String? versionId);
 
   String getObjectUrl(
-      String bucket, String region, String key, String serviceKey);
+      String bucket, String region, String cosPath, String serviceKey);
+
+  @async
+  String getPresignedUrl(
+      String serviceKey,
+      String bucket,
+      String cosPath,
+      int? signValidTime,
+      bool? signHost,
+      Map<String?, String?>? parameters,
+      String? region
+  );
 
   @async
   void preBuildConnection(String bucket, String serviceKey);

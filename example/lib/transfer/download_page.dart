@@ -145,6 +145,7 @@ class _DownloadPageState extends State<DownloadPage> {
           widget.bucketName, widget.fileKey, downliadPath,
           resultListener:
               ResultListener((result) {
+                print(result);
                 if (mounted) {
                   setState(() {
                     _resultString = "文件已下载到：$downliadPath";

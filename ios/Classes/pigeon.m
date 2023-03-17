@@ -839,16 +839,42 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getObjectUrlBucket:region:key:serviceKey:error:)], @"CosServiceApi api (%@) doesn't respond to @selector(getObjectUrlBucket:region:key:serviceKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(getObjectUrlBucket:region:cosPath:serviceKey:error:)], @"CosServiceApi api (%@) doesn't respond to @selector(getObjectUrlBucket:region:cosPath:serviceKey:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 0);
         NSString *arg_region = GetNullableObjectAtIndex(args, 1);
-        NSString *arg_key = GetNullableObjectAtIndex(args, 2);
+        NSString *arg_cosPath = GetNullableObjectAtIndex(args, 2);
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 3);
         FlutterError *error;
-        NSString *output = [api getObjectUrlBucket:arg_bucket region:arg_region key:arg_key serviceKey:arg_serviceKey error:&error];
+        NSString *output = [api getObjectUrlBucket:arg_bucket region:arg_region cosPath:arg_cosPath serviceKey:arg_serviceKey error:&error];
         callback(wrapResult(output, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosServiceApi.getPresignedUrl"
+        binaryMessenger:binaryMessenger
+        codec:CosServiceApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:completion:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
+        NSString *arg_cosPath = GetNullableObjectAtIndex(args, 2);
+        NSNumber *arg_signValidTime = GetNullableObjectAtIndex(args, 3);
+        NSNumber *arg_signHost = GetNullableObjectAtIndex(args, 4);
+        NSDictionary<NSString *, NSString *> *arg_parameters = GetNullableObjectAtIndex(args, 5);
+        NSString *arg_region = GetNullableObjectAtIndex(args, 6);
+        [api getPresignedUrlServiceKey:arg_serviceKey bucket:arg_bucket cosPath:arg_cosPath signValidTime:arg_signValidTime signHost:arg_signHost parameters:arg_parameters region:arg_region completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
+          callback(wrapResult(output, error));
+        }];
       }];
     }
     else {

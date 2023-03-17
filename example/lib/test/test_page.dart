@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -29,7 +31,7 @@ class _TestPageState extends State<TestPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: <Widget>[
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -37,9 +39,9 @@ class _TestPageState extends State<TestPage> {
               textColor: Colors.white,
               onPressed: () async {
                 // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
-                String bucket = "qjdtest1-1253960454";
+                String bucket = "mobile-ut-1253960454";
                 // 存储桶所在地域简称，例如广州地区是 ap-guangzhou
-                String region = "ap-beijing";
+                String region = "ap-guangzhou";
                 try {
                   Map<String?, String?> header = await Cos().getDefaultService().headBucket(
                       bucket,
@@ -54,7 +56,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("存储桶head"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -78,7 +80,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("删除存储桶"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -104,7 +106,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("删除对象"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -131,7 +133,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("列出对象第一页数据"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -161,7 +163,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("列出对象下一页数据"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -193,7 +195,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("获取对象列表与子目录"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -216,7 +218,7 @@ class _TestPageState extends State<TestPage> {
               },
               child: const Text("自定义源站域名"),
             ),
-            Gaps.vGap50,
+            Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
               height: 50.0,
@@ -238,6 +240,55 @@ class _TestPageState extends State<TestPage> {
                 Cos().registerDefaultService(serviceConfig);
               },
               child: const Text("全球加速域名"),
+            ),
+            Gaps.vGap5,
+            MaterialButton(
+              minWidth: double.infinity,
+              height: 50.0,
+              color: Colours.app_main,
+              textColor: Colors.white,
+              onPressed: () async {
+                // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
+                String bucket = "mobile-ut-1253960454";
+                // 存储桶所在地域简称，例如广州地区是 ap-guangzhou
+                String region = "ap-guangzhou";
+                // 对象在存储桶中的位置标识符，即对象键
+                String cosKey = "test.png";
+                try {
+                  String objectUrl = await Cos().getDefaultService().getObjectUrl(bucket, region, cosKey);
+                  print(objectUrl);
+                } catch (e) {
+                  // 失败后会抛异常 根据异常进行业务处理
+                  Toast.show(e.toString());
+                  print(e);
+                }
+              },
+              child: const Text("获取对象url"),
+            ),
+            Gaps.vGap5,
+            MaterialButton(
+              minWidth: double.infinity,
+              height: 50.0,
+              color: Colours.app_main,
+              textColor: Colors.white,
+              onPressed: () async {
+                // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
+                String bucket = "mobile-ut-1253960454";
+                // 对象在存储桶中的位置标识符，即对象键
+                String cosKey = "test.png";
+                try {
+                  HashMap<String, String> parameters = HashMap();
+                  parameters["test1k"] = "test1v";
+                  parameters["test2k"] = "test2v";
+                  String objectUrl = await Cos().getDefaultService().getPresignedUrl(bucket, cosKey, signValidTime: 500, signHost: false, parameters: parameters);
+                  print(objectUrl);
+                } catch (e) {
+                  // 失败后会抛异常 根据异常进行业务处理
+                  Toast.show(e.toString());
+                  print(e);
+                }
+              },
+              child: const Text("预签名链接"),
             )
           ],
         ),
