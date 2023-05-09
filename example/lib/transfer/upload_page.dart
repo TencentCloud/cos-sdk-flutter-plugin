@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
@@ -144,6 +145,20 @@ class _UploadPageState extends State<UploadPage> {
                 ),
               )
             ]),
+            Gaps.vGap32,
+            MaterialButton(
+              height: 50.0,
+              color: Colours.app_main,
+              textColor: Colors.white,
+              onPressed: () {
+                MyRouterDelegate.of(context).push(name: "/upload/batch", arguments: {
+                  'bucketName': widget.bucketName,
+                  'bucketRegion': widget.bucketRegion,
+                  'folderPath': widget.folderPath
+                });
+              },
+              child: const Text("批量上传"),
+            )
           ],
         ),
       ),
@@ -171,7 +186,9 @@ class _UploadPageState extends State<UploadPage> {
       CosTransferManger cosTransferManger = await getTransferManger();
       // 上传成功回调
       successCallBack(result) {
-        print(result);
+        if (kDebugMode) {
+          print(result);
+        }
         if (mounted) {
           setState(() {
             _resultString = "文件已上传到COS：$cosPath";
@@ -187,14 +204,18 @@ class _UploadPageState extends State<UploadPage> {
               _resultString = "错误信息：${clientException.toString()}";
               _resultColor = Colours.red;
             });
-            print(clientException);
+            if (kDebugMode) {
+              print(clientException);
+            }
           }
           if (serviceException != null) {
             setState(() {
               _resultString = "错误信息：${serviceException.toString()}";
               _resultColor = Colours.red;
             });
-            print(serviceException);
+            if (kDebugMode) {
+              print(serviceException);
+            }
           }
         }
       }
@@ -234,7 +255,9 @@ class _UploadPageState extends State<UploadPage> {
           initMultipleUploadCallback: initMultipleUploadCallback);
     } catch (e) {
       Toast.show(e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -47,11 +48,15 @@ class _TestPageState extends State<TestPage> {
                       bucket,
                       region: region
                   );
-                  print(header);
+                  if (kDebugMode) {
+                    print(header);
+                  }
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("存储桶head"),
@@ -75,7 +80,9 @@ class _TestPageState extends State<TestPage> {
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("删除存储桶"),
@@ -101,7 +108,9 @@ class _TestPageState extends State<TestPage> {
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("删除对象"),
@@ -128,7 +137,9 @@ class _TestPageState extends State<TestPage> {
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("列出对象第一页数据"),
@@ -190,7 +201,9 @@ class _TestPageState extends State<TestPage> {
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("获取对象列表与子目录"),
@@ -256,11 +269,15 @@ class _TestPageState extends State<TestPage> {
                 String cosKey = "test.png";
                 try {
                   String objectUrl = await Cos().getDefaultService().getObjectUrl(bucket, region, cosKey);
-                  print(objectUrl);
+                  if (kDebugMode) {
+                    print(objectUrl);
+                  }
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("获取对象url"),
@@ -273,19 +290,23 @@ class _TestPageState extends State<TestPage> {
               textColor: Colors.white,
               onPressed: () async {
                 // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
-                String bucket = "mobile-ut-1253960454";
+                String bucket = "000000-1253960454";
                 // 对象在存储桶中的位置标识符，即对象键
-                String cosKey = "test.png";
+                String cosKey = "1.txt";
                 try {
                   HashMap<String, String> parameters = HashMap();
                   parameters["test1k"] = "test1v";
                   parameters["test2k"] = "test2v";
                   String objectUrl = await Cos().getDefaultService().getPresignedUrl(bucket, cosKey, signValidTime: 500, signHost: false, parameters: parameters);
-                  print(objectUrl);
+                  if (kDebugMode) {
+                    print(objectUrl);
+                  }
                 } catch (e) {
                   // 失败后会抛异常 根据异常进行业务处理
                   Toast.show(e.toString());
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                 }
               },
               child: const Text("预签名链接"),

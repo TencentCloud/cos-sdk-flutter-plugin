@@ -119,6 +119,42 @@ class TransferConfig {
   }
 }
 
+class STSCredentialScope {
+  STSCredentialScope({
+    required this.action,
+    required this.region,
+    this.bucket,
+    this.prefix,
+  });
+
+  String action;
+
+  String region;
+
+  String? bucket;
+
+  String? prefix;
+
+  Object encode() {
+    return <Object?>[
+      action,
+      region,
+      bucket,
+      prefix,
+    ];
+  }
+
+  static STSCredentialScope decode(Object result) {
+    result as List<Object?>;
+    return STSCredentialScope(
+      action: result[0]! as String,
+      region: result[1]! as String,
+      bucket: result[2] as String?,
+      prefix: result[3] as String?,
+    );
+  }
+}
+
 class SessionQCloudCredentials {
   SessionQCloudCredentials({
     required this.secretId,
@@ -562,6 +598,28 @@ class CosApi {
   Future<void> initWithSessionCredential() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosApi.initWithSessionCredential', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> initWithScopeLimitCredential() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.initWithScopeLimitCredential', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
         await channel.send(null) as List<Object?>?;
@@ -1372,8 +1430,11 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
     } else if (value is CosXmlServiceException) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is SessionQCloudCredentials) {
+    } else if (value is STSCredentialScope) {
       buffer.putUint8(130);
+      writeValue(buffer, value.encode());
+    } else if (value is SessionQCloudCredentials) {
+      buffer.putUint8(131);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1390,6 +1451,9 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
         return CosXmlServiceException.decode(readValue(buffer)!);
       
       case 130:       
+        return STSCredentialScope.decode(readValue(buffer)!);
+      
+      case 131:       
         return SessionQCloudCredentials.decode(readValue(buffer)!);
       
       default:
@@ -1404,6 +1468,8 @@ abstract class FlutterCosApi {
   static const MessageCodec<Object?> codec = _FlutterCosApiCodec();
 
   Future<SessionQCloudCredentials> fetchSessionCredentials();
+
+  Future<SessionQCloudCredentials> fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
 
   void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header);
 
@@ -1426,6 +1492,24 @@ abstract class FlutterCosApi {
         channel.setMessageHandler((Object? message) async {
           // ignore message
           final SessionQCloudCredentials output = await api.fetchSessionCredentials();
+          return output;
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials', codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final List<STSCredentialScope?>? arg_stsCredentialScopes = (args[0] as List<Object?>?)?.cast<STSCredentialScope?>();
+          assert(arg_stsCredentialScopes != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials was null, expected non-null List<STSCredentialScope?>.');
+          final SessionQCloudCredentials output = await api.fetchScopeLimitCredentials(arg_stsCredentialScopes!);
           return output;
         });
       }

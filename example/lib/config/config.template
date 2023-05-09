@@ -7,12 +7,16 @@ class TestConst {
   late String COS_APP_ID="XXXXXXXX";
   // 是否使用临时密钥请求 COS
   late bool USE_SESSION_TOKEN_CREDENTIAL = true;
+  // 是否使用范围限制的临时密钥请求 COS
+  late bool USE_SCOPE_LIMIT_TOKEN_CREDENTIAL = false;
   // 腾讯云永久密钥 SecretID
   late String SECRET_ID="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
   // 腾讯云永久密钥 SecretKey
   late String SECRET_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
   // STS 临时密钥服务器地址
-  late String STS_URL = "http://stsservice.com/sts";
+  late String STS_URL = "https://stsservice.com/sts";
+   // STS 范围限制的临时密钥服务器地址
+   late String STS_SCOPE_LIMIT_URL = "https://stsservice.com/sts/scope";
   // 存储桶所在地域
   late String PERSIST_BUCKET_REGION="ap-guangzhou";
 

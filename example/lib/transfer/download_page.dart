@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
@@ -145,7 +146,9 @@ class _DownloadPageState extends State<DownloadPage> {
           widget.bucketName, widget.fileKey, downliadPath,
           resultListener:
               ResultListener((result) {
-                print(result);
+                if (kDebugMode) {
+                  print(result);
+                }
                 if (mounted) {
                   setState(() {
                     _resultString = "文件已下载到：$downliadPath";
@@ -159,14 +162,18 @@ class _DownloadPageState extends State<DownloadPage> {
                       _resultString = "错误信息：${clientException.toString()}";
                       _resultColor = Colours.red;
                     });
-                    print(clientException);
+                    if (kDebugMode) {
+                      print(clientException);
+                    }
                   }
                   if (serviceException != null) {
                     setState(() {
                       _resultString = "错误信息：${serviceException.toString()}";
                       _resultColor = Colours.red;
                     });
-                    print(serviceException);
+                    if (kDebugMode) {
+                      print(serviceException);
+                    }
                   }
                 }
           }), stateCallback: (state) {
@@ -185,7 +192,9 @@ class _DownloadPageState extends State<DownloadPage> {
       });
     } catch (e) {
       Toast.show(e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 

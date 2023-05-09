@@ -33,6 +33,11 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 + (nullable TransferConfig *)nullableFromList:(NSArray *)list;
 - (NSArray *)toList;
 @end
+@interface STSCredentialScope ()
++ (STSCredentialScope *)fromList:(NSArray *)list;
++ (nullable STSCredentialScope *)nullableFromList:(NSArray *)list;
+- (NSArray *)toList;
+@end
 @interface SessionQCloudCredentials ()
 + (SessionQCloudCredentials *)fromList:(NSArray *)list;
 + (nullable SessionQCloudCredentials *)nullableFromList:(NSArray *)list;
@@ -169,6 +174,39 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     (self.enableVerification ?: [NSNull null]),
     (self.divisionForUpload ?: [NSNull null]),
     (self.sliceSizeForUpload ?: [NSNull null]),
+  ];
+}
+@end
+
+@implementation STSCredentialScope
++ (instancetype)makeWithAction:(NSString *)action
+    region:(NSString *)region
+    bucket:(nullable NSString *)bucket
+    prefix:(nullable NSString *)prefix {
+  STSCredentialScope* pigeonResult = [[STSCredentialScope alloc] init];
+  pigeonResult.action = action;
+  pigeonResult.region = region;
+  pigeonResult.bucket = bucket;
+  pigeonResult.prefix = prefix;
+  return pigeonResult;
+}
++ (STSCredentialScope *)fromList:(NSArray *)list {
+  STSCredentialScope *pigeonResult = [[STSCredentialScope alloc] init];
+  pigeonResult.action = GetNullableObjectAtIndex(list, 0);
+  NSAssert(pigeonResult.action != nil, @"");
+  pigeonResult.region = GetNullableObjectAtIndex(list, 1);
+  NSAssert(pigeonResult.region != nil, @"");
+  pigeonResult.bucket = GetNullableObjectAtIndex(list, 2);
+  pigeonResult.prefix = GetNullableObjectAtIndex(list, 3);
+  return pigeonResult;
+}
++ (nullable STSCredentialScope *)nullableFromList:(NSArray *)list { return (list) ? [STSCredentialScope fromList:list] : nil; }
+- (NSArray *)toList {
+  return @[
+    (self.action ?: [NSNull null]),
+    (self.region ?: [NSNull null]),
+    (self.bucket ?: [NSNull null]),
+    (self.prefix ?: [NSNull null]),
   ];
 }
 @end
@@ -583,6 +621,24 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         FlutterError *error;
         [api initWithSessionCredentialWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.initWithScopeLimitCredential"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(initWithScopeLimitCredentialWithError:)], @"CosApi api (%@) doesn't respond to @selector(initWithScopeLimitCredentialWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api initWithScopeLimitCredentialWithError:&error];
         callback(wrapResult(nil, error));
       }];
     }
@@ -1341,6 +1397,9 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
       return [CosXmlServiceException fromList:[self readValue]];
     
     case 130:     
+      return [STSCredentialScope fromList:[self readValue]];
+    
+    case 131:     
       return [SessionQCloudCredentials fromList:[self readValue]];
     
     default:    
@@ -1363,8 +1422,12 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
     [self writeByte:129];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+  if ([value isKindOfClass:[STSCredentialScope class]]) {
     [self writeByte:130];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+    [self writeByte:131];
     [self writeValue:[value toList]];
   } else 
 {
@@ -1415,6 +1478,17 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec() {
       binaryMessenger:self.binaryMessenger
       codec:FlutterCosApiGetCodec()];
   [channel sendMessage:nil reply:^(id reply) {
+    SessionQCloudCredentials *output = reply;
+    completion(output, nil);
+  }];
+}
+- (void)fetchScopeLimitCredentialsStsCredentialScopes:(NSArray<STSCredentialScope *> *)arg_stsCredentialScopes completion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials"
+      binaryMessenger:self.binaryMessenger
+      codec:FlutterCosApiGetCodec()];
+  [channel sendMessage:@[arg_stsCredentialScopes ?: [NSNull null]] reply:^(id reply) {
     SessionQCloudCredentials *output = reply;
     completion(output, nil);
   }];

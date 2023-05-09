@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_service.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -36,7 +37,9 @@ class _BucketListPageState extends State<BucketListPage> {
       _refreshController.refreshCompleted();
     } catch (e) {
       Toast.show(e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       _refreshController.refreshFailed();
     }
   }

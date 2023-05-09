@@ -6,6 +6,8 @@ abstract class CosApi {
 
   void initWithSessionCredential();
 
+  void initWithScopeLimitCredential();
+
   void setCloseBeacon(bool isCloseBeacon);
 
   @async
@@ -157,6 +159,9 @@ abstract class FlutterCosApi {
   @async
   SessionQCloudCredentials fetchSessionCredentials();
 
+  @async
+  SessionQCloudCredentials fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
+
   void resultSuccessCallback(
       String transferKey, int key, Map<String?, String?>? header);
 
@@ -194,6 +199,13 @@ class TransferConfig {
   bool? enableVerification;
   int? divisionForUpload;
   int? sliceSizeForUpload;
+}
+
+class STSCredentialScope {
+  late String action;
+  late String region;
+  String? bucket;
+  String? prefix;
 }
 
 class SessionQCloudCredentials {

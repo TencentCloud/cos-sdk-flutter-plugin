@@ -300,6 +300,92 @@ public class Pigeon {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static class STSCredentialScope {
+    private @NonNull String action;
+    public @NonNull String getAction() { return action; }
+    public void setAction(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"action\" is null.");
+      }
+      this.action = setterArg;
+    }
+
+    private @NonNull String region;
+    public @NonNull String getRegion() { return region; }
+    public void setRegion(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"region\" is null.");
+      }
+      this.region = setterArg;
+    }
+
+    private @Nullable String bucket;
+    public @Nullable String getBucket() { return bucket; }
+    public void setBucket(@Nullable String setterArg) {
+      this.bucket = setterArg;
+    }
+
+    private @Nullable String prefix;
+    public @Nullable String getPrefix() { return prefix; }
+    public void setPrefix(@Nullable String setterArg) {
+      this.prefix = setterArg;
+    }
+
+    /**Constructor is private to enforce null safety; use Builder. */
+    private STSCredentialScope() {}
+    public static final class Builder {
+      private @Nullable String action;
+      public @NonNull Builder setAction(@NonNull String setterArg) {
+        this.action = setterArg;
+        return this;
+      }
+      private @Nullable String region;
+      public @NonNull Builder setRegion(@NonNull String setterArg) {
+        this.region = setterArg;
+        return this;
+      }
+      private @Nullable String bucket;
+      public @NonNull Builder setBucket(@Nullable String setterArg) {
+        this.bucket = setterArg;
+        return this;
+      }
+      private @Nullable String prefix;
+      public @NonNull Builder setPrefix(@Nullable String setterArg) {
+        this.prefix = setterArg;
+        return this;
+      }
+      public @NonNull STSCredentialScope build() {
+        STSCredentialScope pigeonReturn = new STSCredentialScope();
+        pigeonReturn.setAction(action);
+        pigeonReturn.setRegion(region);
+        pigeonReturn.setBucket(bucket);
+        pigeonReturn.setPrefix(prefix);
+        return pigeonReturn;
+      }
+    }
+    @NonNull ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(4);
+      toListResult.add(action);
+      toListResult.add(region);
+      toListResult.add(bucket);
+      toListResult.add(prefix);
+      return toListResult;
+    }
+    static @NonNull STSCredentialScope fromList(@NonNull ArrayList<Object> list) {
+      STSCredentialScope pigeonResult = new STSCredentialScope();
+      Object action = list.get(0);
+      pigeonResult.setAction((String)action);
+      Object region = list.get(1);
+      pigeonResult.setRegion((String)region);
+      Object bucket = list.get(2);
+      pigeonResult.setBucket((String)bucket);
+      Object prefix = list.get(3);
+      pigeonResult.setPrefix((String)prefix);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static class SessionQCloudCredentials {
     private @NonNull String secretId;
     public @NonNull String getSecretId() { return secretId; }
@@ -1224,6 +1310,7 @@ public class Pigeon {
   public interface CosApi {
     void initWithPlainSecret(@NonNull String secretId, @NonNull String secretKey);
     void initWithSessionCredential();
+    void initWithScopeLimitCredential();
     void setCloseBeacon(@NonNull Boolean isCloseBeacon);
     void registerDefaultService(@NonNull CosXmlServiceConfig config, Result<String> result);
     void registerDefaultTransferManger(@NonNull CosXmlServiceConfig config, @Nullable TransferConfig transferConfig, Result<String> result);
@@ -1273,6 +1360,26 @@ public class Pigeon {
             ArrayList wrapped = new ArrayList<>();
             try {
               api.initWithSessionCredential();
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.initWithScopeLimitCredential", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              api.initWithScopeLimitCredential();
               wrapped.add(0, null);
             }
             catch (Error | RuntimeException exception) {
@@ -2493,6 +2600,9 @@ public class Pigeon {
           return CosXmlServiceException.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)130:         
+          return STSCredentialScope.fromList((ArrayList<Object>) readValue(buffer));
+        
+        case (byte)131:         
           return SessionQCloudCredentials.fromList((ArrayList<Object>) readValue(buffer));
         
         default:        
@@ -2510,8 +2620,12 @@ public class Pigeon {
         stream.write(129);
         writeValue(stream, ((CosXmlServiceException) value).toList());
       } else 
-      if (value instanceof SessionQCloudCredentials) {
+      if (value instanceof STSCredentialScope) {
         stream.write(130);
+        writeValue(stream, ((STSCredentialScope) value).toList());
+      } else 
+      if (value instanceof SessionQCloudCredentials) {
+        stream.write(131);
         writeValue(stream, ((SessionQCloudCredentials) value).toList());
       } else 
 {
@@ -2537,6 +2651,15 @@ public class Pigeon {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.fetchSessionCredentials", getCodec());
       channel.send(null, channelReply -> {
+        @SuppressWarnings("ConstantConditions")
+        SessionQCloudCredentials output = (SessionQCloudCredentials)channelReply;
+        callback.reply(output);
+      });
+    }
+    public void fetchScopeLimitCredentials(@NonNull List<STSCredentialScope> stsCredentialScopesArg, Reply<SessionQCloudCredentials> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials", getCodec());
+      channel.send(new ArrayList<Object>(Collections.singletonList(stsCredentialScopesArg)), channelReply -> {
         @SuppressWarnings("ConstantConditions")
         SessionQCloudCredentials output = (SessionQCloudCredentials)channelReply;
         callback.reply(output);

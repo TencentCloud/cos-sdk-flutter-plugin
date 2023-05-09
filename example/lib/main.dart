@@ -16,7 +16,11 @@ void main() async {
 
   //初始化COS
   if(TestConst().USE_SESSION_TOKEN_CREDENTIAL){
-    await Cos().initWithSessionCredential(FetchCredentials());
+    if(!TestConst().USE_SCOPE_LIMIT_TOKEN_CREDENTIAL){
+      await Cos().initWithSessionCredential(FetchCredentials());
+    } else {
+      await Cos().initWithScopeLimitCredential(FetchScopeLimitCredentials());
+    }
   } else {
     await Cos().initWithPlainSecret(TestConst().SECRET_ID, TestConst().SECRET_KEY);
   }

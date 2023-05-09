@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -76,7 +77,9 @@ class _BucketAddPageState extends State<BucketAddPage> {
                     MyRouterDelegate.of(context).pop(true);
                   }
                 } catch(e) {
-                  print(e);
+                  if (kDebugMode) {
+                    print(e);
+                  }
                   EasyLoading.showError(e.toString());
                 }
               },

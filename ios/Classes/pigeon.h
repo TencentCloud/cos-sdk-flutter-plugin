@@ -10,6 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class CosXmlServiceConfig;
 @class TransferConfig;
+@class STSCredentialScope;
 @class SessionQCloudCredentials;
 @class CosXmlClientException;
 @class CosXmlServiceException;
@@ -56,6 +57,19 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong, nullable) NSNumber * enableVerification;
 @property(nonatomic, strong, nullable) NSNumber * divisionForUpload;
 @property(nonatomic, strong, nullable) NSNumber * sliceSizeForUpload;
+@end
+
+@interface STSCredentialScope : NSObject
+/// `init` unavailable to enforce nonnull fields, see the `make` class method.
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)makeWithAction:(NSString *)action
+    region:(NSString *)region
+    bucket:(nullable NSString *)bucket
+    prefix:(nullable NSString *)prefix;
+@property(nonatomic, copy) NSString * action;
+@property(nonatomic, copy) NSString * region;
+@property(nonatomic, copy, nullable) NSString * bucket;
+@property(nonatomic, copy, nullable) NSString * prefix;
 @end
 
 @interface SessionQCloudCredentials : NSObject
@@ -219,6 +233,7 @@ NSObject<FlutterMessageCodec> *CosApiGetCodec(void);
 @protocol CosApi
 - (void)initWithPlainSecretSecretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)initWithSessionCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setCloseBeaconIsCloseBeacon:(NSNumber *)isCloseBeacon error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
 - (void)registerDefaultTransferMangerConfig:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
@@ -276,6 +291,7 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec(void);
 @interface FlutterCosApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
 - (void)fetchSessionCredentialsWithCompletion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion;
+- (void)fetchScopeLimitCredentialsStsCredentialScopes:(NSArray<STSCredentialScope *> *)stsCredentialScopes completion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion;
 - (void)resultSuccessCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key header:(nullable NSDictionary<NSString *, NSString *> *)header completion:(void(^)(NSError *_Nullable))completion;
 - (void)resultFailCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key clientException:(nullable CosXmlClientException *)clientException serviceException:(nullable CosXmlServiceException *)serviceException completion:(void(^)(NSError *_Nullable))completion;
 - (void)stateCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key state:(NSString *)state completion:(void(^)(NSError *_Nullable))completion;

@@ -24,9 +24,15 @@ class Cos {
   final Map<String, CosTransferManger> _cosTransferMangers = HashMap();
 
   bool _initialized = false;
+
   late IFetchCredentials _iFetchCredentials;
   IFetchCredentials getFetchCredentials(){
     return _iFetchCredentials;
+  }
+
+  late IFetchScopeLimitCredentials _iFetchScopeLimitCredentials;
+  IFetchScopeLimitCredentials getFetchScopeLimitCredentials(){
+    return _iFetchScopeLimitCredentials;
   }
 
   Future<void> initWithPlainSecret(String secretId, String secretKey) async {
@@ -43,6 +49,16 @@ class Cos {
       _initialized = true;
       _iFetchCredentials = iFetchCredentials;
       return await _cosApi.initWithSessionCredential();
+    } else {
+      print("COS Service has been inited before.");
+    }
+  }
+
+  Future<void> initWithScopeLimitCredential(IFetchScopeLimitCredentials iFetchScopeLimitCredentials) async {
+    if (!_initialized) {
+      _initialized = true;
+      _iFetchScopeLimitCredentials = iFetchScopeLimitCredentials;
+      return await _cosApi.initWithScopeLimitCredential();
     } else {
       print("COS Service has been inited before.");
     }

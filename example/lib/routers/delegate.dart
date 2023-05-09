@@ -6,6 +6,7 @@ import '../bucket/region_list_page.dart';
 import '../object/object_list_page.dart';
 import '../test/test_page.dart';
 import '../transfer/download_page.dart';
+import '../transfer/upload_batch_page.dart';
 import '../transfer/upload_page.dart';
 import '../common/toast_utils.dart';
 import 'custom_page.dart';
@@ -106,6 +107,9 @@ class MyRouterDelegate extends RouterDelegate<String> with ChangeNotifier, PopNa
         break;
       case '/upload':
         child = UploadPage(routeSettings.arguments! as Map<String, String?>);
+        break;
+      case '/upload/batch':
+        child = UploadBatchPage(routeSettings.arguments! as Map<String, String?>);
         break;
       case '/test':
         child = TestPage();

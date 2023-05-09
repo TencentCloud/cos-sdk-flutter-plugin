@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/cos_service.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
@@ -75,7 +76,9 @@ class _ObjectListPageState extends State<ObjectListPage> {
       }
     } catch (e) {
       Toast.show(e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       _refreshController.refreshFailed();
     }
   }
@@ -104,7 +107,9 @@ class _ObjectListPageState extends State<ObjectListPage> {
       }
     } catch (e) {
       Toast.show(e.toString());
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       _refreshController.loadFailed();
     }
   }
@@ -232,7 +237,9 @@ class _ObjectListPageState extends State<ObjectListPage> {
                             Navigator.pop(context);
                           }
                         } catch (e) {
-                          print(e);
+                          if (kDebugMode) {
+                            print(e);
+                          }
                           EasyLoading.showError(e.toString());
                         }
                       },

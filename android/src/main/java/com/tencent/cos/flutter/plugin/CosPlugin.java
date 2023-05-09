@@ -53,6 +53,7 @@ import com.tencent.cos.xml.transfer.TransferConfig;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
+import com.tencent.qcloud.core.task.TaskExecutors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,6 +114,14 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     @Override
     public void initWithSessionCredential() {
         qCloudCredentialProvider = new BridgeCredentialProvider(flutterCosApi);
+        synchronized (credentialProviderLock) {
+            credentialProviderLock.notify();
+        }
+    }
+
+    @Override
+    public void initWithScopeLimitCredential() {
+        qCloudCredentialProvider = new BridgeScopeLimitCredentialProvider(flutterCosApi);
         synchronized (credentialProviderLock) {
             credentialProviderLock.notify();
         }
@@ -286,13 +295,18 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if(parameters != null){
             presignedUrlRequest.setQueryParameters(parameters);
         }
-        try {
-            String urlWithSign = service.getPresignedURL(presignedUrlRequest);
-            result.success(urlWithSign);
-        } catch (CosXmlClientException e) {
-            e.printStackTrace();
-            result.error(e);
+        if (region != null) {
+            presignedUrlRequest.setRegion(region);
         }
+        TaskExecutors.COMMAND_EXECUTOR.execute(() -> {
+            try {
+                String urlWithSign = service.getPresignedURL(presignedUrlRequest);
+                result.success(urlWithSign);
+            } catch (CosXmlClientException e) {
+                e.printStackTrace();
+                result.error(e);
+            }
+        });
     }
 
     @Override

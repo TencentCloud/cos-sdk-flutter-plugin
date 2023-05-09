@@ -112,6 +112,7 @@ NSString * const STATE_CANCELED = @"CANCELED";
 FlutterCosApi* flutterCosApi;
 NSString * permanentSecretId = nil;
 NSString * permanentSecretKey = nil;
+bool isScopeLimitCredential = false;
 
 QCloudThreadSafeMutableDictionary *QCloudCOSTransferConfigCache() {
     static QCloudThreadSafeMutableDictionary *CloudCOSTransferConfig = nil;
@@ -168,7 +169,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     // todo iOS不支持：HostFormat、SocketTimeout、port、IsDebuggable、SignInUrl、DnsCache、
     configuration.endpoint = endpoint;
-    configuration.signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey];
+    configuration.signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
     return configuration;
 }
 
@@ -193,7 +194,11 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     permanentSecretKey = secretKey;
 }
 - (void)initWithSessionCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
-    
+    isScopeLimitCredential = false;
+}
+
+- (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
+    isScopeLimitCredential = true;
 }
 
 - (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{

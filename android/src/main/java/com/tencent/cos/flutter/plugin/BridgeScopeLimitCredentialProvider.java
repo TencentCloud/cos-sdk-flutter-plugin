@@ -5,31 +5,33 @@ import android.os.Looper;
 
 import com.tencent.cos.xml.common.ClientErrorCode;
 import com.tencent.cos.xml.exception.CosXmlClientException;
-import com.tencent.qcloud.core.auth.BasicLifecycleCredentialProvider;
-import com.tencent.qcloud.core.auth.QCloudLifecycleCredentials;
+import com.tencent.qcloud.core.auth.BasicScopeLimitCredentialProvider;
+import com.tencent.qcloud.core.auth.STSCredentialScope;
 import com.tencent.qcloud.core.auth.SessionQCloudCredentials;
 import com.tencent.qcloud.core.common.QCloudClientException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import java8.util.concurrent.CompletableFuture;
 
-class BridgeCredentialProvider extends BasicLifecycleCredentialProvider {
+class BridgeScopeLimitCredentialProvider extends BasicScopeLimitCredentialProvider {
     private final Pigeon.FlutterCosApi flutterCosApi;
 
-    BridgeCredentialProvider(Pigeon.FlutterCosApi flutterCosApi) {
+    BridgeScopeLimitCredentialProvider(Pigeon.FlutterCosApi flutterCosApi) {
         super();
         this.flutterCosApi = flutterCosApi;
     }
 
     @Override
-    protected QCloudLifecycleCredentials fetchNewCredentials() throws QCloudClientException {
+    protected SessionQCloudCredentials fetchNewCredentials(STSCredentialScope[] stsCredentialScopes) throws QCloudClientException {
         CompletableFuture<Pigeon.SessionQCloudCredentials> future = new CompletableFuture<>();
         //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
         runMainThread(() ->
-                flutterCosApi.fetchSessionCredentials(future::complete)
+                flutterCosApi.fetchScopeLimitCredentials(convertSTSCredentialScope(stsCredentialScopes), future::complete)
         );
         try {
             Pigeon.SessionQCloudCredentials sessionQCloudCredentials = future.get(60, TimeUnit.SECONDS);
@@ -56,6 +58,23 @@ class BridgeCredentialProvider extends BasicLifecycleCredentialProvider {
             e.printStackTrace();
             throw new CosXmlClientException(ClientErrorCode.INVALID_CREDENTIALS.getCode(), e);
         }
+    }
+
+    private List<Pigeon.STSCredentialScope> convertSTSCredentialScope(STSCredentialScope[] stsCredentialScopes){
+        List<Pigeon.STSCredentialScope> list =  new ArrayList<>();
+        if(stsCredentialScopes != null && stsCredentialScopes.length > 0){
+            for (STSCredentialScope stsCredentialScope : stsCredentialScopes) {
+                list.add(
+                        new Pigeon.STSCredentialScope.Builder()
+                                .setAction(stsCredentialScope.action)
+                                .setRegion(stsCredentialScope.region)
+                                .setBucket(stsCredentialScope.bucket)
+                                .setPrefix(stsCredentialScope.prefix)
+                                .build()
+                );
+            }
+        }
+        return list;
     }
 
     private void runMainThread(Runnable runnable){
