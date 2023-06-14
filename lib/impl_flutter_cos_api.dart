@@ -12,6 +12,10 @@ class ImplFlutterCosApi extends FlutterCosApi{
   static const int MAX_CACHE_CREDENTIAL_SIZE = 100;
   Map<int, SessionQCloudCredentials> credentialPairs = Map<int, SessionQCloudCredentials>.from({});
 
+  void forceInvalidationScopeCredentials(){
+    credentialPairs.clear();
+  }
+
   @override
   Future<SessionQCloudCredentials> fetchSessionCredentials() {
     return Cos().getFetchCredentials().fetchSessionCredentials();
@@ -29,8 +33,8 @@ class ImplFlutterCosApi extends FlutterCosApi{
     SessionQCloudCredentials? credentials = lookupValidCredentials(scopeId);
     if (credentials == null) {
       credentials = await Cos().getFetchScopeLimitCredentials().fetchScopeLimitCredentials(stsCredentialScopes.map((e) => STSCredentialScope(
-          action: e == null ? '' : (e.action ?? ''),
-          region: e == null ? '' : (e.region ?? ''),
+          action: e == null ? '' : (e.action),
+          region: e == null ? '' : (e.region),
           bucket: e == null ? '' : (e.bucket ?? ''),
           prefix: e == null ? '' : (e.prefix ?? '')
       )).toList());

@@ -128,6 +128,14 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
+    public void forceInvalidationCredential() {
+        if(qCloudCredentialProvider instanceof BridgeCredentialProvider){
+            BridgeCredentialProvider bridgeCredentialProvider = (BridgeCredentialProvider)qCloudCredentialProvider;
+            bridgeCredentialProvider.forceInvalidationCredential();
+        }
+    }
+
+    @Override
     public void setCloseBeacon(@NonNull Boolean isCloseBeacon) {
         CosXmlBaseService.IS_CLOSE_BEACON = isCloseBeacon;
     }

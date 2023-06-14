@@ -35,7 +35,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -64,7 +64,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -90,7 +90,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -118,7 +118,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -147,7 +147,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -177,7 +177,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -211,7 +211,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -234,7 +234,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -257,7 +257,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -285,7 +285,7 @@ class _TestPageState extends State<TestPage> {
             Gaps.vGap5,
             MaterialButton(
               minWidth: double.infinity,
-              height: 50.0,
+              height: 30.0,
               color: Colours.app_main,
               textColor: Colors.white,
               onPressed: () async {
@@ -310,6 +310,17 @@ class _TestPageState extends State<TestPage> {
                 }
               },
               child: const Text("预签名链接"),
+            ),
+            Gaps.vGap5,
+            MaterialButton(
+              minWidth: double.infinity,
+              height: 30.0,
+              color: Colours.app_main,
+              textColor: Colors.white,
+              onPressed: () async {
+                await Cos().forceInvalidationCredential();
+              },
+              child: const Text("强制签名失效"),
             )
           ],
         ),

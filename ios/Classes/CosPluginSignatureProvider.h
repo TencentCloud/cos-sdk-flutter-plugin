@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, copy, nullable) NSString* secretKey;
 @property (nonatomic) bool isScopeLimitCredential;
 
+- (void)forceInvalidationCredential;
 @end
 
 NS_ASSUME_NONNULL_END

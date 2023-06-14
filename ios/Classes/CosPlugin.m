@@ -95,24 +95,29 @@ static void *kQCloudUploadRequestResmeData = &kQCloudUploadRequestResmeData;
 
 @end
 
+@interface CosPlugin ()
+{
+    CosPluginSignatureProvider* signatureProvider;
+    NSString * permanentSecretId;
+    NSString * permanentSecretKey;
+    bool isScopeLimitCredential;
+}
+@end
 
 @implementation CosPlugin
-NSString * const DEFAULT_KEY = @"";
-NSString * const BRIDGE = @"Flutter";
-NSString * const UA_FLUTTER_PLUGIN = @"FlutterPlugin";
+NSString * const QCloudCOS_DEFAULT_KEY = @"";
+NSString * const QCloudCOS_BRIDGE = @"Flutter";
+NSString * const QCloudCOS_UA_FLUTTER_PLUGIN = @"FlutterPlugin";
 
-NSString * const STATE_WAITING = @"WAITING";
-NSString * const STATE_IN_PROGRESS = @"IN_PROGRESS";
-NSString * const STATE_PAUSED = @"PAUSED";
-NSString * const STATE_RESUMED_WAITING = @"RESUMED_WAITING";
-NSString * const STATE_COMPLETED = @"COMPLETED";
-NSString * const STATE_FAILED = @"FAILED";
-NSString * const STATE_CANCELED = @"CANCELED";
+NSString * const QCloudCOS_STATE_WAITING = @"WAITING";
+NSString * const QCloudCOS_STATE_IN_PROGRESS = @"IN_PROGRESS";
+NSString * const QCloudCOS_STATE_PAUSED = @"PAUSED";
+NSString * const QCloudCOS_STATE_RESUMED_WAITING = @"RESUMED_WAITING";
+NSString * const QCloudCOS_STATE_COMPLETED = @"COMPLETED";
+NSString * const QCloudCOS_STATE_FAILED = @"FAILED";
+NSString * const QCloudCOS_STATE_CANCELED = @"CANCELED";
 
 FlutterCosApi* flutterCosApi;
-NSString * permanentSecretId = nil;
-NSString * permanentSecretKey = nil;
-bool isScopeLimitCredential = false;
 
 QCloudThreadSafeMutableDictionary *QCloudCOSTransferConfigCache() {
     static QCloudThreadSafeMutableDictionary *CloudCOSTransferConfig = nil;
@@ -143,7 +148,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 
 -(nonnull QCloudServiceConfiguration *)buildConfiguration:(nonnull CosXmlServiceConfig *)config{
     QCloudServiceConfiguration* configuration = [QCloudServiceConfiguration new];
-    configuration.bridge = BRIDGE;
+    configuration.bridge = QCloudCOS_BRIDGE;
     QCloudCOSXMLEndPoint* endpoint;
     if(config.host){
         endpoint = [[QCloudCOSXMLEndPoint alloc] initWithLiteralURL:[NSURL URLWithString:config.host]];
@@ -159,7 +164,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     if(config.userAgent && ![config.userAgent isEqualToString:@""]){
         configuration.userAgentProductKey = config.userAgent;
     } else {
-        configuration.userAgentProductKey = UA_FLUTTER_PLUGIN;
+        configuration.userAgentProductKey = QCloudCOS_UA_FLUTTER_PLUGIN;
     }
     if(config.isHttps){
         endpoint.useHTTPS = config.isHttps;
@@ -169,12 +174,12 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     // todo iOS不支持：HostFormat、SocketTimeout、port、IsDebuggable、SignInUrl、DnsCache、
     configuration.endpoint = endpoint;
-    configuration.signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
+    configuration.signatureProvider = signatureProvider;
     return configuration;
 }
 
 -(QCloudCOSXMLService *)getQCloudCOSXMLService:(nonnull NSString *)key {
-    if([DEFAULT_KEY isEqual:key]){
+    if([QCloudCOS_DEFAULT_KEY isEqual:key]){
         return [QCloudCOSXMLService defaultCOSXML];
     } else {
         return [QCloudCOSXMLService cosxmlServiceForKey:key];
@@ -182,7 +187,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 }
 
 -(QCloudCOSTransferMangerService *)getQCloudCOSTransferMangerService:(nonnull NSString *)key {
-    if([DEFAULT_KEY isEqual:key]){
+    if([QCloudCOS_DEFAULT_KEY isEqual:key]){
         return [QCloudCOSTransferMangerService defaultCOSTransferManager];
     } else {
         return [QCloudCOSTransferMangerService costransfermangerServiceForKey:key];
@@ -192,26 +197,35 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 - (void)initWithPlainSecretSecretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error{
     permanentSecretId = secretId;
     permanentSecretKey = secretKey;
+    signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
 }
 - (void)initWithSessionCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
     isScopeLimitCredential = false;
+    signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
 }
 
 - (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
     isScopeLimitCredential = true;
+    signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
+}
+
+- (void)forceInvalidationCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
+    if(signatureProvider){
+        [signatureProvider forceInvalidationCredential];
+    }
 }
 
 - (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSXMLService registerDefaultCOSXMLWithConfiguration: [self buildConfiguration: config]];
-    completion(DEFAULT_KEY, nil);
+    completion(QCloudCOS_DEFAULT_KEY, nil);
 }
 
 - (void)registerDefaultTransferMangerConfig:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
     [QCloudCOSTransferMangerService registerDefaultCOSTransferMangerWithConfiguration: [self buildConfiguration: config]];
     if(transferConfig){
-        [QCloudCOSTransferConfigCache() setObject:transferConfig forKey:DEFAULT_KEY];
+        [QCloudCOSTransferConfigCache() setObject:transferConfig forKey:QCloudCOS_DEFAULT_KEY];
     }
-    completion(DEFAULT_KEY, nil);
+    completion(QCloudCOS_DEFAULT_KEY, nil);
 }
 
 - (void)registerServiceKey:(NSString *)key config:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion{
@@ -652,9 +666,9 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         }
         
         if(error == nil){
-            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_COMPLETED];
+            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_COMPLETED];
         } else {
-            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_FAILED];
+            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_FAILED];
         }
         
         if(resultCallbackKey){
@@ -687,7 +701,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [getObjectRequest setDownProcessBlock:^(int64_t bytesDownload,
                                             int64_t totalBytesDownload,
                                             int64_t totalBytesExpectedToDownload) {
-        [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_IN_PROGRESS];
+        [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_IN_PROGRESS];
         if(progressCallbackKey){
             [flutterCosApi progressCallbackTransferKey:transferKey
                                                    key:progressCallbackKey
@@ -699,7 +713,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }];
     
     [transferManger DownloadObject:getObjectRequest];
-    [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_WAITING];
+    [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_WAITING];
     
     [QCloudCOSTaskCache() setObject:getObjectRequest forKey:taskKey];
     return taskKey;
@@ -714,7 +728,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         }
         NSError *error;
         put.resmeData = [put cancelByProductingResumeData:&error];
-        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:STATE_PAUSED];
+        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:QCloudCOS_STATE_PAUSED];
     } else if ([taskId hasPrefix:@"download-"]){
         QCloudCOSXMLDownloadObjectRequest* request = [QCloudCOSTaskCache() objectForKey:taskId];
         if(request == nil) {
@@ -722,7 +736,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
             return;
         }
         [request cancel];
-        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:STATE_PAUSED];
+        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:QCloudCOS_STATE_PAUSED];
     }
 }
 
@@ -749,7 +763,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
   initMultipleUploadCallbackKey:[put iinitMultipleUploadCallbackKey]
                         taskKey:taskId
                           error:error];
-        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:STATE_RESUMED_WAITING];
+        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:QCloudCOS_STATE_RESUMED_WAITING];
     } else if ([taskId hasPrefix:@"download-"]){
         QCloudCOSXMLDownloadObjectRequest* request = [QCloudCOSTaskCache() objectForKey:taskId];
         if(request == nil) {
@@ -768,7 +782,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
               progressCallbackKey:[request progressCallbackKey]
                           taskKey:taskId
                             error:error];
-        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:STATE_RESUMED_WAITING];
+        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:QCloudCOS_STATE_RESUMED_WAITING];
     }
 }
 
@@ -781,7 +795,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
             return;
         }
         [put abort:^(id outputObject, NSError *error) {}];
-        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:STATE_CANCELED];
+        [self stateCallback:transferKey stateCallbackKey:[put stateCallbackKey] state:QCloudCOS_STATE_CANCELED];
     } else if ([taskId hasPrefix:@"download-"]){
         QCloudCOSXMLDownloadObjectRequest* request = [QCloudCOSTaskCache() objectForKey:taskId];
         if(request == nil) {
@@ -789,7 +803,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
             return;
         }
         [request cancel];
-        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:STATE_CANCELED];
+        [self stateCallback:transferKey stateCallbackKey:[request stateCallbackKey] state:QCloudCOS_STATE_CANCELED];
     }
     [QCloudCOSTaskCache() removeObject:taskId];
 }
@@ -865,7 +879,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [put setSendProcessBlock:^(int64_t bytesSent,
                                int64_t totalBytesSent,
                                int64_t totalBytesExpectedToSend) {
-        [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_IN_PROGRESS];
+        [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_IN_PROGRESS];
         if(progressCallbackKey){
             [flutterCosApi progressCallbackTransferKey:transferKey
                                                    key:progressCallbackKey
@@ -885,9 +899,9 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         }
         
         if(error == nil){
-            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_COMPLETED];
+            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_COMPLETED];
         } else {
-            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_FAILED];
+            [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_FAILED];
         }
         
         if(resultCallbackKey){
@@ -927,7 +941,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         }
     }];
     [transferManger UploadObject:put];
-    [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:STATE_WAITING];
+    [self stateCallback:transferKey stateCallbackKey:stateCallbackKey state:QCloudCOS_STATE_WAITING];
     
     [QCloudCOSTaskCache() setObject:put forKey:taskKey];
     return taskKey;

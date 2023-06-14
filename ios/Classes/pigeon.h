@@ -234,6 +234,7 @@ NSObject<FlutterMessageCodec> *CosApiGetCodec(void);
 - (void)initWithPlainSecretSecretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)initWithSessionCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)forceInvalidationCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setCloseBeaconIsCloseBeacon:(NSNumber *)isCloseBeacon error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
 - (void)registerDefaultTransferMangerConfig:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;

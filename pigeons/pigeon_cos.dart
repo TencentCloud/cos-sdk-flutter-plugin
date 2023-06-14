@@ -8,6 +8,8 @@ abstract class CosApi {
 
   void initWithScopeLimitCredential();
 
+  void forceInvalidationCredential();
+
   void setCloseBeacon(bool isCloseBeacon);
 
   @async

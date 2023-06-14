@@ -1311,6 +1311,7 @@ public class Pigeon {
     void initWithPlainSecret(@NonNull String secretId, @NonNull String secretKey);
     void initWithSessionCredential();
     void initWithScopeLimitCredential();
+    void forceInvalidationCredential();
     void setCloseBeacon(@NonNull Boolean isCloseBeacon);
     void registerDefaultService(@NonNull CosXmlServiceConfig config, Result<String> result);
     void registerDefaultTransferManger(@NonNull CosXmlServiceConfig config, @Nullable TransferConfig transferConfig, Result<String> result);
@@ -1380,6 +1381,26 @@ public class Pigeon {
             ArrayList wrapped = new ArrayList<>();
             try {
               api.initWithScopeLimitCredential();
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.forceInvalidationCredential", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              api.forceInvalidationCredential();
               wrapped.add(0, null);
             }
             catch (Error | RuntimeException exception) {

@@ -649,6 +649,24 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.forceInvalidationCredential"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(forceInvalidationCredentialWithError:)], @"CosApi api (%@) doesn't respond to @selector(forceInvalidationCredentialWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api forceInvalidationCredentialWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.CosApi.setCloseBeacon"
         binaryMessenger:binaryMessenger
         codec:CosApiGetCodec()];

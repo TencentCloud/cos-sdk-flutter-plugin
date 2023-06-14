@@ -26,7 +26,7 @@ flutter pub add tencentcloud_cos_sdk_plugin
 2. 这将向您的包的 pubspec.yaml 添加这样一行（并运行隐式 flutter pub get）
 ```
 dependencies:
-  tencentcloud_cos_sdk_plugin: ^1.0.3
+  tencentcloud_cos_sdk_plugin: ^1.0.4
 ```
 3. 在您的 Dart 代码中，您可以使用 import 进行导入，然后开始使用：
 ```
@@ -175,6 +175,16 @@ class FetchScopeLimitCredentials implements IFetchScopeLimitCredentials{
 
 ```dart
 Cos().initWithScopeLimitCredential(FetchScopeLimitCredentials());
+```
+
+
+#### 强制使本地保存的临时密钥失效
+
+该功能可以强制使 COS SDK 已经缓存的临时密钥失效，包括无限制使用范围和限制使用范围的临时密钥，失效后再使用 COS 接口功能时 SDK 会重新向业务临时密钥服务端获取新的临时密钥。
+调用方法：
+
+```dart
+await Cos().forceInvalidationCredential();
 ```
 
 #### 使用永久密钥进行本地调试

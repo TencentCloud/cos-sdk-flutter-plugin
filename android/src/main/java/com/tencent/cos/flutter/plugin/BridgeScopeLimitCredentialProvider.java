@@ -5,8 +5,9 @@ import android.os.Looper;
 
 import com.tencent.cos.xml.common.ClientErrorCode;
 import com.tencent.cos.xml.exception.CosXmlClientException;
-import com.tencent.qcloud.core.auth.BasicScopeLimitCredentialProvider;
+import com.tencent.qcloud.core.auth.QCloudCredentials;
 import com.tencent.qcloud.core.auth.STSCredentialScope;
+import com.tencent.qcloud.core.auth.ScopeLimitCredentialProvider;
 import com.tencent.qcloud.core.auth.SessionQCloudCredentials;
 import com.tencent.qcloud.core.common.QCloudClientException;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.TimeoutException;
 
 import java8.util.concurrent.CompletableFuture;
 
-class BridgeScopeLimitCredentialProvider extends BasicScopeLimitCredentialProvider {
+class BridgeScopeLimitCredentialProvider implements ScopeLimitCredentialProvider {
     private final Pigeon.FlutterCosApi flutterCosApi;
 
     BridgeScopeLimitCredentialProvider(Pigeon.FlutterCosApi flutterCosApi) {
@@ -27,7 +28,7 @@ class BridgeScopeLimitCredentialProvider extends BasicScopeLimitCredentialProvid
     }
 
     @Override
-    protected SessionQCloudCredentials fetchNewCredentials(STSCredentialScope[] stsCredentialScopes) throws QCloudClientException {
+    public SessionQCloudCredentials getCredentials(STSCredentialScope[] stsCredentialScopes) throws QCloudClientException {
         CompletableFuture<Pigeon.SessionQCloudCredentials> future = new CompletableFuture<>();
         //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
         runMainThread(() ->
@@ -58,6 +59,15 @@ class BridgeScopeLimitCredentialProvider extends BasicScopeLimitCredentialProvid
             e.printStackTrace();
             throw new CosXmlClientException(ClientErrorCode.INVALID_CREDENTIALS.getCode(), e);
         }
+    }
+
+    @Override
+    public QCloudCredentials getCredentials() {
+        throw new UnsupportedOperationException("not support ths op");
+    }
+
+    @Override
+    public void refresh() {
     }
 
     private List<Pigeon.STSCredentialScope> convertSTSCredentialScope(STSCredentialScope[] stsCredentialScopes){
