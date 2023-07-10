@@ -754,7 +754,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                          region:[put regionName]
                        filePath:nil
                         byteArr:nil
-                       uploadId:[put uploadid]
+                       uploadId:[put valueForKey:@"uploadId"]
                    stroageClass:QCloudCOSStorageClassTransferToString([put storageClass])
                    trafficLimit:[NSNumber numberWithInteger:[put trafficLimit]]
               resultCallbackKey:[put resultCallbackKey]
@@ -838,7 +838,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
             put.regionName = region;
         }
         if(uploadId){
-            put.uploadid = uploadId;
+            [put setValue:uploadId forKey:@"uploadId"];
         }
         if(stroageClass){
             put.storageClass = QCloudCOSStorageClassDumpFromString(stroageClass);
