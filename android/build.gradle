@@ -12,26 +12,11 @@ buildscript {
     }
 }
 
-// 定义一个方法, 用于获取当前moudle的dir
-def getCurrentProjectDir() {
-    String result = ""
-    rootProject.allprojects { project ->
-        if (project.properties.get("identityPath").toString() == ":tencentcloud_cos_sdk_plugin") { // 这里是flutter的约定, 插件的module名是插件名, :是gradle的约定. project前加:
-            result = project.properties.get("projectDir").toString()
-        }
-    }
-    return result
-}
-
 rootProject.allprojects {
-    // 这个闭包是循环所有project, 我们让这个仓库可以被所有module找到
-    def dir = getCurrentProjectDir()
     repositories {
         google()
         mavenCentral()
-        maven { // 添加这个指向本地的仓库目录
-            url "$dir/repo"
-        }
+        flatDir { dirs project(":tencentcloud_cos_sdk_plugin").file("libs") }
     }
 }
 
@@ -52,6 +37,6 @@ android {
 
 dependencies {
     implementation 'com.qcloud.cos:qcloud-foundation:1.5.55'
-    implementation 'com.qcloud.cos:cos-android-nobeacon:5.9.13'
+    implementation(name: 'cos-android-nobeacon-5.9.13', ext: 'aar')
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
 }
