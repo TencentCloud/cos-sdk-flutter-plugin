@@ -1,5 +1,6 @@
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'common/DnsConfig.dart';
 import 'routers/delegate.dart';
 import 'routers/route_parser.dart';
 import 'config/config.dart';
@@ -24,6 +25,12 @@ void main() async {
   } else {
     await Cos().initWithPlainSecret(TestConst().SECRET_ID, TestConst().SECRET_KEY);
   }
+
+  // 设置静态自定义dns
+  // await Cos().initCustomerDNS(FetchDns.dnsMap);
+  // 设置动态自定义dns回调（更推荐使用 因为更灵活）
+  // await Cos().initCustomerDNSFetch(FetchDns());
+
   await Cos().registerDefaultService(Constant.serviceConfig);
   await Cos().registerDefaultTransferManger(Constant.serviceConfig, TransferConfig());
 

@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 
+import 'fetch_dns.dart';
 import 'pigeon.dart';
 
 import 'cos_service.dart';
@@ -36,6 +37,11 @@ class Cos {
   late IFetchScopeLimitCredentials _iFetchScopeLimitCredentials;
   IFetchScopeLimitCredentials getFetchScopeLimitCredentials(){
     return _iFetchScopeLimitCredentials;
+  }
+
+  late IFetchDns _iFetchDns;
+  IFetchDns getFetchDns(){
+    return _iFetchDns;
   }
 
   /// 设置永久秘钥
@@ -74,6 +80,17 @@ class Cos {
         print("COS Service has been inited before.");
       }
     }
+  }
+
+  /// 初始化自定义 DNS 解析Map
+  Future<void> initCustomerDNS(Map<String, List<String>> dnsMap) async {
+    return _cosApi.initCustomerDNS(dnsMap);
+  }
+
+  /// 初始化自定义 DNS 解析器
+  Future<void> initCustomerDNSFetch(IFetchDns iFetchDns) async {
+    _iFetchDns = iFetchDns;
+    return _cosApi.initCustomerDNSFetch();
   }
 
   /// 强制让本地保存临时秘钥失效

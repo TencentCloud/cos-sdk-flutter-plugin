@@ -234,6 +234,8 @@ NSObject<FlutterMessageCodec> *CosApiGetCodec(void);
 - (void)initWithPlainSecretSecretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)initWithSessionCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)initCustomerDNSDnsMap:(NSDictionary<NSString *, NSArray<NSString *> *> *)dnsMap error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)initCustomerDNSFetchWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)forceInvalidationCredentialWithError:(FlutterError *_Nullable *_Nonnull)error;
 - (void)setCloseBeaconIsCloseBeacon:(NSNumber *)isCloseBeacon error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)registerDefaultServiceConfig:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
@@ -293,6 +295,10 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec(void);
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
 - (void)fetchSessionCredentialsWithCompletion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion;
 - (void)fetchScopeLimitCredentialsStsCredentialScopes:(NSArray<STSCredentialScope *> *)stsCredentialScopes completion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion;
+/// 获取dns记录
+/// @param domain 域名
+/// @return ip集合
+- (void)fetchDnsDomain:(NSString *)domain completion:(void(^)(NSArray<NSString *> *_Nullable, NSError *_Nullable))completion;
 - (void)resultSuccessCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key header:(nullable NSDictionary<NSString *, NSString *> *)header completion:(void(^)(NSError *_Nullable))completion;
 - (void)resultFailCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key clientException:(nullable CosXmlClientException *)clientException serviceException:(nullable CosXmlServiceException *)serviceException completion:(void(^)(NSError *_Nullable))completion;
 - (void)stateCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key state:(NSString *)state completion:(void(^)(NSError *_Nullable))completion;

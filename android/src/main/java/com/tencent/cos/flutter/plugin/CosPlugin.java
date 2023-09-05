@@ -55,15 +55,19 @@ import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
 import com.tencent.qcloud.core.task.TaskExecutors;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import java8.util.concurrent.CompletableFuture;
 
 /**
  * CosPlugin
@@ -79,6 +83,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     private final Map<String, COSXMLTask> taskMap = new HashMap<>();
 
     private QCloudCredentialProvider qCloudCredentialProvider = null;
+    private Map<String, List<String>> dnsMap = null;
+    private boolean initDnsFetch = false;
     private final Object credentialProviderLock = new Object();
     public static ThreadPoolExecutor COMMAND_EXECUTOR = null;
 
@@ -125,6 +131,16 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         synchronized (credentialProviderLock) {
             credentialProviderLock.notify();
         }
+    }
+
+    @Override
+    public void initCustomerDNS(@NonNull Map<String, List<String>> dnsMap) {
+        this.dnsMap = dnsMap;
+    }
+
+    @Override
+    public void initCustomerDNSFetch() {
+        initDnsFetch = true;
     }
 
     @Override
@@ -848,7 +864,41 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (qCloudCredentialProvider == null) {
             throw new IllegalArgumentException("Please call method initWithPlainSecret or initWithSessionCredentialCallback first");
         } else {
-            return new CosXmlService(context, serviceConfigBuilder.builder(), qCloudCredentialProvider);
+            CosXmlService cosXmlService = new CosXmlService(context, serviceConfigBuilder.builder(), qCloudCredentialProvider);
+            if(dnsMap != null) {
+                try {
+                    for (String domain: dnsMap.keySet()) {
+                        if(dnsMap.get(domain) != null && dnsMap.get(domain).size() > 0){
+                            cosXmlService.addCustomerDNS(domain, dnsMap.get(domain).toArray(new String[0]));
+                        }
+                    }
+                } catch (CosXmlClientException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(initDnsFetch){
+                cosXmlService.addCustomerDNSFetch(domain -> {
+                    CompletableFuture<List<String>> future = new CompletableFuture<>();
+                    //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
+                    runMainThread(() ->
+                            flutterCosApi.fetchDns(domain, future::complete)
+                    );
+                    List<InetAddress> inetAddresses = new ArrayList<>();
+                    try {
+                        List<String> ipList = future.get(60, TimeUnit.SECONDS);
+                        if(ipList != null && ipList.size() > 0){
+                            for (String ip : ipList) {
+                                inetAddresses.add(InetAddress.getByName(ip));
+                            }
+                        }
+                        return inetAddresses;
+                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                });
+            }
+            return cosXmlService;
         }
     }
 

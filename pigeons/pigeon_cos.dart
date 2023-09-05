@@ -8,6 +8,10 @@ abstract class CosApi {
 
   void initWithScopeLimitCredential();
 
+  void initCustomerDNS(Map<String, List<String>> dnsMap);
+
+  void initCustomerDNSFetch();
+
   void forceInvalidationCredential();
 
   void setCloseBeacon(bool isCloseBeacon);
@@ -163,6 +167,12 @@ abstract class FlutterCosApi {
 
   @async
   SessionQCloudCredentials fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
+
+  /// 获取dns记录
+  /// @param domain 域名
+  /// @return ip集合
+  @async
+  List<String>? fetchDns(String domain);
 
   void resultSuccessCallback(
       String transferKey, int key, Map<String?, String?>? header);

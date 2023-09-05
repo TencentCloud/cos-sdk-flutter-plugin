@@ -5,6 +5,8 @@
 #import <QCloudCOSXML/QCloudCOSXML.h>
 #import <Flutter/Flutter.h>
 #import <objc/runtime.h>
+#import "QCloudHttpDNS.h"
+#import "QCloudThreadSafeMutableDictionary.h"
 
 static void *kQCloudDownloadRequestResultCallbackKey = &kQCloudDownloadRequestResultCallbackKey;
 static void *kQCloudDownloadRequestProgressCallbackKey = &kQCloudDownloadRequestProgressCallbackKey;
@@ -95,12 +97,13 @@ static void *kQCloudUploadRequestResmeData = &kQCloudUploadRequestResmeData;
 
 @end
 
-@interface CosPlugin ()
+@interface CosPlugin ()<QCloudHTTPDNSProtocol>
 {
     CosPluginSignatureProvider* signatureProvider;
     NSString * permanentSecretId;
     NSString * permanentSecretKey;
     bool isScopeLimitCredential;
+    bool isFetchDns;
 }
 @end
 
@@ -207,6 +210,22 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 - (void)initWithScopeLimitCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
     isScopeLimitCredential = true;
     signatureProvider = [CosPluginSignatureProvider makeWithFlutterCosApi:flutterCosApi secretId:permanentSecretId secretKey:permanentSecretKey isScopeLimitCredential:isScopeLimitCredential];
+}
+
+- (void)initCustomerDNSDnsMap:(NSDictionary<NSString *, NSArray<NSString *> *> *)dnsMap error:(FlutterError *_Nullable *_Nonnull)error{
+    [dnsMap enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSArray<NSString *> * _Nonnull obj, BOOL * _Nonnull stop) {
+        [obj enumerateObjectsUsingBlock:^(NSString * _Nonnull ip, NSUInteger idx, BOOL * _Nonnull stop) {
+            [[QCloudHttpDNS shareDNS] setIp:ip forDomain:key];
+        }];
+        QCloudThreadSafeMutableDictionary * ipHostMap = [[QCloudHttpDNS shareDNS] valueForKey:@"_ipHostMap"];
+        if(obj && key){
+            [ipHostMap setObject:obj forKey:key];
+        }
+    }];
+}
+- (void)initCustomerDNSFetchWithError:(FlutterError *_Nullable *_Nonnull)error{
+    isFetchDns = YES;
+    [QCloudHttpDNS shareDNS].delegate = self;
 }
 
 - (void)forceInvalidationCredentialWithError:(FlutterError *_Nullable *_Nonnull)error{
@@ -1048,5 +1067,20 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     return 0;
 
+}
+
+- (NSString *)resolveDomain:(NSString *)domain{
+    __block NSString * ip;
+    dispatch_semaphore_t semp = dispatch_semaphore_create(0);
+    [flutterCosApi fetchDnsDomain:domain completion:^(NSArray<NSString *> * _Nullable ips, NSError * _Nullable) {
+        ip = ips.lastObject;
+        QCloudThreadSafeMutableDictionary * ipHostMap = [[QCloudHttpDNS shareDNS] valueForKey:@"_ipHostMap"];
+        if(ips && domain){
+            [ipHostMap setObject:ips forKey:domain];
+        }
+        dispatch_semaphore_signal(semp);
+    }];
+    dispatch_semaphore_wait(semp, dispatch_time(DISPATCH_TIME_NOW, 60 * NSEC_PER_SEC));
+    return ip;
 }
 @end

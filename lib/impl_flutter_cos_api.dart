@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:tencentcloud_cos_sdk_plugin/Extensions.dart';
+import 'Extensions.dart';
 
 import 'pigeon.dart';
 
@@ -41,6 +41,11 @@ class ImplFlutterCosApi extends FlutterCosApi{
       cacheCredentialsAndCleanUp(scopeId, credentials);
     }
     return credentials;
+  }
+
+  @override
+  Future<List<String>?> fetchDns(String domain) {
+    return Cos().getFetchDns().fetchDns(domain);
   }
 
   @override

@@ -649,6 +649,44 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
   {
     FlutterBasicMessageChannel *channel =
       [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.initCustomerDNS"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(initCustomerDNSDnsMap:error:)], @"CosApi api (%@) doesn't respond to @selector(initCustomerDNSDnsMap:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSDictionary<NSString *, NSArray<NSString *> *> *arg_dnsMap = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api initCustomerDNSDnsMap:arg_dnsMap error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.initCustomerDNSFetch"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(initCustomerDNSFetchWithError:)], @"CosApi api (%@) doesn't respond to @selector(initCustomerDNSFetchWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api initCustomerDNSFetchWithError:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
         initWithName:@"dev.flutter.pigeon.CosApi.forceInvalidationCredential"
         binaryMessenger:binaryMessenger
         codec:CosApiGetCodec()];
@@ -1508,6 +1546,17 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec() {
       codec:FlutterCosApiGetCodec()];
   [channel sendMessage:@[arg_stsCredentialScopes ?: [NSNull null]] reply:^(id reply) {
     SessionQCloudCredentials *output = reply;
+    completion(output, nil);
+  }];
+}
+- (void)fetchDnsDomain:(NSString *)arg_domain completion:(void(^)(NSArray<NSString *> *_Nullable, NSError *_Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterCosApi.fetchDns"
+      binaryMessenger:self.binaryMessenger
+      codec:FlutterCosApiGetCodec()];
+  [channel sendMessage:@[arg_domain ?: [NSNull null]] reply:^(id reply) {
+    NSArray<NSString *> *output = reply;
     completion(output, nil);
   }];
 }

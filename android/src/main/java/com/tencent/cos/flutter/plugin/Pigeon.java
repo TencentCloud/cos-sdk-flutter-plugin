@@ -1311,6 +1311,8 @@ public class Pigeon {
     void initWithPlainSecret(@NonNull String secretId, @NonNull String secretKey);
     void initWithSessionCredential();
     void initWithScopeLimitCredential();
+    void initCustomerDNS(@NonNull Map<String, List<String>> dnsMap);
+    void initCustomerDNSFetch();
     void forceInvalidationCredential();
     void setCloseBeacon(@NonNull Boolean isCloseBeacon);
     void registerDefaultService(@NonNull CosXmlServiceConfig config, Result<String> result);
@@ -1381,6 +1383,52 @@ public class Pigeon {
             ArrayList wrapped = new ArrayList<>();
             try {
               api.initWithScopeLimitCredential();
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.initCustomerDNS", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Map<String, List<String>> dnsMapArg = (Map<String, List<String>>)args.get(0);
+              if (dnsMapArg == null) {
+                throw new NullPointerException("dnsMapArg unexpectedly null.");
+              }
+              api.initCustomerDNS(dnsMapArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.initCustomerDNSFetch", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              api.initCustomerDNSFetch();
               wrapped.add(0, null);
             }
             catch (Error | RuntimeException exception) {
@@ -2683,6 +2731,20 @@ public class Pigeon {
       channel.send(new ArrayList<Object>(Collections.singletonList(stsCredentialScopesArg)), channelReply -> {
         @SuppressWarnings("ConstantConditions")
         SessionQCloudCredentials output = (SessionQCloudCredentials)channelReply;
+        callback.reply(output);
+      });
+    }
+    /**
+     * 获取dns记录
+     * @param domain 域名
+     * @return ip集合
+     */
+    public void fetchDns(@NonNull String domainArg, Reply<List<String>> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.fetchDns", getCodec());
+      channel.send(new ArrayList<Object>(Collections.singletonList(domainArg)), channelReply -> {
+        @SuppressWarnings("ConstantConditions")
+        List<String> output = (List<String>)channelReply;
         callback.reply(output);
       });
     }

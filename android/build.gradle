@@ -16,7 +16,7 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
-        flatDir { dirs project(":tencentcloud_cos_sdk_plugin").file("libs") }
+//        flatDir { dirs project(":tencentcloud_cos_sdk_plugin").file("libs") }
     }
 }
 
@@ -36,11 +36,13 @@ android {
 }
 
 dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:3.12.6'
-    implementation 'com.squareup.okio:okio:1.15.0'
-    implementation 'com.parse.bolts:bolts-tasks:1.4.0'
+//    implementation 'com.squareup.okhttp3:okhttp:3.12.6'
+//    implementation 'com.squareup.okio:okio:1.15.0'
+//    implementation 'com.parse.bolts:bolts-tasks:1.4.0'
+//
+//    implementation(name: 'qcloud-foundation-1.5.55', ext: 'aar')
+//    implementation(name: 'cos-android-nobeacon-5.9.13', ext: 'aar')
 
-    implementation(name: 'qcloud-foundation-1.5.55', ext: 'aar')
-    implementation(name: 'cos-android-nobeacon-5.9.13', ext: 'aar')
+    implementation 'com.qcloud.cos:cos-android-nobeacon:5.9.16'
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
 }

@@ -47,7 +47,7 @@ PODS:
     - SDWebImage/Core (= 5.13.5)
   - SDWebImage/Core (5.13.5)
   - SwiftyGif (5.4.3)
-  - tencentcloud_cos_sdk_plugin (1.0.7):
+  - tencentcloud_cos_sdk_plugin (1.0.8):
     - Flutter
     - QCloudCOSXML (>= 6.1.7)
 
@@ -86,8 +86,8 @@ SPEC CHECKSUMS:
   QCloudCOSXML: 4cab311d08a8df863db977d397e67f4dac27a39b
   SDWebImage: 23d714cd599354ee7906dbae26dff89b421c4370
   SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
-  tencentcloud_cos_sdk_plugin: f1da4d8d632877866d5ccdffd56de28247485690
+  tencentcloud_cos_sdk_plugin: bfd4f82052a77bbe39272f7c871d1c1b2eac4cb7
 
 PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

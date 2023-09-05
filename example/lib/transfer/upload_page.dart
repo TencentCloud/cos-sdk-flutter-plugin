@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
+import '../common/DnsConfig.dart';
 import '../common/constant.dart';
 import '../common/res/colors.dart';
 import '../common/res/gaps.dart';

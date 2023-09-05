@@ -639,6 +639,50 @@ class CosApi {
     }
   }
 
+  Future<void> initCustomerDNS(Map<String?, List<String?>?> arg_dnsMap) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.initCustomerDNS', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_dnsMap]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> initCustomerDNSFetch() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.initCustomerDNSFetch', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
   Future<void> forceInvalidationCredential() async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosApi.forceInvalidationCredential', codec,
@@ -1493,6 +1537,11 @@ abstract class FlutterCosApi {
 
   Future<SessionQCloudCredentials> fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
 
+  /// 获取dns记录
+  /// @param domain 域名
+  /// @return ip集合
+  Future<List<String?>?> fetchDns(String domain);
+
   void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header);
 
   void resultFailCallback(String transferKey, int key, CosXmlClientException? clientException, CosXmlServiceException? serviceException);
@@ -1532,6 +1581,24 @@ abstract class FlutterCosApi {
           final List<STSCredentialScope?>? arg_stsCredentialScopes = (args[0] as List<Object?>?)?.cast<STSCredentialScope?>();
           assert(arg_stsCredentialScopes != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.fetchScopeLimitCredentials was null, expected non-null List<STSCredentialScope?>.');
           final SessionQCloudCredentials output = await api.fetchScopeLimitCredentials(arg_stsCredentialScopes!);
+          return output;
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.FlutterCosApi.fetchDns', codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.FlutterCosApi.fetchDns was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final String? arg_domain = (args[0] as String?);
+          assert(arg_domain != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.fetchDns was null, expected non-null String.');
+          final List<String?>? output = await api.fetchDns(arg_domain!);
           return output;
         });
       }

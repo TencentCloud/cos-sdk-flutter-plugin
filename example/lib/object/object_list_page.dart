@@ -8,6 +8,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../common/constant.dart';
 import '../../common/toast_utils.dart';
+import '../common/DnsConfig.dart';
 import '../common/res/colors.dart';
 import '../routers/delegate.dart';
 import '../../common/utils.dart';
