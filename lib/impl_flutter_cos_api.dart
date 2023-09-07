@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'Extensions.dart';
+import 'extensions.dart';
 
 import 'pigeon.dart';
 
