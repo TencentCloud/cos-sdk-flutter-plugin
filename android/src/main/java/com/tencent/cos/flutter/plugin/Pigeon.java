@@ -97,6 +97,12 @@ public class Pigeon {
       this.accelerate = setterArg;
     }
 
+    private @Nullable Boolean domainSwitch;
+    public @Nullable Boolean getDomainSwitch() { return domainSwitch; }
+    public void setDomainSwitch(@Nullable Boolean setterArg) {
+      this.domainSwitch = setterArg;
+    }
+
     public static final class Builder {
       private @Nullable String region;
       public @NonNull Builder setRegion(@Nullable String setterArg) {
@@ -158,6 +164,11 @@ public class Pigeon {
         this.accelerate = setterArg;
         return this;
       }
+      private @Nullable Boolean domainSwitch;
+      public @NonNull Builder setDomainSwitch(@Nullable Boolean setterArg) {
+        this.domainSwitch = setterArg;
+        return this;
+      }
       public @NonNull CosXmlServiceConfig build() {
         CosXmlServiceConfig pigeonReturn = new CosXmlServiceConfig();
         pigeonReturn.setRegion(region);
@@ -172,11 +183,12 @@ public class Pigeon {
         pigeonReturn.setUserAgent(userAgent);
         pigeonReturn.setDnsCache(dnsCache);
         pigeonReturn.setAccelerate(accelerate);
+        pigeonReturn.setDomainSwitch(domainSwitch);
         return pigeonReturn;
       }
     }
     @NonNull ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<Object>(12);
+      ArrayList<Object> toListResult = new ArrayList<Object>(13);
       toListResult.add(region);
       toListResult.add(connectionTimeout);
       toListResult.add(socketTimeout);
@@ -189,6 +201,7 @@ public class Pigeon {
       toListResult.add(userAgent);
       toListResult.add(dnsCache);
       toListResult.add(accelerate);
+      toListResult.add(domainSwitch);
       return toListResult;
     }
     static @NonNull CosXmlServiceConfig fromList(@NonNull ArrayList<Object> list) {
@@ -217,6 +230,8 @@ public class Pigeon {
       pigeonResult.setDnsCache((Boolean)dnsCache);
       Object accelerate = list.get(11);
       pigeonResult.setAccelerate((Boolean)accelerate);
+      Object domainSwitch = list.get(12);
+      pigeonResult.setDomainSwitch((Boolean)domainSwitch);
       return pigeonResult;
     }
   }

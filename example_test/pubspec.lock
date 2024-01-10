@@ -270,7 +270,7 @@ packages:
       sha256: "23522428b1091b9fa0dabf7f71a6736b0636a58b5c38ba5b47ac83156634c201"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.8"
+    version: "1.1.0"
   term_glyph:
     dependency: transitive
     description:

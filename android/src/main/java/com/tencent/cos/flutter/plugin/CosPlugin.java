@@ -153,7 +153,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
 
     @Override
     public void setCloseBeacon(@NonNull Boolean isCloseBeacon) {
-        CosXmlBaseService.IS_CLOSE_BEACON = isCloseBeacon;
+        CosXmlBaseService.IS_CLOSE_REPORT = isCloseBeacon;
     }
 
     @Override
@@ -823,6 +823,9 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         }
         if (config.getIsHttps() != null) {
             serviceConfigBuilder.isHttps(config.getIsHttps());
+        }
+        if (config.getDomainSwitch() != null) {
+            serviceConfigBuilder.setDomainSwitch(config.getDomainSwitch());
         }
         if (config.getHost() != null) {
             serviceConfigBuilder.setHost(config.getHost());

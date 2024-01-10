@@ -11,7 +11,7 @@
 1. 您需要一个纯 Flutter 项目或 Flutter 原生混合项目，这个应用可以是您现有的工程，也可以是您新建的一个空的工程。
 2. Flutter 版本要求：
 ```
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.15.0 <4.0.0"
   flutter: ">=2.5.0"
 ```
 
@@ -26,7 +26,7 @@ flutter pub add tencentcloud_cos_sdk_plugin
 2. 这将向您的包的 pubspec.yaml 添加这样一行（并运行隐式 flutter pub get）
 ```
 dependencies:
-  tencentcloud_cos_sdk_plugin: ^1.0.8
+  tencentcloud_cos_sdk_plugin: ^1.1.0
 ```
 3. 在您的 Dart 代码中，您可以使用 import 进行导入，然后开始使用：
 ```

@@ -21,6 +21,7 @@ class CosXmlServiceConfig {
     this.userAgent,
     this.dnsCache,
     this.accelerate,
+    this.domainSwitch,
   });
 
   String? region;
@@ -47,6 +48,8 @@ class CosXmlServiceConfig {
 
   bool? accelerate;
 
+  bool? domainSwitch;
+
   Object encode() {
     return <Object?>[
       region,
@@ -61,6 +64,7 @@ class CosXmlServiceConfig {
       userAgent,
       dnsCache,
       accelerate,
+      domainSwitch,
     ];
   }
 
@@ -79,6 +83,7 @@ class CosXmlServiceConfig {
       userAgent: result[9] as String?,
       dnsCache: result[10] as bool?,
       accelerate: result[11] as bool?,
+      domainSwitch: result[12] as bool?,
     );
   }
 }

@@ -169,6 +169,9 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     } else {
         configuration.userAgentProductKey = QCloudCOS_UA_FLUTTER_PLUGIN;
     }
+    if(config.domainSwitch){
+        configuration.disableChangeHost = ![config.domainSwitch boolValue];
+    }
     if(config.isHttps){
         endpoint.useHTTPS = config.isHttps;
     }
@@ -928,8 +931,8 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                 NSDictionary* headerAll = [[result __originHTTPURLResponse__] allHeaderFields];
                 NSMutableDictionary* resultDictionary = [NSMutableDictionary new];
                 NSString* encodedAccessUrl = [result.location stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
-                [resultDictionary setObject:encodedAccessUrl forKey:@"accessUrl"];
-                [resultDictionary setObject:result.eTag forKey:@"eTag"];
+                [resultDictionary setObject:encodedAccessUrl?:@"" forKey:@"accessUrl"];
+                [resultDictionary setObject:result.eTag?:@"" forKey:@"eTag"];
                 NSString* crc64ecma = [headerAll objectForKey: @"x-cos-hash-crc64ecma"];
                 if(crc64ecma){
                     [resultDictionary setObject:crc64ecma forKey:@"crc64ecma"];

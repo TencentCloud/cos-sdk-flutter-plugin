@@ -34,27 +34,28 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
-  - QCloudCore (6.2.5):
-    - QCloudCore/Default (= 6.2.5)
-  - QCloudCore/Default (6.2.5)
-  - QCloudCOSXML (6.2.5):
-    - QCloudCOSXML/Default (= 6.2.5)
-  - QCloudCOSXML/Default (6.2.5):
-    - QCloudCore (= 6.2.5)
-  - SDWebImage (5.13.5):
-    - SDWebImage/Core (= 5.13.5)
-  - SDWebImage/Core (5.13.5)
-  - SwiftyGif (5.4.3)
-  - tencentcloud_cos_sdk_plugin (1.0.8):
+    - FlutterMacOS
+  - QCloudCore (6.3.3):
+    - QCloudCore/Default (= 6.3.3)
+  - QCloudCore/Default (6.3.3)
+  - QCloudCOSXML (6.3.3):
+    - QCloudCOSXML/Default (= 6.3.3)
+  - QCloudCOSXML/Default (6.3.3):
+    - QCloudCore (= 6.3.3)
+  - SDWebImage (5.18.8):
+    - SDWebImage/Core (= 5.18.8)
+  - SDWebImage/Core (5.18.8)
+  - SwiftyGif (5.4.4)
+  - tencentcloud_cos_sdk_plugin (1.1.0):
     - Flutter
-    - QCloudCOSXML (>= 6.1.7)
+    - QCloudCOSXML (>= 6.3.3)
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - tencentcloud_cos_sdk_plugin (from `.symlinks/plugins/tencentcloud_cos_sdk_plugin/ios`)
 
 SPEC REPOS:
@@ -71,22 +72,22 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   tencentcloud_cos_sdk_plugin:
     :path: ".symlinks/plugins/tencentcloud_cos_sdk_plugin/ios"
 
 SPEC CHECKSUMS:
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
-  file_picker: 817ab1d8cd2da9d2da412a417162deee3500fc95
+  file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
-  QCloudCore: 81d649400ba861fc8e182d135b567d8eefe09e65
-  QCloudCOSXML: 4cab311d08a8df863db977d397e67f4dac27a39b
-  SDWebImage: 23d714cd599354ee7906dbae26dff89b421c4370
-  SwiftyGif: 6c3eafd0ce693cad58bb63d2b2fb9bacb8552780
-  tencentcloud_cos_sdk_plugin: bfd4f82052a77bbe39272f7c871d1c1b2eac4cb7
+  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
+  QCloudCore: 0044722792f3c72ae1fd6265e3fc233c670d4bf7
+  QCloudCOSXML: f281564c0418a25eba2c657374927ac61735c3b7
+  SDWebImage: a81bbb3ba4ea5f810f4069c68727cb118467a04a
+  SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
+  tencentcloud_cos_sdk_plugin: 5c7872b9666f27862e2e960d3586a71bf275a31d
 
 PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
 

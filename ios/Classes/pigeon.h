@@ -33,7 +33,8 @@ NS_ASSUME_NONNULL_BEGIN
     signInUrl:(nullable NSNumber *)signInUrl
     userAgent:(nullable NSString *)userAgent
     dnsCache:(nullable NSNumber *)dnsCache
-    accelerate:(nullable NSNumber *)accelerate;
+    accelerate:(nullable NSNumber *)accelerate
+    domainSwitch:(nullable NSNumber *)domainSwitch;
 @property(nonatomic, copy, nullable) NSString * region;
 @property(nonatomic, strong, nullable) NSNumber * connectionTimeout;
 @property(nonatomic, strong, nullable) NSNumber * socketTimeout;
@@ -46,6 +47,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, nullable) NSString * userAgent;
 @property(nonatomic, strong, nullable) NSNumber * dnsCache;
 @property(nonatomic, strong, nullable) NSNumber * accelerate;
+@property(nonatomic, strong, nullable) NSNumber * domainSwitch;
 @end
 
 @interface TransferConfig : NSObject

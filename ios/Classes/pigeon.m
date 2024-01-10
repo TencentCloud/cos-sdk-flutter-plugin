@@ -96,7 +96,8 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     signInUrl:(nullable NSNumber *)signInUrl
     userAgent:(nullable NSString *)userAgent
     dnsCache:(nullable NSNumber *)dnsCache
-    accelerate:(nullable NSNumber *)accelerate {
+    accelerate:(nullable NSNumber *)accelerate
+    domainSwitch:(nullable NSNumber *)domainSwitch {
   CosXmlServiceConfig* pigeonResult = [[CosXmlServiceConfig alloc] init];
   pigeonResult.region = region;
   pigeonResult.connectionTimeout = connectionTimeout;
@@ -110,6 +111,7 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   pigeonResult.userAgent = userAgent;
   pigeonResult.dnsCache = dnsCache;
   pigeonResult.accelerate = accelerate;
+  pigeonResult.domainSwitch = domainSwitch;
   return pigeonResult;
 }
 + (CosXmlServiceConfig *)fromList:(NSArray *)list {
@@ -126,6 +128,7 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   pigeonResult.userAgent = GetNullableObjectAtIndex(list, 9);
   pigeonResult.dnsCache = GetNullableObjectAtIndex(list, 10);
   pigeonResult.accelerate = GetNullableObjectAtIndex(list, 11);
+  pigeonResult.domainSwitch = GetNullableObjectAtIndex(list, 12);
   return pigeonResult;
 }
 + (nullable CosXmlServiceConfig *)nullableFromList:(NSArray *)list { return (list) ? [CosXmlServiceConfig fromList:list] : nil; }
@@ -143,6 +146,7 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     (self.userAgent ?: [NSNull null]),
     (self.dnsCache ?: [NSNull null]),
     (self.accelerate ?: [NSNull null]),
+    (self.domainSwitch ?: [NSNull null]),
   ];
 }
 @end

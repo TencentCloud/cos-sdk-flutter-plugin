@@ -203,6 +203,7 @@ class CosXmlServiceConfig {
   String? userAgent;
   bool? dnsCache;
   bool? accelerate;
+  bool? domainSwitch;
 //重试
 }
 

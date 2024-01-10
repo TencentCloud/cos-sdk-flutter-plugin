@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'tencentcloud_cos_sdk_plugin'
-  s.version          = '1.0.8'
+  s.version          = '1.1.0'
   s.summary          = 'Tencent COS Flutter Plugin SDK.'
   s.description      = <<-DESC
 Tencent COS Flutter Plugin SDK.
@@ -17,7 +17,7 @@ Tencent COS Flutter Plugin SDK.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'QCloudCOSXML','>= 6.1.7'
+  s.dependency 'QCloudCOSXML','>= 6.3.3'
   s.platform = :ios, '9.0'
   s.static_framework = true
 
