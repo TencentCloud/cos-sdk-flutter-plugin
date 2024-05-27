@@ -1,33 +1,33 @@
 PODS:
-  - DKImagePickerController/Core (4.3.4):
+  - DKImagePickerController/Core (4.3.9):
     - DKImagePickerController/ImageDataManager
     - DKImagePickerController/Resource
-  - DKImagePickerController/ImageDataManager (4.3.4)
-  - DKImagePickerController/PhotoGallery (4.3.4):
+  - DKImagePickerController/ImageDataManager (4.3.9)
+  - DKImagePickerController/PhotoGallery (4.3.9):
     - DKImagePickerController/Core
     - DKPhotoGallery
-  - DKImagePickerController/Resource (4.3.4)
-  - DKPhotoGallery (0.0.17):
-    - DKPhotoGallery/Core (= 0.0.17)
-    - DKPhotoGallery/Model (= 0.0.17)
-    - DKPhotoGallery/Preview (= 0.0.17)
-    - DKPhotoGallery/Resource (= 0.0.17)
+  - DKImagePickerController/Resource (4.3.9)
+  - DKPhotoGallery (0.0.19):
+    - DKPhotoGallery/Core (= 0.0.19)
+    - DKPhotoGallery/Model (= 0.0.19)
+    - DKPhotoGallery/Preview (= 0.0.19)
+    - DKPhotoGallery/Resource (= 0.0.19)
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Core (0.0.17):
+  - DKPhotoGallery/Core (0.0.19):
     - DKPhotoGallery/Model
     - DKPhotoGallery/Preview
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Model (0.0.17):
+  - DKPhotoGallery/Model (0.0.19):
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Preview (0.0.17):
+  - DKPhotoGallery/Preview (0.0.19):
     - DKPhotoGallery/Model
     - DKPhotoGallery/Resource
     - SDWebImage
     - SwiftyGif
-  - DKPhotoGallery/Resource (0.0.17):
+  - DKPhotoGallery/Resource (0.0.19):
     - SDWebImage
     - SwiftyGif
   - file_picker (0.0.1):
@@ -37,20 +37,22 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - QCloudCore (6.3.3):
-    - QCloudCore/Default (= 6.3.3)
-  - QCloudCore/Default (6.3.3)
-  - QCloudCOSXML (6.3.3):
-    - QCloudCOSXML/Default (= 6.3.3)
-  - QCloudCOSXML/Default (6.3.3):
-    - QCloudCore (= 6.3.3)
-  - SDWebImage (5.18.8):
-    - SDWebImage/Core (= 5.18.8)
-  - SDWebImage/Core (5.18.8)
-  - SwiftyGif (5.4.4)
-  - tencentcloud_cos_sdk_plugin (1.1.1):
+  - QCloudCore (6.4.0):
+    - QCloudCore/Default (= 6.4.0)
+  - QCloudCore/Default (6.4.0):
+    - QCloudTrack/Beacon (= 6.4.0)
+  - QCloudCOSXML (6.4.0):
+    - QCloudCOSXML/Default (= 6.4.0)
+  - QCloudCOSXML/Default (6.4.0):
+    - QCloudCore (= 6.4.0)
+  - QCloudTrack/Beacon (6.4.0)
+  - SDWebImage (5.19.2):
+    - SDWebImage/Core (= 5.19.2)
+  - SDWebImage/Core (5.19.2)
+  - SwiftyGif (5.4.5)
+  - tencentcloud_cos_sdk_plugin (1.1.2):
     - Flutter
-    - QCloudCOSXML (>= 6.3.3)
+    - QCloudCOSXML (>= 6.4.0)
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -64,6 +66,7 @@ SPEC REPOS:
     - DKPhotoGallery
     - QCloudCore
     - QCloudCOSXML
+    - QCloudTrack
     - SDWebImage
     - SwiftyGif
 
@@ -78,16 +81,17 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/tencentcloud_cos_sdk_plugin/ios"
 
 SPEC CHECKSUMS:
-  DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
-  DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
+  DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
+  DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  QCloudCore: 0044722792f3c72ae1fd6265e3fc233c670d4bf7
-  QCloudCOSXML: f281564c0418a25eba2c657374927ac61735c3b7
-  SDWebImage: a81bbb3ba4ea5f810f4069c68727cb118467a04a
-  SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
-  tencentcloud_cos_sdk_plugin: 5c7872b9666f27862e2e960d3586a71bf275a31d
+  QCloudCore: 231bef84178cc0cb87e36b5d074c3045a6d813c8
+  QCloudCOSXML: 796d1bbe01de2ae67e09a2df95bf1aef59336a05
+  QCloudTrack: daf143ed973d47d8a0cf3889ae03389b20464fae
+  SDWebImage: dfe95b2466a9823cf9f0c6d01217c06550d7b29a
+  SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
+  tencentcloud_cos_sdk_plugin: 1e3112e7e87adf0ad51628d9dc565133a942a461
 
 PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
 
