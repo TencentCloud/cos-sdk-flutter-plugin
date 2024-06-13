@@ -97,7 +97,8 @@ class Cos {
   /// 包括SessionCredential或ScopeLimitCredential
   Future<void> forceInvalidationCredential() async {
     flutterCosApi.forceInvalidationScopeCredentials();
-    return await _cosApi.forceInvalidationCredential();
+    await _cosApi.forceInvalidationCredential();
+    _initialized = false;
   }
 
   Future<void> setCloseBeacon(bool isCloseBeacon) async {
