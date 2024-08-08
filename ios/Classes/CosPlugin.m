@@ -443,9 +443,10 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     getPresignedURLRequest.object = cosPath;
     getPresignedURLRequest.HTTPMethod = @"GET";
 
-    if(signValidTime){
-        getPresignedURLRequest.expires = [NSDate dateWithTimeIntervalSinceNow:[signValidTime intValue]];
-    }
+    // 2024-08-08 腾讯突然 expires not found error了
+    // if(signValidTime){
+    //     getPresignedURLRequest.expires = [NSDate dateWithTimeIntervalSinceNow:[signValidTime intValue]];
+    // }
     
     if(signHost){
         // 获取预签名函数，默认签入Header Host；您也可以选择不签入Header Host，但可能导致请求失败或安全漏洞
