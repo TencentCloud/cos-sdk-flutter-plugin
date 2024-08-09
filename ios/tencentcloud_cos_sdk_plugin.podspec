@@ -17,7 +17,7 @@ Tencent COS Flutter Plugin SDK.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'QCloudCOSXML','>= 6.4.0'
+  s.dependency 'QCloudCOSXML','= 6.4.0'
   s.platform = :ios, '9.0'
   s.static_framework = true
 
