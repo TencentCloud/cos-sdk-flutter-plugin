@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
-import 'package:tencentcloud_cos_sdk_plugin/cos_service.dart';
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/cos.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/cos_service.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/pigeon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';

@@ -18,7 +18,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  tencentcloud_cos_sdk_plugin:
+  tencentcloud_cos_sdk_plugin_nobeacon:
     # When depending on this package from a real application you should use:
     #   cos: ^x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints

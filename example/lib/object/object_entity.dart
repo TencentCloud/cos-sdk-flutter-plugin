@@ -1,4 +1,4 @@
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/pigeon.dart';
 
 class ObjectEntity {
   final int _type;//文件夹0 文件1

@@ -37,28 +37,22 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - QCloudCore (6.4.1):
-    - QCloudCore/Default (= 6.4.1)
-  - QCloudCore/Default (6.4.1):
-    - QCloudTrack/Beacon (= 6.4.1)
-  - QCloudCOSXML (6.4.1):
-    - QCloudCOSXML/Default (= 6.4.1)
-  - QCloudCOSXML/Default (6.4.1):
-    - QCloudCore (= 6.4.1)
-  - QCloudTrack/Beacon (6.4.1)
+  - QCloudCore/WithoutMTA (6.4.3)
+  - QCloudCOSXML/Slim (6.4.3):
+    - QCloudCore/WithoutMTA (= 6.4.3)
   - SDWebImage (5.19.7):
     - SDWebImage/Core (= 5.19.7)
   - SDWebImage/Core (5.19.7)
   - SwiftyGif (5.4.5)
-  - tencentcloud_cos_sdk_plugin (1.1.4):
+  - tencentcloud_cos_sdk_plugin_nobeacon (1.1.6):
     - Flutter
-    - QCloudCOSXML (= 6.4.1)
+    - QCloudCOSXML/Slim (= 6.4.3)
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
-  - tencentcloud_cos_sdk_plugin (from `.symlinks/plugins/tencentcloud_cos_sdk_plugin/ios`)
+  - tencentcloud_cos_sdk_plugin_nobeacon (from `.symlinks/plugins/tencentcloud_cos_sdk_plugin_nobeacon/ios`)
 
 SPEC REPOS:
   trunk:
@@ -66,7 +60,6 @@ SPEC REPOS:
     - DKPhotoGallery
     - QCloudCore
     - QCloudCOSXML
-    - QCloudTrack
     - SDWebImage
     - SwiftyGif
 
@@ -77,21 +70,20 @@ EXTERNAL SOURCES:
     :path: Flutter
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
-  tencentcloud_cos_sdk_plugin:
-    :path: ".symlinks/plugins/tencentcloud_cos_sdk_plugin/ios"
+  tencentcloud_cos_sdk_plugin_nobeacon:
+    :path: ".symlinks/plugins/tencentcloud_cos_sdk_plugin_nobeacon/ios"
 
 SPEC CHECKSUMS:
   DKImagePickerController: 946cec48c7873164274ecc4624d19e3da4c1ef3c
   DKPhotoGallery: b3834fecb755ee09a593d7c9e389d8b5d6deed60
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  QCloudCore: 6252d05b183f45698550c5445de85826fd89f9a5
-  QCloudCOSXML: 48557a25a8803093a80951e65753a68275ff967d
-  QCloudTrack: 7458275adda5626dd2dc99367e3993080ab119c8
+  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
+  QCloudCore: 71b30f12a6d55e022b67872dab520178780e75dd
+  QCloudCOSXML: 46b57292baaab179679f48288f85443deae806b3
   SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  tencentcloud_cos_sdk_plugin: 6f0609b044156bcd68186663e5e3325dbb7c4cc7
+  tencentcloud_cos_sdk_plugin_nobeacon: 7f6646c60c8dff08ad6f7dfe54bb532d3c7c95d7
 
 PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
 

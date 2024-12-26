@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:tencentcloud_cos_sdk_plugin/fetch_credentials.dart';
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/fetch_credentials.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/pigeon.dart';
 
 import '../config/config.dart';
 

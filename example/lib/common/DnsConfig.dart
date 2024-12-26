@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:tencentcloud_cos_sdk_plugin/fetch_dns.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/fetch_dns.dart';
 /// 测试用的自定义DNS配置
 class FetchDns implements IFetchDns{
   static Map<String, List<String>> dnsMap = {

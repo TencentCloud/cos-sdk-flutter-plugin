@@ -1,5 +1,5 @@
-import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/cos.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/pigeon.dart';
 import 'common/DnsConfig.dart';
 import 'routers/delegate.dart';
 import 'routers/route_parser.dart';

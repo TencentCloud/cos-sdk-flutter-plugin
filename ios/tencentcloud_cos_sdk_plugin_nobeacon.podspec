@@ -3,7 +3,7 @@
 # Run `pod lib lint cos.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'tencentcloud_cos_sdk_plugin'
+  s.name             = 'tencentcloud_cos_sdk_plugin_nobeacon'
   s.version          = '1.1.9'
   s.summary          = 'Tencent COS Flutter Plugin SDK.'
   s.description      = <<-DESC
@@ -17,7 +17,7 @@ Tencent COS Flutter Plugin SDK.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'QCloudCOSXML','6.4.5'
+  s.dependency 'QCloudCOSXML/Slim','6.4.5'
   s.platform = :ios, '9.0'
   s.static_framework = true
 

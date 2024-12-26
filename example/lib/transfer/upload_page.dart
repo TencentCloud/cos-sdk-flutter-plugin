@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
-import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
-import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
-import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
-import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/cos.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/cos_transfer_manger.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/enums.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/pigeon.dart';
+import 'package:tencentcloud_cos_sdk_plugin_nobeacon/transfer_task.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
