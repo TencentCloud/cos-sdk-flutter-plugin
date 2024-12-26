@@ -43,6 +43,21 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 + (nullable SessionQCloudCredentials *)nullableFromList:(NSArray *)list;
 - (NSArray *)toList;
 @end
+@interface CosXmlResult ()
++ (CosXmlResult *)fromList:(NSArray *)list;
++ (nullable CosXmlResult *)nullableFromList:(NSArray *)list;
+- (NSArray *)toList;
+@end
+@interface CallbackResult ()
++ (CallbackResult *)fromList:(NSArray *)list;
++ (nullable CallbackResult *)nullableFromList:(NSArray *)list;
+- (NSArray *)toList;
+@end
+@interface CallbackResultError ()
++ (CallbackResultError *)fromList:(NSArray *)list;
++ (nullable CallbackResultError *)nullableFromList:(NSArray *)list;
+- (NSArray *)toList;
+@end
 @interface CosXmlClientException ()
 + (CosXmlClientException *)fromList:(NSArray *)list;
 + (nullable CosXmlClientException *)nullableFromList:(NSArray *)list;
@@ -250,6 +265,84 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     (self.token ?: [NSNull null]),
     (self.startTime ?: [NSNull null]),
     (self.expiredTime ?: [NSNull null]),
+  ];
+}
+@end
+
+@implementation CosXmlResult
++ (instancetype)makeWithETag:(nullable NSString *)eTag
+    accessUrl:(nullable NSString *)accessUrl
+    callbackResult:(nullable CallbackResult *)callbackResult {
+  CosXmlResult* pigeonResult = [[CosXmlResult alloc] init];
+  pigeonResult.eTag = eTag;
+  pigeonResult.accessUrl = accessUrl;
+  pigeonResult.callbackResult = callbackResult;
+  return pigeonResult;
+}
++ (CosXmlResult *)fromList:(NSArray *)list {
+  CosXmlResult *pigeonResult = [[CosXmlResult alloc] init];
+  pigeonResult.eTag = GetNullableObjectAtIndex(list, 0);
+  pigeonResult.accessUrl = GetNullableObjectAtIndex(list, 1);
+  pigeonResult.callbackResult = [CallbackResult nullableFromList:(GetNullableObjectAtIndex(list, 2))];
+  return pigeonResult;
+}
++ (nullable CosXmlResult *)nullableFromList:(NSArray *)list { return (list) ? [CosXmlResult fromList:list] : nil; }
+- (NSArray *)toList {
+  return @[
+    (self.eTag ?: [NSNull null]),
+    (self.accessUrl ?: [NSNull null]),
+    (self.callbackResult ? [self.callbackResult toList] : [NSNull null]),
+  ];
+}
+@end
+
+@implementation CallbackResult
++ (instancetype)makeWithStatus:(NSNumber *)status
+    callbackBody:(nullable NSString *)callbackBody
+    error:(nullable CallbackResultError *)error {
+  CallbackResult* pigeonResult = [[CallbackResult alloc] init];
+  pigeonResult.status = status;
+  pigeonResult.callbackBody = callbackBody;
+  pigeonResult.error = error;
+  return pigeonResult;
+}
++ (CallbackResult *)fromList:(NSArray *)list {
+  CallbackResult *pigeonResult = [[CallbackResult alloc] init];
+  pigeonResult.status = GetNullableObjectAtIndex(list, 0);
+  NSAssert(pigeonResult.status != nil, @"");
+  pigeonResult.callbackBody = GetNullableObjectAtIndex(list, 1);
+  pigeonResult.error = [CallbackResultError nullableFromList:(GetNullableObjectAtIndex(list, 2))];
+  return pigeonResult;
+}
++ (nullable CallbackResult *)nullableFromList:(NSArray *)list { return (list) ? [CallbackResult fromList:list] : nil; }
+- (NSArray *)toList {
+  return @[
+    (self.status ?: [NSNull null]),
+    (self.callbackBody ?: [NSNull null]),
+    (self.error ? [self.error toList] : [NSNull null]),
+  ];
+}
+@end
+
+@implementation CallbackResultError
++ (instancetype)makeWithCode:(nullable NSString *)code
+    message:(nullable NSString *)message {
+  CallbackResultError* pigeonResult = [[CallbackResultError alloc] init];
+  pigeonResult.code = code;
+  pigeonResult.message = message;
+  return pigeonResult;
+}
++ (CallbackResultError *)fromList:(NSArray *)list {
+  CallbackResultError *pigeonResult = [[CallbackResultError alloc] init];
+  pigeonResult.code = GetNullableObjectAtIndex(list, 0);
+  pigeonResult.message = GetNullableObjectAtIndex(list, 1);
+  return pigeonResult;
+}
++ (nullable CallbackResultError *)nullableFromList:(NSArray *)list { return (list) ? [CallbackResultError fromList:list] : nil; }
+- (NSArray *)toList {
+  return @[
+    (self.code ?: [NSNull null]),
+    (self.message ?: [NSNull null]),
   ];
 }
 @end
@@ -1326,7 +1419,7 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         binaryMessenger:binaryMessenger
         codec:CosTransferApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_transferKey = GetNullableObjectAtIndex(args, 0);
@@ -1338,12 +1431,13 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         NSString *arg_uploadId = GetNullableObjectAtIndex(args, 6);
         NSString *arg_stroageClass = GetNullableObjectAtIndex(args, 7);
         NSNumber *arg_trafficLimit = GetNullableObjectAtIndex(args, 8);
-        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 9);
-        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 10);
-        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 11);
-        NSNumber *arg_initMultipleUploadCallbackKey = GetNullableObjectAtIndex(args, 12);
+        NSString *arg_callbackParam = GetNullableObjectAtIndex(args, 9);
+        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 10);
+        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 11);
+        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 12);
+        NSNumber *arg_initMultipleUploadCallbackKey = GetNullableObjectAtIndex(args, 13);
         FlutterError *error;
-        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey error:&error];
+        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit callbackParam:arg_callbackParam resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey error:&error];
         callback(wrapResult(output, error));
       }];
     }
@@ -1451,15 +1545,24 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
 {
   switch (type) {
     case 128:     
-      return [CosXmlClientException fromList:[self readValue]];
+      return [CallbackResult fromList:[self readValue]];
     
     case 129:     
-      return [CosXmlServiceException fromList:[self readValue]];
+      return [CallbackResultError fromList:[self readValue]];
     
     case 130:     
-      return [STSCredentialScope fromList:[self readValue]];
+      return [CosXmlClientException fromList:[self readValue]];
     
     case 131:     
+      return [CosXmlResult fromList:[self readValue]];
+    
+    case 132:     
+      return [CosXmlServiceException fromList:[self readValue]];
+    
+    case 133:     
+      return [STSCredentialScope fromList:[self readValue]];
+    
+    case 134:     
       return [SessionQCloudCredentials fromList:[self readValue]];
     
     default:    
@@ -1474,20 +1577,32 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
 @implementation FlutterCosApiCodecWriter
 - (void)writeValue:(id)value 
 {
-  if ([value isKindOfClass:[CosXmlClientException class]]) {
+  if ([value isKindOfClass:[CallbackResult class]]) {
     [self writeByte:128];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[CosXmlServiceException class]]) {
+  if ([value isKindOfClass:[CallbackResultError class]]) {
     [self writeByte:129];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[STSCredentialScope class]]) {
+  if ([value isKindOfClass:[CosXmlClientException class]]) {
     [self writeByte:130];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+  if ([value isKindOfClass:[CosXmlResult class]]) {
     [self writeByte:131];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[CosXmlServiceException class]]) {
+    [self writeByte:132];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[STSCredentialScope class]]) {
+    [self writeByte:133];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+    [self writeByte:134];
     [self writeValue:[value toList]];
   } else 
 {
@@ -1564,13 +1679,13 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec() {
     completion(output, nil);
   }];
 }
-- (void)resultSuccessCallbackTransferKey:(NSString *)arg_transferKey key:(NSNumber *)arg_key header:(nullable NSDictionary<NSString *, NSString *> *)arg_header completion:(void(^)(NSError *_Nullable))completion {
+- (void)resultSuccessCallbackTransferKey:(NSString *)arg_transferKey key:(NSNumber *)arg_key header:(nullable NSDictionary<NSString *, NSString *> *)arg_header result:(nullable CosXmlResult *)arg_result completion:(void(^)(NSError *_Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.FlutterCosApi.resultSuccessCallback"
       binaryMessenger:self.binaryMessenger
       codec:FlutterCosApiGetCodec()];
-  [channel sendMessage:@[arg_transferKey ?: [NSNull null], arg_key ?: [NSNull null], arg_header ?: [NSNull null]] reply:^(id reply) {
+  [channel sendMessage:@[arg_transferKey ?: [NSNull null], arg_key ?: [NSNull null], arg_header ?: [NSNull null], arg_result ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
   }];
 }

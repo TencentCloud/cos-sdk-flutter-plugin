@@ -508,6 +508,190 @@ public class Pigeon {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static class CosXmlResult {
+    private @Nullable String eTag;
+    public @Nullable String getETag() { return eTag; }
+    public void setETag(@Nullable String setterArg) {
+      this.eTag = setterArg;
+    }
+
+    private @Nullable String accessUrl;
+    public @Nullable String getAccessUrl() { return accessUrl; }
+    public void setAccessUrl(@Nullable String setterArg) {
+      this.accessUrl = setterArg;
+    }
+
+    private @Nullable CallbackResult callbackResult;
+    public @Nullable CallbackResult getCallbackResult() { return callbackResult; }
+    public void setCallbackResult(@Nullable CallbackResult setterArg) {
+      this.callbackResult = setterArg;
+    }
+
+    public static final class Builder {
+      private @Nullable String eTag;
+      public @NonNull Builder setETag(@Nullable String setterArg) {
+        this.eTag = setterArg;
+        return this;
+      }
+      private @Nullable String accessUrl;
+      public @NonNull Builder setAccessUrl(@Nullable String setterArg) {
+        this.accessUrl = setterArg;
+        return this;
+      }
+      private @Nullable CallbackResult callbackResult;
+      public @NonNull Builder setCallbackResult(@Nullable CallbackResult setterArg) {
+        this.callbackResult = setterArg;
+        return this;
+      }
+      public @NonNull CosXmlResult build() {
+        CosXmlResult pigeonReturn = new CosXmlResult();
+        pigeonReturn.setETag(eTag);
+        pigeonReturn.setAccessUrl(accessUrl);
+        pigeonReturn.setCallbackResult(callbackResult);
+        return pigeonReturn;
+      }
+    }
+    @NonNull ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(3);
+      toListResult.add(eTag);
+      toListResult.add(accessUrl);
+      toListResult.add((callbackResult == null) ? null : callbackResult.toList());
+      return toListResult;
+    }
+    static @NonNull CosXmlResult fromList(@NonNull ArrayList<Object> list) {
+      CosXmlResult pigeonResult = new CosXmlResult();
+      Object eTag = list.get(0);
+      pigeonResult.setETag((String)eTag);
+      Object accessUrl = list.get(1);
+      pigeonResult.setAccessUrl((String)accessUrl);
+      Object callbackResult = list.get(2);
+      pigeonResult.setCallbackResult((callbackResult == null) ? null : CallbackResult.fromList((ArrayList<Object>)callbackResult));
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static class CallbackResult {
+    /** Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败 */
+    private @NonNull Long status;
+    public @NonNull Long getStatus() { return status; }
+    public void setStatus(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"status\" is null.");
+      }
+      this.status = setterArg;
+    }
+
+    /** Status为200时，说明上传成功、回调成功，返回 CallbackBody */
+    private @Nullable String callbackBody;
+    public @Nullable String getCallbackBody() { return callbackBody; }
+    public void setCallbackBody(@Nullable String setterArg) {
+      this.callbackBody = setterArg;
+    }
+
+    /** Status为203时，说明Callback，返回 Error，说明回调失败信息 */
+    private @Nullable CallbackResultError error;
+    public @Nullable CallbackResultError getError() { return error; }
+    public void setError(@Nullable CallbackResultError setterArg) {
+      this.error = setterArg;
+    }
+
+    /**Constructor is private to enforce null safety; use Builder. */
+    private CallbackResult() {}
+    public static final class Builder {
+      private @Nullable Long status;
+      public @NonNull Builder setStatus(@NonNull Long setterArg) {
+        this.status = setterArg;
+        return this;
+      }
+      private @Nullable String callbackBody;
+      public @NonNull Builder setCallbackBody(@Nullable String setterArg) {
+        this.callbackBody = setterArg;
+        return this;
+      }
+      private @Nullable CallbackResultError error;
+      public @NonNull Builder setError(@Nullable CallbackResultError setterArg) {
+        this.error = setterArg;
+        return this;
+      }
+      public @NonNull CallbackResult build() {
+        CallbackResult pigeonReturn = new CallbackResult();
+        pigeonReturn.setStatus(status);
+        pigeonReturn.setCallbackBody(callbackBody);
+        pigeonReturn.setError(error);
+        return pigeonReturn;
+      }
+    }
+    @NonNull ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(3);
+      toListResult.add(status);
+      toListResult.add(callbackBody);
+      toListResult.add((error == null) ? null : error.toList());
+      return toListResult;
+    }
+    static @NonNull CallbackResult fromList(@NonNull ArrayList<Object> list) {
+      CallbackResult pigeonResult = new CallbackResult();
+      Object status = list.get(0);
+      pigeonResult.setStatus((status == null) ? null : ((status instanceof Integer) ? (Integer)status : (Long)status));
+      Object callbackBody = list.get(1);
+      pigeonResult.setCallbackBody((String)callbackBody);
+      Object error = list.get(2);
+      pigeonResult.setError((error == null) ? null : CallbackResultError.fromList((ArrayList<Object>)error));
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static class CallbackResultError {
+    /** 回调失败信息的错误码，例如CallbackFailed */
+    private @Nullable String code;
+    public @Nullable String getCode() { return code; }
+    public void setCode(@Nullable String setterArg) {
+      this.code = setterArg;
+    }
+
+    /** Callback 失败的错误信息 */
+    private @Nullable String message;
+    public @Nullable String getMessage() { return message; }
+    public void setMessage(@Nullable String setterArg) {
+      this.message = setterArg;
+    }
+
+    public static final class Builder {
+      private @Nullable String code;
+      public @NonNull Builder setCode(@Nullable String setterArg) {
+        this.code = setterArg;
+        return this;
+      }
+      private @Nullable String message;
+      public @NonNull Builder setMessage(@Nullable String setterArg) {
+        this.message = setterArg;
+        return this;
+      }
+      public @NonNull CallbackResultError build() {
+        CallbackResultError pigeonReturn = new CallbackResultError();
+        pigeonReturn.setCode(code);
+        pigeonReturn.setMessage(message);
+        return pigeonReturn;
+      }
+    }
+    @NonNull ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(2);
+      toListResult.add(code);
+      toListResult.add(message);
+      return toListResult;
+    }
+    static @NonNull CallbackResultError fromList(@NonNull ArrayList<Object> list) {
+      CallbackResultError pigeonResult = new CallbackResultError();
+      Object code = list.get(0);
+      pigeonResult.setCode((String)code);
+      Object message = list.get(1);
+      pigeonResult.setMessage((String)message);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static class CosXmlClientException {
     private @NonNull Long errorCode;
     public @NonNull Long getErrorCode() { return errorCode; }
@@ -2480,7 +2664,7 @@ public class Pigeon {
   }
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface CosTransferApi {
-    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey);
+    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable String callbackParam, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey);
     @NonNull String download(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @NonNull String savePath, @Nullable String versionId, @Nullable Long trafficLimit, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey);
     void pause(@NonNull String taskId, @NonNull String transferKey);
     void resume(@NonNull String taskId, @NonNull String transferKey);
@@ -2518,11 +2702,12 @@ public class Pigeon {
               String uploadIdArg = (String)args.get(6);
               String stroageClassArg = (String)args.get(7);
               Number trafficLimitArg = (Number)args.get(8);
-              Number resultCallbackKeyArg = (Number)args.get(9);
-              Number stateCallbackKeyArg = (Number)args.get(10);
-              Number progressCallbackKeyArg = (Number)args.get(11);
-              Number initMultipleUploadCallbackKeyArg = (Number)args.get(12);
-              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue());
+              String callbackParamArg = (String)args.get(9);
+              Number resultCallbackKeyArg = (Number)args.get(10);
+              Number stateCallbackKeyArg = (Number)args.get(11);
+              Number progressCallbackKeyArg = (Number)args.get(12);
+              Number initMultipleUploadCallbackKeyArg = (Number)args.get(13);
+              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), callbackParamArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue());
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {
@@ -2678,15 +2863,24 @@ public class Pigeon {
     protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
       switch (type) {
         case (byte)128:         
-          return CosXmlClientException.fromList((ArrayList<Object>) readValue(buffer));
+          return CallbackResult.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)129:         
-          return CosXmlServiceException.fromList((ArrayList<Object>) readValue(buffer));
+          return CallbackResultError.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)130:         
-          return STSCredentialScope.fromList((ArrayList<Object>) readValue(buffer));
+          return CosXmlClientException.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)131:         
+          return CosXmlResult.fromList((ArrayList<Object>) readValue(buffer));
+        
+        case (byte)132:         
+          return CosXmlServiceException.fromList((ArrayList<Object>) readValue(buffer));
+        
+        case (byte)133:         
+          return STSCredentialScope.fromList((ArrayList<Object>) readValue(buffer));
+        
+        case (byte)134:         
           return SessionQCloudCredentials.fromList((ArrayList<Object>) readValue(buffer));
         
         default:        
@@ -2696,20 +2890,32 @@ public class Pigeon {
     }
     @Override
     protected void writeValue(@NonNull ByteArrayOutputStream stream, Object value)     {
-      if (value instanceof CosXmlClientException) {
+      if (value instanceof CallbackResult) {
         stream.write(128);
+        writeValue(stream, ((CallbackResult) value).toList());
+      } else 
+      if (value instanceof CallbackResultError) {
+        stream.write(129);
+        writeValue(stream, ((CallbackResultError) value).toList());
+      } else 
+      if (value instanceof CosXmlClientException) {
+        stream.write(130);
         writeValue(stream, ((CosXmlClientException) value).toList());
       } else 
+      if (value instanceof CosXmlResult) {
+        stream.write(131);
+        writeValue(stream, ((CosXmlResult) value).toList());
+      } else 
       if (value instanceof CosXmlServiceException) {
-        stream.write(129);
+        stream.write(132);
         writeValue(stream, ((CosXmlServiceException) value).toList());
       } else 
       if (value instanceof STSCredentialScope) {
-        stream.write(130);
+        stream.write(133);
         writeValue(stream, ((STSCredentialScope) value).toList());
       } else 
       if (value instanceof SessionQCloudCredentials) {
-        stream.write(131);
+        stream.write(134);
         writeValue(stream, ((SessionQCloudCredentials) value).toList());
       } else 
 {
@@ -2763,10 +2969,10 @@ public class Pigeon {
         callback.reply(output);
       });
     }
-    public void resultSuccessCallback(@NonNull String transferKeyArg, @NonNull Long keyArg, @Nullable Map<String, String> headerArg, Reply<Void> callback) {
+    public void resultSuccessCallback(@NonNull String transferKeyArg, @NonNull Long keyArg, @Nullable Map<String, String> headerArg, @Nullable CosXmlResult resultArg, Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.resultSuccessCallback", getCodec());
-      channel.send(new ArrayList<Object>(Arrays.asList(transferKeyArg, keyArg, headerArg)), channelReply -> {
+      channel.send(new ArrayList<Object>(Arrays.asList(transferKeyArg, keyArg, headerArg, resultArg)), channelReply -> {
         callback.reply(null);
       });
     }

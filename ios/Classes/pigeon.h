@@ -12,6 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 @class TransferConfig;
 @class STSCredentialScope;
 @class SessionQCloudCredentials;
+@class CosXmlResult;
+@class CallbackResult;
+@class CallbackResultError;
 @class CosXmlClientException;
 @class CosXmlServiceException;
 @class Owner;
@@ -87,6 +90,38 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy) NSString * token;
 @property(nonatomic, strong, nullable) NSNumber * startTime;
 @property(nonatomic, strong) NSNumber * expiredTime;
+@end
+
+@interface CosXmlResult : NSObject
++ (instancetype)makeWithETag:(nullable NSString *)eTag
+    accessUrl:(nullable NSString *)accessUrl
+    callbackResult:(nullable CallbackResult *)callbackResult;
+@property(nonatomic, copy, nullable) NSString * eTag;
+@property(nonatomic, copy, nullable) NSString * accessUrl;
+@property(nonatomic, strong, nullable) CallbackResult * callbackResult;
+@end
+
+@interface CallbackResult : NSObject
+/// `init` unavailable to enforce nonnull fields, see the `make` class method.
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)makeWithStatus:(NSNumber *)status
+    callbackBody:(nullable NSString *)callbackBody
+    error:(nullable CallbackResultError *)error;
+/// Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败
+@property(nonatomic, strong) NSNumber * status;
+/// Status为200时，说明上传成功、回调成功，返回 CallbackBody
+@property(nonatomic, copy, nullable) NSString * callbackBody;
+/// Status为203时，说明Callback，返回 Error，说明回调失败信息
+@property(nonatomic, strong, nullable) CallbackResultError * error;
+@end
+
+@interface CallbackResultError : NSObject
++ (instancetype)makeWithCode:(nullable NSString *)code
+    message:(nullable NSString *)message;
+/// 回调失败信息的错误码，例如CallbackFailed
+@property(nonatomic, copy, nullable) NSString * code;
+/// Callback 失败的错误信息
+@property(nonatomic, copy, nullable) NSString * message;
 @end
 
 @interface CosXmlClientException : NSObject
@@ -280,7 +315,7 @@ NSObject<FlutterMessageCodec> *CosTransferApiGetCodec(void);
 
 @protocol CosTransferApi
 /// @return `nil` only when `error != nil`.
-- (nullable NSString *)uploadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
+- (nullable NSString *)uploadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
 /// @return `nil` only when `error != nil`.
 - (nullable NSString *)downloadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region savePath:(NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)pauseTaskId:(NSString *)taskId transferKey:(NSString *)transferKey error:(FlutterError *_Nullable *_Nonnull)error;
@@ -301,7 +336,7 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec(void);
 /// @param domain 域名
 /// @return ip集合
 - (void)fetchDnsDomain:(NSString *)domain completion:(void(^)(NSArray<NSString *> *_Nullable, NSError *_Nullable))completion;
-- (void)resultSuccessCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key header:(nullable NSDictionary<NSString *, NSString *> *)header completion:(void(^)(NSError *_Nullable))completion;
+- (void)resultSuccessCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key header:(nullable NSDictionary<NSString *, NSString *> *)header result:(nullable CosXmlResult *)result completion:(void(^)(NSError *_Nullable))completion;
 - (void)resultFailCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key clientException:(nullable CosXmlClientException *)clientException serviceException:(nullable CosXmlServiceException *)serviceException completion:(void(^)(NSError *_Nullable))completion;
 - (void)stateCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key state:(NSString *)state completion:(void(^)(NSError *_Nullable))completion;
 - (void)progressCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key complete:(NSNumber *)complete target:(NSNumber *)target completion:(void(^)(NSError *_Nullable))completion;

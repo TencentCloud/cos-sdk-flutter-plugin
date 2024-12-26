@@ -63,7 +63,14 @@ class _BucketListPageState extends State<BucketListPage> {
                 if(isAdd == true){
                   _refreshController.requestRefresh();
                 }
+
                 // await MyRouterDelegate.of(context).push(name: "/test");
+
+                // MyRouterDelegate.of(context).push(name: "/upload", arguments: {
+                //   'bucketName': "test-callback-1252246555",
+                //   'bucketRegion': "ap-shanghai",
+                //   'folderPath': ""
+                // });
               },
               icon: const Icon(Icons.add),
             ),

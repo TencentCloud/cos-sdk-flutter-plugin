@@ -26,12 +26,17 @@ flutter pub add tencentcloud_cos_sdk_plugin
 2. 这将向您的包的 pubspec.yaml 添加这样一行（并运行隐式 flutter pub get）
 ```
 dependencies:
-  tencentcloud_cos_sdk_plugin: ^1.1.2
+  tencentcloud_cos_sdk_plugin: ^1.1.9
 ```
 3. 在您的 Dart 代码中，您可以使用 import 进行导入，然后开始使用：
 ```
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 ```
+
+#### 关闭腾讯灯塔上报功能
+
+为了持续跟踪和优化 SDK 的质量，给您带来更好的使用体验，我们在 SDK 中引入了 [腾讯灯塔](https://beacon.qq.com/) SDK，腾讯灯塔只对 COS 侧的请求性能进行监控，不会上报业务侧数据。
+若是想关闭该功能，可以在依赖引入和 import 时将 tencentcloud_cos_sdk_plugin 替换为 tencentcloud_cos_sdk_plugin_nobeacon即可。
 
 ## 第三步：开始使用
 

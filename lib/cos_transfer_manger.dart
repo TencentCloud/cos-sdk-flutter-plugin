@@ -27,6 +27,7 @@ class CosTransferManger {
       String? uploadId,
       String? stroageClass,
       int? trafficLimit,
+      String? callbackParam,
       ResultListener? resultListener,
       StateCallBack? stateCallback,
       ProgressCallBack? progressCallBack,
@@ -50,6 +51,7 @@ class CosTransferManger {
         uploadId,
         stroageClass,
         trafficLimit,
+        callbackParam,
         resultCallbackKey,
         stateCallbackKey,
         progressCallbackKey,
@@ -84,8 +86,8 @@ class CosTransferManger {
     return TransferTask(_transferKey, taskId, _transferApi);
   }
 
-  void runResultSuccessCallBack(int key, Map<String?, String?>? header) {
-    _resultListeners[key]?.successCallBack.call(header);
+  void runResultSuccessCallBack(int key, Map<String?, String?>? header, CosXmlResult? result) {
+    _resultListeners[key]?.successCallBack.call(header, result);
     _resultListeners.remove(key);
     _stateCallBacks.remove(key);
     _progressCallBacks.remove(key);
@@ -150,7 +152,7 @@ class CosTransferManger {
 }
 
 /// 成功回调
-typedef ResultSuccessCallBack = Function(Map<String?, String?>? header);
+typedef ResultSuccessCallBack = Function(Map<String?, String?>? header, CosXmlResult? result);
 
 /// 失败回调
 typedef ResultFailCallBack = Function(CosXmlClientException? clientException,

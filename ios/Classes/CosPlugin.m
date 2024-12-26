@@ -335,7 +335,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     if(region){
         request.regionName = region;
     }
-    [request setFinishBlock:^(id outputObject,NSError*error) {
+    [request setFinishBlock:^(QCloudBucketAccelerateConfiguration *_Nullable outputObject,NSError*error) {
         if(outputObject){
             bool b = [outputObject status] == QCloudCOSBucketAccelerateStatusEnabled;
             completion([NSNumber numberWithBool:b], nil);
@@ -417,7 +417,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     if(region){
         request.regionName = region;
     }
-    [request setFinishBlock:^(id outputObject,NSError*error) {
+    [request setFinishBlock:^(QCloudBucketVersioningConfiguration *_Nullable outputObject,NSError*error) {
         if(outputObject){
             bool b = [outputObject status] == QCloudCOSBucketVersioningStatusEnabled;
             completion([NSNumber numberWithBool:b], nil);
@@ -443,10 +443,6 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     getPresignedURLRequest.object = cosPath;
     getPresignedURLRequest.HTTPMethod = @"GET";
 
-    if(signValidTime){
-        getPresignedURLRequest.expires = [NSDate dateWithTimeIntervalSinceNow:[signValidTime intValue]];
-    }
-    
     if(signHost){
         // 获取预签名函数，默认签入Header Host；您也可以选择不签入Header Host，但可能导致请求失败或安全漏洞
         getPresignedURLRequest.signHost = [signHost boolValue];
@@ -704,6 +700,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                 [flutterCosApi resultSuccessCallbackTransferKey:transferKey
                                                             key:resultCallbackKey
                                                          header:resultDictionary
+                                                         result:nil
                                                      completion:^(NSError * _Nullable error) {}
                 ];
             } else {
@@ -769,6 +766,10 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
             NSLog(@"%@ request canceled or ended", taskId);
             return;
         }
+        if([put resmeData] == nil) {
+            NSLog(@"%@ request has not started", taskId);
+            return;
+        }
         [self uploadInternalTransferKey:transferKey
                               resmeData:[put resmeData]
                          bucket:[put bucket]
@@ -779,6 +780,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                        uploadId:[put valueForKey:@"uploadId"]
                    stroageClass:QCloudCOSStorageClassTransferToString([put storageClass])
                    trafficLimit:[NSNumber numberWithInteger:[put trafficLimit]]
+                          callbackParam:[put customHeaders][@"x-cos-callback"]
               resultCallbackKey:[put resultCallbackKey]
                stateCallbackKey:[put stateCallbackKey]
             progressCallbackKey:[put progressCallbackKey]
@@ -830,7 +832,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [QCloudCOSTaskCache() removeObject:taskId];
 }
 
-- (nullable NSString *)uploadTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)uploadTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     return [self uploadInternalTransferKey:transferKey
                                  resmeData:nil
                                     bucket:bucket
@@ -841,6 +843,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                                   uploadId:uploadId
                               stroageClass:stroageClass
                               trafficLimit:trafficLimit
+                             callbackParam:callbackParam
                          resultCallbackKey:resultCallbackKey
                           stateCallbackKey:stateCallbackKey
                        progressCallbackKey:progressCallbackKey
@@ -849,7 +852,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                                      error:error];
 }
 
-- (nullable NSString *)uploadInternalTransferKey:(nonnull NSString *)transferKey resmeData:(nullable NSData *)resmeData bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)uploadInternalTransferKey:(nonnull NSString *)transferKey resmeData:(nullable NSData *)resmeData bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     QCloudCOSTransferMangerService * transferManger = [self getQCloudCOSTransferMangerService:transferKey];
     QCloudCOSXMLUploadObjectRequest* put = nil;
     if(resmeData == nil){
@@ -867,6 +870,14 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         }
         if(trafficLimit){
             put.trafficLimit = [trafficLimit integerValue];
+        }
+        if(callbackParam){
+            NSData *data = [callbackParam dataUsingEncoding:NSUTF8StringEncoding];
+            NSString *base64String = [data base64EncodedStringWithOptions:0];
+            if(base64String){
+                // 配置回调参数
+                [put.customHeaders setObject:base64String forKey:@"x-cos-callback"];
+            }
         }
         // 需要上传的对象内容。可以传入NSData*或者NSURL*类型的变量
         if(filePath){
@@ -937,9 +948,24 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                 if(crc64ecma){
                     [resultDictionary setObject:crc64ecma forKey:@"crc64ecma"];
                 }
+                
+                CosXmlResult * cosXmlResult = [CosXmlResult new];
+                [cosXmlResult setETag:result.eTag?:@""];
+                [cosXmlResult setAccessUrl:encodedAccessUrl?:@""];
+                if (result.CallbackResult) {
+                    CallbackResultError* callbackResultError = nil;
+                    if(result.CallbackResult.Error){
+                        callbackResultError = [CallbackResultError makeWithCode:result.CallbackResult.Error.Code message:result.CallbackResult.Error.Message];
+                    }
+                    CallbackResult * callbackResult = [CallbackResult makeWithStatus:[NSNumber numberWithInteger:result.CallbackResult.Status.integerValue] callbackBody:result.CallbackResult.CallbackBody error:callbackResultError];
+                    [cosXmlResult setCallbackResult:callbackResult];
+                }
+
+                
                 [flutterCosApi resultSuccessCallbackTransferKey:transferKey
                                                             key:resultCallbackKey
                                                          header:resultDictionary
+                                                         result:cosXmlResult
                                                      completion:^(NSError * _Nullable error) {}
                 ];
             } else {

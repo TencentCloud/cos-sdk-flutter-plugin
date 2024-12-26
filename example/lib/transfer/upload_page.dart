@@ -186,9 +186,29 @@ class _UploadPageState extends State<UploadPage> {
           "${widget.folderPath ?? ""}${_pickFilePath!.split("/").last}";
       CosTransferManger cosTransferManger = await getTransferManger();
       // 上传成功回调
-      successCallBack(result) {
+      successCallBack(Map<String?, String?>? header, CosXmlResult? result) {
         if (kDebugMode) {
-          print(result);
+          print(header);
+          print(result?.eTag);
+          print(result?.accessUrl);
+
+          // 获取上传回调数据
+          // CallbackResult? callbackResult = result?.callbackResult;
+          // if(callbackResult != null){
+          //   // 获取回调状态：Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败。
+          //   int status = callbackResult.status;
+          //   print(status);
+          //   if(status == 200){
+          //     // 获取回调内容 CallbackBody
+          //     String? callbackBody = callbackResult.callbackBody;
+          //     print(callbackBody);
+          //   } else if(status == 203){
+          //     // 获取回调状态：Status为203时，说明Callback，返回 Error，说明回调失败信息。
+          //     CallbackResultError? error = callbackResult.error;
+          //     print(error?.code);
+          //     print(error?.message);
+          //   }
+          // }
         }
         if (mounted) {
           setState(() {
@@ -246,10 +266,15 @@ class _UploadPageState extends State<UploadPage> {
       File file = File(_pickFilePath!);
       Uint8List bytes = file.readAsBytesSync();
       //开始上传
+      // String callbackParam = "{ \"callbackUrl\": \"http://xx.xx.xx.xx/index\", " +
+      //     "\"callbackHost\": \"xx.xx.xx.xx\", " +
+      //     "\"callbackBody\": \"bucket=\${bucket}&object=\${object}&etag=\${etag}&test=test_123\", " +
+      //     "\"callbackBodyType\": \"application/x-www-form-urlencoded\" }";
       _transferTask = await cosTransferManger.upload(widget.bucketName, cosPath,
           filePath: _pickFilePath,
           // byteArr: bytes,
           uploadId: _uploadId,
+          // callbackParam: callbackParam,
           resultListener: ResultListener(successCallBack, failCallBack),
           stateCallback: stateCallback,
           progressCallBack: progressCallBack,

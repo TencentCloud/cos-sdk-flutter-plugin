@@ -201,6 +201,103 @@ class SessionQCloudCredentials {
   }
 }
 
+class CosXmlResult {
+  CosXmlResult({
+    this.eTag,
+    this.accessUrl,
+    this.callbackResult,
+  });
+
+  String? eTag;
+
+  String? accessUrl;
+
+  CallbackResult? callbackResult;
+
+  Object encode() {
+    return <Object?>[
+      eTag,
+      accessUrl,
+      callbackResult?.encode(),
+    ];
+  }
+
+  static CosXmlResult decode(Object result) {
+    result as List<Object?>;
+    return CosXmlResult(
+      eTag: result[0] as String?,
+      accessUrl: result[1] as String?,
+      callbackResult: result[2] != null
+          ? CallbackResult.decode(result[2]! as List<Object?>)
+          : null,
+    );
+  }
+}
+
+class CallbackResult {
+  CallbackResult({
+    required this.status,
+    this.callbackBody,
+    this.error,
+  });
+
+  /// Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败
+  int status;
+
+  /// Status为200时，说明上传成功、回调成功，返回 CallbackBody
+  String? callbackBody;
+
+  /// Status为203时，说明Callback，返回 Error，说明回调失败信息
+  CallbackResultError? error;
+
+  Object encode() {
+    return <Object?>[
+      status,
+      callbackBody,
+      error?.encode(),
+    ];
+  }
+
+  static CallbackResult decode(Object result) {
+    result as List<Object?>;
+    return CallbackResult(
+      status: result[0]! as int,
+      callbackBody: result[1] as String?,
+      error: result[2] != null
+          ? CallbackResultError.decode(result[2]! as List<Object?>)
+          : null,
+    );
+  }
+}
+
+class CallbackResultError {
+  CallbackResultError({
+    this.code,
+    this.message,
+  });
+
+  /// 回调失败信息的错误码，例如CallbackFailed
+  String? code;
+
+  /// Callback 失败的错误信息
+  String? message;
+
+  Object encode() {
+    return <Object?>[
+      code,
+      message,
+    ];
+  }
+
+  static CallbackResultError decode(Object result) {
+    result as List<Object?>;
+    return CallbackResultError(
+      code: result[0] as String?,
+      message: result[1] as String?,
+    );
+  }
+}
+
 class CosXmlClientException {
   CosXmlClientException({
     required this.errorCode,
@@ -1370,12 +1467,12 @@ class CosTransferApi {
 
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey) async {
+  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, String? arg_callbackParam, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosTransferApi.upload', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_callbackParam, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1495,17 +1592,26 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
   const _FlutterCosApiCodec();
   @override
   void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is CosXmlClientException) {
+    if (value is CallbackResult) {
       buffer.putUint8(128);
       writeValue(buffer, value.encode());
-    } else if (value is CosXmlServiceException) {
+    } else if (value is CallbackResultError) {
       buffer.putUint8(129);
       writeValue(buffer, value.encode());
-    } else if (value is STSCredentialScope) {
+    } else if (value is CosXmlClientException) {
       buffer.putUint8(130);
       writeValue(buffer, value.encode());
-    } else if (value is SessionQCloudCredentials) {
+    } else if (value is CosXmlResult) {
       buffer.putUint8(131);
+      writeValue(buffer, value.encode());
+    } else if (value is CosXmlServiceException) {
+      buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    } else if (value is STSCredentialScope) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    } else if (value is SessionQCloudCredentials) {
+      buffer.putUint8(134);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1516,15 +1622,24 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
       case 128:       
-        return CosXmlClientException.decode(readValue(buffer)!);
+        return CallbackResult.decode(readValue(buffer)!);
       
       case 129:       
-        return CosXmlServiceException.decode(readValue(buffer)!);
+        return CallbackResultError.decode(readValue(buffer)!);
       
       case 130:       
-        return STSCredentialScope.decode(readValue(buffer)!);
+        return CosXmlClientException.decode(readValue(buffer)!);
       
       case 131:       
+        return CosXmlResult.decode(readValue(buffer)!);
+      
+      case 132:       
+        return CosXmlServiceException.decode(readValue(buffer)!);
+      
+      case 133:       
+        return STSCredentialScope.decode(readValue(buffer)!);
+      
+      case 134:       
         return SessionQCloudCredentials.decode(readValue(buffer)!);
       
       default:
@@ -1547,7 +1662,7 @@ abstract class FlutterCosApi {
   /// @return ip集合
   Future<List<String?>?> fetchDns(String domain);
 
-  void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header);
+  void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header, CosXmlResult? result);
 
   void resultFailCallback(String transferKey, int key, CosXmlClientException? clientException, CosXmlServiceException? serviceException);
 
@@ -1624,7 +1739,8 @@ abstract class FlutterCosApi {
           final int? arg_key = (args[1] as int?);
           assert(arg_key != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.resultSuccessCallback was null, expected non-null int.');
           final Map<String?, String?>? arg_header = (args[2] as Map<Object?, Object?>?)?.cast<String?, String?>();
-          api.resultSuccessCallback(arg_transferKey!, arg_key!, arg_header);
+          final CosXmlResult? arg_result = (args[3] as CosXmlResult?);
+          api.resultSuccessCallback(arg_transferKey!, arg_key!, arg_header, arg_result);
           return;
         });
       }

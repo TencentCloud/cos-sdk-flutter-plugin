@@ -118,11 +118,11 @@ class _UploadBatchPageState extends State<UploadBatchPage> {
             "${widget.folderPath ?? ""}${_pickFilePath!.split("/").last}";
         CosTransferManger cosTransferManger = await getTransferManger();
         // 上传成功回调
-        successCallBack(result) {
+        successCallBack(header, result) {
           if (kDebugMode) {
             print("successCallBack");
           }
-          print(result);
+          print(header);
         }
         //上传失败回调
         failCallBack(clientException, serviceException) {

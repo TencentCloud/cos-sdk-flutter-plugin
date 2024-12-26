@@ -134,6 +134,7 @@ abstract class CosTransferApi {
     String? uploadId,
     String? stroageClass,
     int? trafficLimit,
+    String? callbackParam,
     int? resultCallbackKey,
     int? stateCallbackKey,
     int? progressCallbackKey,
@@ -175,7 +176,7 @@ abstract class FlutterCosApi {
   List<String>? fetchDns(String domain);
 
   void resultSuccessCallback(
-      String transferKey, int key, Map<String?, String?>? header);
+      String transferKey, int key, Map<String?, String?>? header, CosXmlResult? result);
 
   void resultFailCallback(
       String transferKey,
@@ -227,6 +228,26 @@ class SessionQCloudCredentials {
   late String token;
   int? startTime;
   late int expiredTime;
+}
+
+class CosXmlResult {
+  late String? eTag;
+  late String? accessUrl;
+  late CallbackResult? callbackResult;
+}
+class CallbackResult {
+  /// Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败
+  late int status;
+  /// Status为200时，说明上传成功、回调成功，返回 CallbackBody
+  late String? callbackBody;
+  /// Status为203时，说明Callback，返回 Error，说明回调失败信息
+  late CallbackResultError? error;
+}
+class CallbackResultError {
+  /// 回调失败信息的错误码，例如CallbackFailed
+  late String? code;
+  /// Callback 失败的错误信息
+  late String? message;
 }
 
 class CosXmlClientException {

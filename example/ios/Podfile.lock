@@ -37,22 +37,22 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - QCloudCore (6.4.0):
-    - QCloudCore/Default (= 6.4.0)
-  - QCloudCore/Default (6.4.0):
-    - QCloudTrack/Beacon (= 6.4.0)
-  - QCloudCOSXML (6.4.0):
-    - QCloudCOSXML/Default (= 6.4.0)
-  - QCloudCOSXML/Default (6.4.0):
-    - QCloudCore (= 6.4.0)
-  - QCloudTrack/Beacon (6.4.0)
-  - SDWebImage (5.19.2):
-    - SDWebImage/Core (= 5.19.2)
-  - SDWebImage/Core (5.19.2)
+  - QCloudCore (6.4.1):
+    - QCloudCore/Default (= 6.4.1)
+  - QCloudCore/Default (6.4.1):
+    - QCloudTrack/Beacon (= 6.4.1)
+  - QCloudCOSXML (6.4.1):
+    - QCloudCOSXML/Default (= 6.4.1)
+  - QCloudCOSXML/Default (6.4.1):
+    - QCloudCore (= 6.4.1)
+  - QCloudTrack/Beacon (6.4.1)
+  - SDWebImage (5.19.7):
+    - SDWebImage/Core (= 5.19.7)
+  - SDWebImage/Core (5.19.7)
   - SwiftyGif (5.4.5)
-  - tencentcloud_cos_sdk_plugin (1.1.2):
+  - tencentcloud_cos_sdk_plugin (1.1.4):
     - Flutter
-    - QCloudCOSXML (>= 6.4.0)
+    - QCloudCOSXML (= 6.4.1)
 
 DEPENDENCIES:
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -86,12 +86,12 @@ SPEC CHECKSUMS:
   file_picker: 15fd9539e4eb735dc54bae8c0534a7a9511a03de
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943
-  QCloudCore: 231bef84178cc0cb87e36b5d074c3045a6d813c8
-  QCloudCOSXML: 796d1bbe01de2ae67e09a2df95bf1aef59336a05
-  QCloudTrack: daf143ed973d47d8a0cf3889ae03389b20464fae
-  SDWebImage: dfe95b2466a9823cf9f0c6d01217c06550d7b29a
+  QCloudCore: 6252d05b183f45698550c5445de85826fd89f9a5
+  QCloudCOSXML: 48557a25a8803093a80951e65753a68275ff967d
+  QCloudTrack: 7458275adda5626dd2dc99367e3993080ab119c8
+  SDWebImage: 8a6b7b160b4d710e2a22b6900e25301075c34cb3
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  tencentcloud_cos_sdk_plugin: 1e3112e7e87adf0ad51628d9dc565133a942a461
+  tencentcloud_cos_sdk_plugin: 6f0609b044156bcd68186663e5e3325dbb7c4cc7
 
 PODFILE CHECKSUM: a6f2d38f98f4f59fb0303750c7dd381592cad796
 

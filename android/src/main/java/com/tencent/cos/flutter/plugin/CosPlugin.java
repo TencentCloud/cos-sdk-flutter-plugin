@@ -51,6 +51,7 @@ import com.tencent.cos.xml.transfer.COSXMLUploadTask;
 import com.tencent.cos.xml.transfer.InitMultipleUploadListener;
 import com.tencent.cos.xml.transfer.TransferConfig;
 import com.tencent.cos.xml.transfer.TransferManager;
+import com.tencent.cos.xml.utils.DigestUtils;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
 import com.tencent.qcloud.core.task.TaskExecutors;
@@ -946,6 +947,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             @Nullable String uploadId,
             @Nullable String stroageClass,
             @Nullable Long trafficLimit,
+            @Nullable String callbackParam,
             @Nullable Long resultCallbackKey,
             @Nullable Long stateCallbackKey,
             @Nullable Long progressCallbackKey,
@@ -966,6 +968,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         }
         if (trafficLimit != null) {
             request.setTrafficLimit(trafficLimit);
+        }
+        if (callbackParam != null) {
+            try {
+                String callbackBase64 = DigestUtils.getBase64(callbackParam);
+                // 配置回调参数
+                request.setRequestHeaders("x-cos-callback", callbackBase64, false);
+            } catch (Exception ignored){}
         }
         COSXMLUploadTask task = transferManager.upload(request, uploadId);
         setTaskListener(task, transferKey, resultCallbackKey, stateCallbackKey, progressCallbackKey, InitMultipleUploadCallbackKey);
@@ -1084,9 +1093,24 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                                     if(header.containsKey("x-cos-hash-crc64ecma")){
                                         uploadResultMap.put("crc64ecma", header.get("x-cos-hash-crc64ecma"));
                                     }
-                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, uploadResultMap, getVoidReply());
+                                    Pigeon.CosXmlResult.Builder resultBuilder = new Pigeon.CosXmlResult.Builder();
+                                    resultBuilder.setETag(uploadResult.eTag);
+                                    resultBuilder.setAccessUrl(cosXmlResult.accessUrl);
+                                    if(uploadResult.callbackResult != null){
+                                        Pigeon.CallbackResult.Builder callbackResultBuilder = new Pigeon.CallbackResult.Builder();
+                                        callbackResultBuilder.setStatus(Long.valueOf(uploadResult.callbackResult.status));
+                                        callbackResultBuilder.setCallbackBody(uploadResult.callbackResult.getCallbackBody());
+                                        if(uploadResult.callbackResult.error != null){
+                                            Pigeon.CallbackResultError.Builder callbackResultError = new Pigeon.CallbackResultError.Builder();
+                                            callbackResultError.setCode(uploadResult.callbackResult.error.code);
+                                            callbackResultError.setMessage(uploadResult.callbackResult.error.message);
+                                            callbackResultBuilder.setError(callbackResultError.build());
+                                        }
+                                        resultBuilder.setCallbackResult(callbackResultBuilder.build());
+                                    }
+                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, uploadResultMap, resultBuilder.build(), getVoidReply());
                                 } else {
-                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, header, getVoidReply());
+                                    flutterCosApi.resultSuccessCallback(transferKey, resultCallbackKey, header, null, getVoidReply());
                                 }
                             }
                     );

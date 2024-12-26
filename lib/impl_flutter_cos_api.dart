@@ -59,8 +59,8 @@ class ImplFlutterCosApi extends FlutterCosApi{
   }
 
   @override
-  void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header) {
-    Cos().getTransferManger(transferKey).runResultSuccessCallBack(key, header);
+  void resultSuccessCallback(String transferKey, int key, Map<String?, String?>? header, CosXmlResult? result) {
+    Cos().getTransferManger(transferKey).runResultSuccessCallBack(key, header, result);
   }
 
   @override
