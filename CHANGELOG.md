@@ -1,3 +1,6 @@
+## 1.2.0
+Android端gradle增加namespace
+
 ## 1.1.9
 升级Android插件版本为5.9.35
 升级iOS插件版本为6.4.5
