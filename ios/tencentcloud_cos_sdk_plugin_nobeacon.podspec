@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'tencentcloud_cos_sdk_plugin_nobeacon'
-  s.version          = '1.1.9'
+  s.version          = '1.2.0'
   s.summary          = 'Tencent COS Flutter Plugin SDK.'
   s.description      = <<-DESC
 Tencent COS Flutter Plugin SDK.

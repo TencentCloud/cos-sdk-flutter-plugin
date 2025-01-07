@@ -1,6 +1,6 @@
 name: tencentcloud_cos_sdk_plugin_nobeacon
 description: Tencent Cloud Flutter Plugin COS SDK.
-version: 1.1.9
+version: 1.2.0
 homepage: https://cloud.tencent.com/document/product/436/86294
 repository: https://github.com/TencentCloud/cos-sdk-flutter-plugin
 
