@@ -53,12 +53,12 @@ import com.tencent.cos.xml.transfer.TransferConfig;
 import com.tencent.cos.xml.transfer.TransferManager;
 import com.tencent.cos.xml.utils.DigestUtils;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
+import com.tencent.qcloud.core.auth.SessionQCloudCredentials;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
 import com.tencent.qcloud.core.logger.COSLogger;
 import com.tencent.qcloud.core.logger.LogCategory;
 import com.tencent.qcloud.core.logger.LogLevel;
 import com.tencent.qcloud.core.logger.channel.CosLogListener;
-import com.tencent.qcloud.core.task.TaskExecutors;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -66,11 +66,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import java8.util.concurrent.CompletableFuture;
 
@@ -91,8 +90,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     private QCloudCredentialProvider qCloudCredentialProvider = null;
     private Map<String, List<String>> dnsMap = null;
     private boolean initDnsFetch = false;
-    private final Object credentialProviderLock = new Object();
-    public static ThreadPoolExecutor COMMAND_EXECUTOR = null;
+//    private final Object credentialProviderLock = new Object();
+//    public static ThreadPoolExecutor COMMAND_EXECUTOR = null;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -103,8 +102,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         flutterCosApi = new Pigeon.FlutterCosApi(flutterPluginBinding.getBinaryMessenger());
         CosXmlBaseService.BRIDGE = "Flutter";
 
-        COMMAND_EXECUTOR = new ThreadPoolExecutor(2, 10, 5L,
-                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE));
+//        COMMAND_EXECUTOR = new ThreadPoolExecutor(2, 10, 5L,
+//                TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(Integer.MAX_VALUE));
     }
 
     @Override
@@ -118,25 +117,25 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                 secretKey,
                 600
         );
-        synchronized (credentialProviderLock) {
-            credentialProviderLock.notify();
-        }
+//        synchronized (credentialProviderLock) {
+//            credentialProviderLock.notify();
+//        }
     }
 
     @Override
     public void initWithSessionCredential() {
         qCloudCredentialProvider = new BridgeCredentialProvider(flutterCosApi);
-        synchronized (credentialProviderLock) {
-            credentialProviderLock.notify();
-        }
+//        synchronized (credentialProviderLock) {
+//            credentialProviderLock.notify();
+//        }
     }
 
     @Override
     public void initWithScopeLimitCredential() {
         qCloudCredentialProvider = new BridgeScopeLimitCredentialProvider(flutterCosApi);
-        synchronized (credentialProviderLock) {
-            credentialProviderLock.notify();
-        }
+//        synchronized (credentialProviderLock) {
+//            credentialProviderLock.notify();
+//        }
     }
 
     @Override
@@ -164,36 +163,44 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
 
     @Override
     public void registerDefaultService(@NonNull Pigeon.CosXmlServiceConfig config, Pigeon.Result<String> result) {
-        COMMAND_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                CosXmlService service = buildCosXmlService(context, config);
-                runMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        cosServices.put(DEFAULT_KEY, service);
-                        result.success(DEFAULT_KEY);
-                    }
-                });
-            }
-        });
+        CosXmlService service = buildCosXmlService(context, config);
+        cosServices.put(DEFAULT_KEY, service);
+        result.success(DEFAULT_KEY);
+
+//        COMMAND_EXECUTOR.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                CosXmlService service = buildCosXmlService(context, config);
+//                runMainThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        cosServices.put(DEFAULT_KEY, service);
+//                        result.success(DEFAULT_KEY);
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
     public void registerDefaultTransferManger(@NonNull Pigeon.CosXmlServiceConfig config, @Nullable Pigeon.TransferConfig transferConfig, Pigeon.Result<String> result) {
-        COMMAND_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                TransferManager transferManager = buildTransferManager(context, config, transferConfig);
-                runMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        transferManagers.put(DEFAULT_KEY, transferManager);
-                        result.success(DEFAULT_KEY);
-                    }
-                });
-            }
-        });
+        TransferManager transferManager = buildTransferManager(context, config, transferConfig);
+        transferManagers.put(DEFAULT_KEY, transferManager);
+        result.success(DEFAULT_KEY);
+
+//        COMMAND_EXECUTOR.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                TransferManager transferManager = buildTransferManager(context, config, transferConfig);
+//                runMainThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        transferManagers.put(DEFAULT_KEY, transferManager);
+//                        result.success(DEFAULT_KEY);
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
@@ -201,19 +208,23 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (key.isEmpty()) {
             result.error(new IllegalArgumentException("register key cannot be empty"));
         }
-        COMMAND_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                CosXmlService service = buildCosXmlService(context, config);
-                runMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        cosServices.put(key, service);
-                        result.success(key);
-                    }
-                });
-            }
-        });
+        CosXmlService service = buildCosXmlService(context, config);
+        cosServices.put(key, service);
+        result.success(key);
+
+//        COMMAND_EXECUTOR.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                CosXmlService service = buildCosXmlService(context, config);
+//                runMainThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        cosServices.put(key, service);
+//                        result.success(key);
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
@@ -221,19 +232,23 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (key.isEmpty()) {
             result.error(new IllegalArgumentException("register key cannot be empty"));
         }
-        COMMAND_EXECUTOR.execute(new Runnable() {
-            @Override
-            public void run() {
-                TransferManager transferManager = buildTransferManager(context, config, transferConfig);
-                runMainThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        transferManagers.put(key, transferManager);
-                        result.success(key);
-                    }
-                });
-            }
-        });
+        TransferManager transferManager = buildTransferManager(context, config, transferConfig);
+        transferManagers.put(key, transferManager);
+        result.success(key);
+
+//        COMMAND_EXECUTOR.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                TransferManager transferManager = buildTransferManager(context, config, transferConfig);
+//                runMainThread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        transferManagers.put(key, transferManager);
+//                        result.success(key);
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
@@ -352,7 +367,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void headObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Pigeon.Result<Map<String, String>> result) {
+    public void headObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Map<String, String>> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         HeadObjectRequest headObjectRequest = new HeadObjectRequest(
                 bucket, cosPath);
@@ -362,6 +377,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (versionId != null) {
             headObjectRequest.setVersionId(versionId);
         }
+        setRequestCredential(sessionCredentials, headObjectRequest);
         service.headObjectAsync(headObjectRequest, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -387,7 +403,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Pigeon.Result<Void> result) {
+    public void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(
                 bucket, cosPath);
@@ -397,7 +413,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (versionId != null) {
             deleteObjectRequest.setVersionId(versionId);
         }
-
+        setRequestCredential(sessionCredentials, deleteObjectRequest);
         service.deleteObjectAsync(deleteObjectRequest, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -427,7 +443,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     @Override
     public void getPresignedUrl(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, @Nullable Long signValidTime,
                                 @Nullable Boolean signHost, @Nullable Map<String, String> parameters,
-                                @Nullable String region, com.tencent.cos.flutter.plugin.Pigeon.Result<String> result) {
+                                @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, com.tencent.cos.flutter.plugin.Pigeon.Result<String> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PresignedUrlRequest presignedUrlRequest = new PresignedUrlRequest(bucket, cosPath);
         presignedUrlRequest.setRequestMethod("GET");
@@ -443,15 +459,24 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (region != null) {
             presignedUrlRequest.setRegion(region);
         }
-        TaskExecutors.COMMAND_EXECUTOR.execute(() -> {
-            try {
-                String urlWithSign = service.getPresignedURL(presignedUrlRequest);
-                result.success(urlWithSign);
-            } catch (CosXmlClientException e) {
-                e.printStackTrace();
-                result.error(e);
-            }
-        });
+        setRequestCredential(sessionCredentials, presignedUrlRequest);
+        try {
+            String urlWithSign = service.getPresignedURL(presignedUrlRequest);
+            result.success(urlWithSign);
+        } catch (CosXmlClientException e) {
+            e.printStackTrace();
+            result.error(e);
+        }
+
+//        TaskExecutors.COMMAND_EXECUTOR.execute(() -> {
+//            try {
+//                String urlWithSign = service.getPresignedURL(presignedUrlRequest);
+//                result.success(urlWithSign);
+//            } catch (CosXmlClientException e) {
+//                e.printStackTrace();
+//                result.error(e);
+//            }
+//        });
     }
 
     @Override
@@ -477,9 +502,10 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void getService(@NonNull String serviceKey, Pigeon.Result<Pigeon.ListAllMyBuckets> result) {
+    public void getService(@NonNull String serviceKey, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Pigeon.ListAllMyBuckets> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         GetServiceRequest request = new GetServiceRequest();
+        setRequestCredential(sessionCredentials, request);
         service.getServiceAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -529,9 +555,12 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void getBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable String prefix, @Nullable String delimiter, @Nullable String encodingType, @Nullable String marker, @Nullable Long maxKeys, Pigeon.Result<Pigeon.BucketContents> result) {
+    public void getBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable String prefix,
+                          @Nullable String delimiter, @Nullable String encodingType, @Nullable String marker, @Nullable Long maxKeys, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials,
+                          Pigeon.Result<Pigeon.BucketContents> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         GetBucketRequest request = new GetBucketRequest(bucket);
+        setRequestCredential(sessionCredentials, request);
         if (region != null) {
             request.setRegion(region);
         }
@@ -618,7 +647,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void putBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Boolean enableMAZ, @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, Pigeon.Result<Void> result) {
+    public void putBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Boolean enableMAZ,
+                          @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketRequest request = new PutBucketRequest(bucket);
         if (region != null) {
@@ -639,6 +669,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (readWriteAccount != null) {
             request.setXCOSReadWrite(readWriteAccount);
         }
+        setRequestCredential(sessionCredentials, request);
         service.putBucketAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -659,12 +690,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void headBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Pigeon.Result<Map<String, String>> result) {
+    public void headBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Map<String, String>> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         HeadBucketRequest request = new HeadBucketRequest(bucket);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.headBucketAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -690,12 +722,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Pigeon.Result<Void> result) {
+    public void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         DeleteBucketRequest request = new DeleteBucketRequest(bucket);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.deleteBucketAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -716,12 +749,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void getBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Pigeon.Result<Boolean> result) {
+    public void getBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Boolean> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         GetBucketAccelerateRequest request = new GetBucketAccelerateRequest(bucket);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.getBucketAccelerateAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -752,12 +786,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, Pigeon.Result<Void> result) {
+    public void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketAccelerateRequest request = new PutBucketAccelerateRequest(bucket, enable);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.putBucketAccelerateAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -778,12 +813,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void getBucketLocation(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Pigeon.Result<String> result) {
+    public void getBucketLocation(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<String> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         GetBucketLocationRequest request = new GetBucketLocationRequest(bucket);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.getBucketLocationAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -810,12 +846,13 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void getBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Pigeon.Result<Boolean> result) {
+    public void getBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Boolean> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         GetBucketVersioningRequest request = new GetBucketVersioningRequest(bucket);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.getBucketVersioningAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -846,13 +883,14 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, Pigeon.Result<Void> result) {
+    public void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketVersioningRequest request = new PutBucketVersioningRequest(bucket);
         request.setEnableVersion(enable);
         if (region != null) {
             request.setRegion(region);
         }
+        setRequestCredential(sessionCredentials, request);
         service.putBucketVersionAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
@@ -992,55 +1030,56 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             serviceConfigBuilder.setUserAgentExtended("FlutterPlugin");
         }
 
-        synchronized (credentialProviderLock) {
-            if (qCloudCredentialProvider == null) {
-                try {
-                    credentialProviderLock.wait(15000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+//        synchronized (credentialProviderLock) {
+//            if (qCloudCredentialProvider == null) {
+//                try {
+//                    credentialProviderLock.wait(15000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
 
+        CosXmlService cosXmlService;
         if (qCloudCredentialProvider == null) {
-            throw new IllegalArgumentException("Please call method initWithPlainSecret or initWithSessionCredentialCallback first");
+            cosXmlService = new CosXmlService(context, serviceConfigBuilder.builder());
         } else {
-            CosXmlService cosXmlService = new CosXmlService(context, serviceConfigBuilder.builder(), qCloudCredentialProvider);
-            if(dnsMap != null) {
-                try {
-                    for (String domain: dnsMap.keySet()) {
-                        if(dnsMap.get(domain) != null && dnsMap.get(domain).size() > 0){
-                            cosXmlService.addCustomerDNS(domain, dnsMap.get(domain).toArray(new String[0]));
-                        }
-                    }
-                } catch (CosXmlClientException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(initDnsFetch){
-                cosXmlService.addCustomerDNSFetch(domain -> {
-                    CompletableFuture<List<String>> future = new CompletableFuture<>();
-                    //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
-                    runMainThread(() ->
-                            flutterCosApi.fetchDns(domain, future::complete)
-                    );
-                    List<InetAddress> inetAddresses = new ArrayList<>();
-                    try {
-                        List<String> ipList = future.get(60, TimeUnit.SECONDS);
-                        if(ipList != null && ipList.size() > 0){
-                            for (String ip : ipList) {
-                                inetAddresses.add(InetAddress.getByName(ip));
-                            }
-                        }
-                        return inetAddresses;
-                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                });
-            }
-            return cosXmlService;
+            cosXmlService = new CosXmlService(context, serviceConfigBuilder.builder(), qCloudCredentialProvider);
         }
+        if(dnsMap != null) {
+            try {
+                for (String domain: dnsMap.keySet()) {
+                    if(dnsMap.get(domain) != null && dnsMap.get(domain).size() > 0){
+                        cosXmlService.addCustomerDNS(domain, dnsMap.get(domain).toArray(new String[0]));
+                    }
+                }
+            } catch (CosXmlClientException e) {
+                e.printStackTrace();
+            }
+        }
+        if(initDnsFetch){
+            cosXmlService.addCustomerDNSFetch(domain -> {
+                CompletableFuture<List<String>> future = new CompletableFuture<>();
+                //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
+                runMainThread(() ->
+                        flutterCosApi.fetchDns(domain, future::complete)
+                );
+                List<InetAddress> inetAddresses = new ArrayList<>();
+                try {
+                    List<String> ipList = future.get(60, TimeUnit.SECONDS);
+                    if(ipList != null && ipList.size() > 0){
+                        for (String ip : ipList) {
+                            inetAddresses.add(InetAddress.getByName(ip));
+                        }
+                    }
+                    return inetAddresses;
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            });
+        }
+        return cosXmlService;
     }
 
     private TransferManager getTransferManager(String transferKey) {
@@ -1090,7 +1129,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             @Nullable Long resultCallbackKey,
             @Nullable Long stateCallbackKey,
             @Nullable Long progressCallbackKey,
-            @Nullable Long InitMultipleUploadCallbackKey
+            @Nullable Long InitMultipleUploadCallbackKey,
+            @Nullable Pigeon.SessionQCloudCredentials sessionCredentials
     ) {
         TransferManager transferManager = getTransferManager(transferKey);
         PutObjectRequest request;
@@ -1130,6 +1170,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                 request.addNoSignHeader(key);
             }
         }
+        setRequestCredential(sessionCredentials, request);
         COSXMLUploadTask task = transferManager.upload(request, uploadId);
         setTaskListener(task, transferKey, resultCallbackKey, stateCallbackKey, progressCallbackKey, InitMultipleUploadCallbackKey);
         String taskKey = String.valueOf(task.hashCode());
@@ -1151,7 +1192,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             @Nullable List<String> noSignHeaders,
             @Nullable Long resultCallbackKey,
             @Nullable Long stateCallbackKey,
-            @Nullable Long progressCallbackKey
+            @Nullable Long progressCallbackKey,
+            @Nullable Pigeon.SessionQCloudCredentials sessionCredentials
     ) {
         TransferManager transferManager = getTransferManager(transferKey);
         int separator = savePath.lastIndexOf("/");
@@ -1182,6 +1224,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                 request.addNoSignHeader(key);
             }
         }
+        setRequestCredential(sessionCredentials, request);
         COSXMLDownloadTask task = transferManager.download(context, request);
         setTaskListener(task, transferKey, resultCallbackKey, stateCallbackKey, progressCallbackKey, null);
         String taskKey = String.valueOf(task.hashCode());
@@ -1402,5 +1445,28 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             default:
                 return Pigeon.LogCategory.PROCESS;
          }
+    }
+
+    private void setRequestCredential(@Nullable Pigeon.SessionQCloudCredentials sessionCredentials, @NonNull CosXmlRequest request){
+        if (sessionCredentials != null){
+            Long startTime = sessionCredentials.getStartTime();
+            SessionQCloudCredentials credentials;
+            if (startTime == null) {
+                credentials = new SessionQCloudCredentials(
+                        sessionCredentials.getSecretId(),
+                        sessionCredentials.getSecretKey(),
+                        sessionCredentials.getToken(),
+                        sessionCredentials.getExpiredTime());
+            } else {
+                credentials = new SessionQCloudCredentials(
+                        sessionCredentials.getSecretId(),
+                        sessionCredentials.getSecretKey(),
+                        sessionCredentials.getToken(),
+                        startTime,
+                        sessionCredentials.getExpiredTime());
+            }
+            Log.d(TAG, "setCredential: " + credentials.toString());
+            request.setCredential(credentials);
+        }
     }
 }

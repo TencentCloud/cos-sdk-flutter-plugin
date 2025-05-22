@@ -2612,6 +2612,9 @@ public class Pigeon {
         case (byte)133:         
           return Owner.fromList((ArrayList<Object>) readValue(buffer));
         
+        case (byte)134:         
+          return SessionQCloudCredentials.fromList((ArrayList<Object>) readValue(buffer));
+        
         default:        
           return super.readValueOfType(type, buffer);
         
@@ -2643,6 +2646,10 @@ public class Pigeon {
         stream.write(133);
         writeValue(stream, ((Owner) value).toList());
       } else 
+      if (value instanceof SessionQCloudCredentials) {
+        stream.write(134);
+        writeValue(stream, ((SessionQCloudCredentials) value).toList());
+      } else 
 {
         super.writeValue(stream, value);
       }
@@ -2651,21 +2658,21 @@ public class Pigeon {
 
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface CosServiceApi {
-    void headObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Result<Map<String, String>> result);
-    void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, Result<Void> result);
+    void headObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable SessionQCloudCredentials sessionCredentials, Result<Map<String, String>> result);
+    void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable SessionQCloudCredentials sessionCredentials, Result<Void> result);
     @NonNull String getObjectUrl(@NonNull String bucket, @NonNull String region, @NonNull String cosPath, @NonNull String serviceKey);
-    void getPresignedUrl(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, @Nullable Long signValidTime, @Nullable Boolean signHost, @Nullable Map<String, String> parameters, @Nullable String region, Result<String> result);
+    void getPresignedUrl(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, @Nullable Long signValidTime, @Nullable Boolean signHost, @Nullable Map<String, String> parameters, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<String> result);
     void preBuildConnection(@NonNull String bucket, @NonNull String serviceKey, Result<Void> result);
-    void getService(@NonNull String serviceKey, Result<ListAllMyBuckets> result);
-    void getBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable String prefix, @Nullable String delimiter, @Nullable String encodingType, @Nullable String marker, @Nullable Long maxKeys, Result<BucketContents> result);
-    void putBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Boolean enableMAZ, @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, Result<Void> result);
-    void headBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Result<Map<String, String>> result);
-    void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Result<Void> result);
-    void getBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Result<Boolean> result);
-    void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, Result<Void> result);
-    void getBucketLocation(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Result<String> result);
-    void getBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, Result<Boolean> result);
-    void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, Result<Void> result);
+    void getService(@NonNull String serviceKey, @Nullable SessionQCloudCredentials sessionCredentials, Result<ListAllMyBuckets> result);
+    void getBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable String prefix, @Nullable String delimiter, @Nullable String encodingType, @Nullable String marker, @Nullable Long maxKeys, @Nullable SessionQCloudCredentials sessionCredentials, Result<BucketContents> result);
+    void putBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Boolean enableMAZ, @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, @Nullable SessionQCloudCredentials sessionCredentials, Result<Void> result);
+    void headBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<Map<String, String>> result);
+    void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<Void> result);
+    void getBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<Boolean> result);
+    void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable SessionQCloudCredentials sessionCredentials, Result<Void> result);
+    void getBucketLocation(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<String> result);
+    void getBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable SessionQCloudCredentials sessionCredentials, Result<Boolean> result);
+    void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable SessionQCloudCredentials sessionCredentials, Result<Void> result);
     void doesBucketExist(@NonNull String serviceKey, @NonNull String bucket, Result<Boolean> result);
     void doesObjectExist(@NonNull String serviceKey, @NonNull String bucket, @NonNull String cosPath, Result<Boolean> result);
     void cancelAll(@NonNull String serviceKey);
@@ -2698,6 +2705,7 @@ public class Pigeon {
                 throw new NullPointerException("cosPathArg unexpectedly null.");
               }
               String versionIdArg = (String)args.get(4);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(5);
               Result<Map<String, String>> resultCallback = new Result<Map<String, String>>() {
                 public void success(Map<String, String> result) {
                   wrapped.add(0, result);
@@ -2709,7 +2717,7 @@ public class Pigeon {
                 }
               };
 
-              api.headObject(serviceKeyArg, bucketArg, regionArg, cosPathArg, versionIdArg, resultCallback);
+              api.headObject(serviceKeyArg, bucketArg, regionArg, cosPathArg, versionIdArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -2743,6 +2751,7 @@ public class Pigeon {
                 throw new NullPointerException("cosPathArg unexpectedly null.");
               }
               String versionIdArg = (String)args.get(4);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(5);
               Result<Void> resultCallback = new Result<Void>() {
                 public void success(Void result) {
                   wrapped.add(0, null);
@@ -2754,7 +2763,7 @@ public class Pigeon {
                 }
               };
 
-              api.deleteObject(serviceKeyArg, bucketArg, regionArg, cosPathArg, versionIdArg, resultCallback);
+              api.deleteObject(serviceKeyArg, bucketArg, regionArg, cosPathArg, versionIdArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -2828,6 +2837,7 @@ public class Pigeon {
               Boolean signHostArg = (Boolean)args.get(4);
               Map<String, String> parametersArg = (Map<String, String>)args.get(5);
               String regionArg = (String)args.get(6);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(7);
               Result<String> resultCallback = new Result<String>() {
                 public void success(String result) {
                   wrapped.add(0, result);
@@ -2839,7 +2849,7 @@ public class Pigeon {
                 }
               };
 
-              api.getPresignedUrl(serviceKeyArg, bucketArg, cosPathArg, (signValidTimeArg == null) ? null : signValidTimeArg.longValue(), signHostArg, parametersArg, regionArg, resultCallback);
+              api.getPresignedUrl(serviceKeyArg, bucketArg, cosPathArg, (signValidTimeArg == null) ? null : signValidTimeArg.longValue(), signHostArg, parametersArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -2902,6 +2912,7 @@ public class Pigeon {
               if (serviceKeyArg == null) {
                 throw new NullPointerException("serviceKeyArg unexpectedly null.");
               }
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(1);
               Result<ListAllMyBuckets> resultCallback = new Result<ListAllMyBuckets>() {
                 public void success(ListAllMyBuckets result) {
                   wrapped.add(0, result);
@@ -2913,7 +2924,7 @@ public class Pigeon {
                 }
               };
 
-              api.getService(serviceKeyArg, resultCallback);
+              api.getService(serviceKeyArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -2947,6 +2958,7 @@ public class Pigeon {
               String encodingTypeArg = (String)args.get(5);
               String markerArg = (String)args.get(6);
               Number maxKeysArg = (Number)args.get(7);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(8);
               Result<BucketContents> resultCallback = new Result<BucketContents>() {
                 public void success(BucketContents result) {
                   wrapped.add(0, result);
@@ -2958,7 +2970,7 @@ public class Pigeon {
                 }
               };
 
-              api.getBucket(serviceKeyArg, bucketArg, regionArg, prefixArg, delimiterArg, encodingTypeArg, markerArg, (maxKeysArg == null) ? null : maxKeysArg.longValue(), resultCallback);
+              api.getBucket(serviceKeyArg, bucketArg, regionArg, prefixArg, delimiterArg, encodingTypeArg, markerArg, (maxKeysArg == null) ? null : maxKeysArg.longValue(), sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -2992,6 +3004,7 @@ public class Pigeon {
               String readAccountArg = (String)args.get(5);
               String writeAccountArg = (String)args.get(6);
               String readWriteAccountArg = (String)args.get(7);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(8);
               Result<Void> resultCallback = new Result<Void>() {
                 public void success(Void result) {
                   wrapped.add(0, null);
@@ -3003,7 +3016,7 @@ public class Pigeon {
                 }
               };
 
-              api.putBucket(serviceKeyArg, bucketArg, regionArg, enableMAZArg, cosaclArg, readAccountArg, writeAccountArg, readWriteAccountArg, resultCallback);
+              api.putBucket(serviceKeyArg, bucketArg, regionArg, enableMAZArg, cosaclArg, readAccountArg, writeAccountArg, readWriteAccountArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3032,6 +3045,7 @@ public class Pigeon {
                 throw new NullPointerException("bucketArg unexpectedly null.");
               }
               String regionArg = (String)args.get(2);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(3);
               Result<Map<String, String>> resultCallback = new Result<Map<String, String>>() {
                 public void success(Map<String, String> result) {
                   wrapped.add(0, result);
@@ -3043,7 +3057,7 @@ public class Pigeon {
                 }
               };
 
-              api.headBucket(serviceKeyArg, bucketArg, regionArg, resultCallback);
+              api.headBucket(serviceKeyArg, bucketArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3072,6 +3086,7 @@ public class Pigeon {
                 throw new NullPointerException("bucketArg unexpectedly null.");
               }
               String regionArg = (String)args.get(2);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(3);
               Result<Void> resultCallback = new Result<Void>() {
                 public void success(Void result) {
                   wrapped.add(0, null);
@@ -3083,7 +3098,7 @@ public class Pigeon {
                 }
               };
 
-              api.deleteBucket(serviceKeyArg, bucketArg, regionArg, resultCallback);
+              api.deleteBucket(serviceKeyArg, bucketArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3112,6 +3127,7 @@ public class Pigeon {
                 throw new NullPointerException("bucketArg unexpectedly null.");
               }
               String regionArg = (String)args.get(2);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(3);
               Result<Boolean> resultCallback = new Result<Boolean>() {
                 public void success(Boolean result) {
                   wrapped.add(0, result);
@@ -3123,7 +3139,7 @@ public class Pigeon {
                 }
               };
 
-              api.getBucketAccelerate(serviceKeyArg, bucketArg, regionArg, resultCallback);
+              api.getBucketAccelerate(serviceKeyArg, bucketArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3156,6 +3172,7 @@ public class Pigeon {
               if (enableArg == null) {
                 throw new NullPointerException("enableArg unexpectedly null.");
               }
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(4);
               Result<Void> resultCallback = new Result<Void>() {
                 public void success(Void result) {
                   wrapped.add(0, null);
@@ -3167,7 +3184,7 @@ public class Pigeon {
                 }
               };
 
-              api.putBucketAccelerate(serviceKeyArg, bucketArg, regionArg, enableArg, resultCallback);
+              api.putBucketAccelerate(serviceKeyArg, bucketArg, regionArg, enableArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3196,6 +3213,7 @@ public class Pigeon {
                 throw new NullPointerException("bucketArg unexpectedly null.");
               }
               String regionArg = (String)args.get(2);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(3);
               Result<String> resultCallback = new Result<String>() {
                 public void success(String result) {
                   wrapped.add(0, result);
@@ -3207,7 +3225,7 @@ public class Pigeon {
                 }
               };
 
-              api.getBucketLocation(serviceKeyArg, bucketArg, regionArg, resultCallback);
+              api.getBucketLocation(serviceKeyArg, bucketArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3236,6 +3254,7 @@ public class Pigeon {
                 throw new NullPointerException("bucketArg unexpectedly null.");
               }
               String regionArg = (String)args.get(2);
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(3);
               Result<Boolean> resultCallback = new Result<Boolean>() {
                 public void success(Boolean result) {
                   wrapped.add(0, result);
@@ -3247,7 +3266,7 @@ public class Pigeon {
                 }
               };
 
-              api.getBucketVersioning(serviceKeyArg, bucketArg, regionArg, resultCallback);
+              api.getBucketVersioning(serviceKeyArg, bucketArg, regionArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3280,6 +3299,7 @@ public class Pigeon {
               if (enableArg == null) {
                 throw new NullPointerException("enableArg unexpectedly null.");
               }
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(4);
               Result<Void> resultCallback = new Result<Void>() {
                 public void success(Void result) {
                   wrapped.add(0, null);
@@ -3291,7 +3311,7 @@ public class Pigeon {
                 }
               };
 
-              api.putBucketVersioning(serviceKeyArg, bucketArg, regionArg, enableArg, resultCallback);
+              api.putBucketVersioning(serviceKeyArg, bucketArg, regionArg, enableArg, sessionCredentialsArg, resultCallback);
             }
             catch (Error | RuntimeException exception) {
               ArrayList<Object> wrappedError = wrapError(exception);
@@ -3412,17 +3432,43 @@ public class Pigeon {
       }
     }
   }
+  private static class CosTransferApiCodec extends StandardMessageCodec {
+    public static final CosTransferApiCodec INSTANCE = new CosTransferApiCodec();
+    private CosTransferApiCodec() {}
+    @Override
+    protected Object readValueOfType(byte type, @NonNull ByteBuffer buffer) {
+      switch (type) {
+        case (byte)128:         
+          return SessionQCloudCredentials.fromList((ArrayList<Object>) readValue(buffer));
+        
+        default:        
+          return super.readValueOfType(type, buffer);
+        
+      }
+    }
+    @Override
+    protected void writeValue(@NonNull ByteArrayOutputStream stream, Object value)     {
+      if (value instanceof SessionQCloudCredentials) {
+        stream.write(128);
+        writeValue(stream, ((SessionQCloudCredentials) value).toList());
+      } else 
+{
+        super.writeValue(stream, value);
+      }
+    }
+  }
+
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface CosTransferApi {
-    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable String callbackParam, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey);
-    @NonNull String download(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @NonNull String savePath, @Nullable String versionId, @Nullable Long trafficLimit, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey);
+    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable String callbackParam, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey, @Nullable SessionQCloudCredentials sessionCredentials);
+    @NonNull String download(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @NonNull String savePath, @Nullable String versionId, @Nullable Long trafficLimit, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable SessionQCloudCredentials sessionCredentials);
     void pause(@NonNull String taskId, @NonNull String transferKey);
     void resume(@NonNull String taskId, @NonNull String transferKey);
     void cancel(@NonNull String taskId, @NonNull String transferKey);
 
     /** The codec used by CosTransferApi. */
     static MessageCodec<Object> getCodec() {
-      return       new StandardMessageCodec();    }
+      return       CosTransferApiCodec.INSTANCE;    }
     /**Sets up an instance of `CosTransferApi` to handle messages through the `binaryMessenger`. */
     static void setup(BinaryMessenger binaryMessenger, CosTransferApi api) {
       {
@@ -3459,7 +3505,8 @@ public class Pigeon {
               Number stateCallbackKeyArg = (Number)args.get(13);
               Number progressCallbackKeyArg = (Number)args.get(14);
               Number initMultipleUploadCallbackKeyArg = (Number)args.get(15);
-              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), callbackParamArg, customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue());
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(16);
+              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), callbackParamArg, customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue(), sessionCredentialsArg);
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {
@@ -3505,7 +3552,8 @@ public class Pigeon {
               Number resultCallbackKeyArg = (Number)args.get(9);
               Number stateCallbackKeyArg = (Number)args.get(10);
               Number progressCallbackKeyArg = (Number)args.get(11);
-              String output = api.download(transferKeyArg, bucketArg, cosPathArg, regionArg, savePathArg, versionIdArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue());
+              SessionQCloudCredentials sessionCredentialsArg = (SessionQCloudCredentials)args.get(12);
+              String output = api.download(transferKeyArg, bucketArg, cosPathArg, regionArg, savePathArg, versionIdArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), sessionCredentialsArg);
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {

@@ -18,7 +18,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  tencentcloud_cos_sdk_plugin: ^1.2.3
+  tencentcloud_cos_sdk_plugin: ^1.2.4
   path_provider: ^2.0.11
 
 dev_dependencies:

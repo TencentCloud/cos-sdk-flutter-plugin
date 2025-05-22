@@ -74,11 +74,11 @@ abstract class CosApi {
 abstract class CosServiceApi {
   @async
   Map<String?, String?> headObject(String serviceKey, String bucket,
-      String? region, String cosPath, String? versionId);
+      String? region, String cosPath, String? versionId, SessionQCloudCredentials? sessionCredentials);
 
   @async
   void deleteObject(String serviceKey, String bucket, String? region,
-      String cosPath, String? versionId);
+      String cosPath, String? versionId, SessionQCloudCredentials? sessionCredentials);
 
   String getObjectUrl(
       String bucket, String region, String cosPath, String serviceKey);
@@ -91,13 +91,13 @@ abstract class CosServiceApi {
       int? signValidTime,
       bool? signHost,
       Map<String?, String?>? parameters,
-      String? region);
+      String? region, SessionQCloudCredentials? sessionCredentials);
 
   @async
   void preBuildConnection(String bucket, String serviceKey);
 
   @async
-  ListAllMyBuckets getService(String serviceKey);
+  ListAllMyBuckets getService(String serviceKey, SessionQCloudCredentials? sessionCredentials);
 
   @async
   BucketContents getBucket(
@@ -108,7 +108,8 @@ abstract class CosServiceApi {
       String? delimiter,
       String? encodingType,
       String? marker,
-      int? maxKeys);
+      int? maxKeys,
+      SessionQCloudCredentials? sessionCredentials);
 
   @async
   void putBucket(
@@ -119,31 +120,33 @@ abstract class CosServiceApi {
       String? cosacl,
       String? readAccount,
       String? writeAccount,
-      String? readWriteAccount);
+      String? readWriteAccount,
+      SessionQCloudCredentials? sessionCredentials);
 
   @async
   Map<String?, String?> headBucket(
-      String serviceKey, String bucket, String? region);
+      String serviceKey, String bucket, String? region,
+      SessionQCloudCredentials? sessionCredentials);
 
   @async
-  void deleteBucket(String serviceKey, String bucket, String? region);
+  void deleteBucket(String serviceKey, String bucket, String? region, SessionQCloudCredentials? sessionCredentials);
 
   @async
-  bool getBucketAccelerate(String serviceKey, String bucket, String? region);
+  bool getBucketAccelerate(String serviceKey, String bucket, String? region, SessionQCloudCredentials? sessionCredentials);
 
   @async
   void putBucketAccelerate(
-      String serviceKey, String bucket, String? region, bool enable);
+      String serviceKey, String bucket, String? region, bool enable, SessionQCloudCredentials? sessionCredentials);
 
   @async
-  String getBucketLocation(String serviceKey, String bucket, String? region);
+  String getBucketLocation(String serviceKey, String bucket, String? region, SessionQCloudCredentials? sessionCredentials);
 
   @async
-  bool getBucketVersioning(String serviceKey, String bucket, String? region);
+  bool getBucketVersioning(String serviceKey, String bucket, String? region, SessionQCloudCredentials? sessionCredentials);
 
   @async
   void putBucketVersioning(
-      String serviceKey, String bucket, String? region, bool enable);
+      String serviceKey, String bucket, String? region, bool enable, SessionQCloudCredentials? sessionCredentials);
 
   @async
   bool doesBucketExist(String serviceKey, String bucket);
@@ -173,6 +176,7 @@ abstract class CosTransferApi {
     int? stateCallbackKey,
     int? progressCallbackKey,
     int? initMultipleUploadCallbackKey,
+      SessionQCloudCredentials? sessionCredentials,
   );
 
   String download(
@@ -188,6 +192,7 @@ abstract class CosTransferApi {
     int? resultCallbackKey,
     int? stateCallbackKey,
     int? progressCallbackKey,
+    SessionQCloudCredentials? sessionCredentials,
   );
 
   void pause(String taskId, String transferKey);

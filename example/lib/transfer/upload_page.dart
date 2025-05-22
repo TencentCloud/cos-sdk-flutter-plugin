@@ -16,6 +16,7 @@ import '../common/res/colors.dart';
 import '../common/res/gaps.dart';
 import '../common/toast_utils.dart';
 import '../common/utils.dart';
+import '../cos/fetch_credentials.dart';
 import '../routers/delegate.dart';
 import '../config/config.dart';
 import 'dart:io';
@@ -280,7 +281,9 @@ class _UploadPageState extends State<UploadPage> {
           resultListener: ResultListener(successCallBack, failCallBack),
           stateCallback: stateCallback,
           progressCallBack: progressCallBack,
-          initMultipleUploadCallback: initMultipleUploadCallback);
+          initMultipleUploadCallback: initMultipleUploadCallback,
+          sessionCredentials: await FetchCredentials.getSessionCredentials()
+      );
     } catch (e) {
       Toast.show(e.toString());
       if (kDebugMode) {

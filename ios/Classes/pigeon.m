@@ -1377,6 +1377,9 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
     case 133:     
       return [Owner fromList:[self readValue]];
     
+    case 134:     
+      return [SessionQCloudCredentials fromList:[self readValue]];
+    
     default:    
       return [super readValueOfType:type];
     
@@ -1411,6 +1414,10 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
   } else 
   if ([value isKindOfClass:[Owner class]]) {
     [self writeByte:133];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+    [self writeByte:134];
     [self writeValue:[value toList]];
   } else 
 {
@@ -1449,7 +1456,7 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(headObjectServiceKey:bucket:region:cosPath:versionId:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(headObjectServiceKey:bucket:region:cosPath:versionId:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(headObjectServiceKey:bucket:region:cosPath:versionId:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(headObjectServiceKey:bucket:region:cosPath:versionId:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
@@ -1457,7 +1464,8 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
         NSString *arg_cosPath = GetNullableObjectAtIndex(args, 3);
         NSString *arg_versionId = GetNullableObjectAtIndex(args, 4);
-        [api headObjectServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region cosPath:arg_cosPath versionId:arg_versionId completion:^(NSDictionary<NSString *, NSString *> *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 5);
+        [api headObjectServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region cosPath:arg_cosPath versionId:arg_versionId sessionCredentials:arg_sessionCredentials completion:^(NSDictionary<NSString *, NSString *> *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1473,7 +1481,7 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(deleteObjectServiceKey:bucket:region:cosPath:versionId:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(deleteObjectServiceKey:bucket:region:cosPath:versionId:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(deleteObjectServiceKey:bucket:region:cosPath:versionId:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(deleteObjectServiceKey:bucket:region:cosPath:versionId:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
@@ -1481,7 +1489,8 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
         NSString *arg_cosPath = GetNullableObjectAtIndex(args, 3);
         NSString *arg_versionId = GetNullableObjectAtIndex(args, 4);
-        [api deleteObjectServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region cosPath:arg_cosPath versionId:arg_versionId completion:^(FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 5);
+        [api deleteObjectServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region cosPath:arg_cosPath versionId:arg_versionId sessionCredentials:arg_sessionCredentials completion:^(FlutterError *_Nullable error) {
           callback(wrapResult(nil, error));
         }];
       }];
@@ -1520,7 +1529,7 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getPresignedUrlServiceKey:bucket:cosPath:signValidTime:signHost:parameters:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
@@ -1530,7 +1539,8 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         NSNumber *arg_signHost = GetNullableObjectAtIndex(args, 4);
         NSDictionary<NSString *, NSString *> *arg_parameters = GetNullableObjectAtIndex(args, 5);
         NSString *arg_region = GetNullableObjectAtIndex(args, 6);
-        [api getPresignedUrlServiceKey:arg_serviceKey bucket:arg_bucket cosPath:arg_cosPath signValidTime:arg_signValidTime signHost:arg_signHost parameters:arg_parameters region:arg_region completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 7);
+        [api getPresignedUrlServiceKey:arg_serviceKey bucket:arg_bucket cosPath:arg_cosPath signValidTime:arg_signValidTime signHost:arg_signHost parameters:arg_parameters region:arg_region sessionCredentials:arg_sessionCredentials completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1567,11 +1577,12 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getServiceServiceKey:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getServiceServiceKey:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getServiceServiceKey:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getServiceServiceKey:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
-        [api getServiceServiceKey:arg_serviceKey completion:^(ListAllMyBuckets *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 1);
+        [api getServiceServiceKey:arg_serviceKey sessionCredentials:arg_sessionCredentials completion:^(ListAllMyBuckets *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1587,7 +1598,7 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getBucketServiceKey:bucket:region:prefix:delimiter:encodingType:marker:maxKeys:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketServiceKey:bucket:region:prefix:delimiter:encodingType:marker:maxKeys:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getBucketServiceKey:bucket:region:prefix:delimiter:encodingType:marker:maxKeys:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketServiceKey:bucket:region:prefix:delimiter:encodingType:marker:maxKeys:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
@@ -1598,7 +1609,8 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         NSString *arg_encodingType = GetNullableObjectAtIndex(args, 5);
         NSString *arg_marker = GetNullableObjectAtIndex(args, 6);
         NSNumber *arg_maxKeys = GetNullableObjectAtIndex(args, 7);
-        [api getBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region prefix:arg_prefix delimiter:arg_delimiter encodingType:arg_encodingType marker:arg_marker maxKeys:arg_maxKeys completion:^(BucketContents *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 8);
+        [api getBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region prefix:arg_prefix delimiter:arg_delimiter encodingType:arg_encodingType marker:arg_marker maxKeys:arg_maxKeys sessionCredentials:arg_sessionCredentials completion:^(BucketContents *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1614,7 +1626,7 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(putBucketServiceKey:bucket:region:enableMAZ:cosacl:readAccount:writeAccount:readWriteAccount:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketServiceKey:bucket:region:enableMAZ:cosacl:readAccount:writeAccount:readWriteAccount:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(putBucketServiceKey:bucket:region:enableMAZ:cosacl:readAccount:writeAccount:readWriteAccount:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketServiceKey:bucket:region:enableMAZ:cosacl:readAccount:writeAccount:readWriteAccount:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
@@ -1625,7 +1637,8 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         NSString *arg_readAccount = GetNullableObjectAtIndex(args, 5);
         NSString *arg_writeAccount = GetNullableObjectAtIndex(args, 6);
         NSString *arg_readWriteAccount = GetNullableObjectAtIndex(args, 7);
-        [api putBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enableMAZ:arg_enableMAZ cosacl:arg_cosacl readAccount:arg_readAccount writeAccount:arg_writeAccount readWriteAccount:arg_readWriteAccount completion:^(FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 8);
+        [api putBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enableMAZ:arg_enableMAZ cosacl:arg_cosacl readAccount:arg_readAccount writeAccount:arg_writeAccount readWriteAccount:arg_readWriteAccount sessionCredentials:arg_sessionCredentials completion:^(FlutterError *_Nullable error) {
           callback(wrapResult(nil, error));
         }];
       }];
@@ -1641,13 +1654,14 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(headBucketServiceKey:bucket:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(headBucketServiceKey:bucket:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(headBucketServiceKey:bucket:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(headBucketServiceKey:bucket:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
-        [api headBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region completion:^(NSDictionary<NSString *, NSString *> *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 3);
+        [api headBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region sessionCredentials:arg_sessionCredentials completion:^(NSDictionary<NSString *, NSString *> *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1663,13 +1677,14 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(deleteBucketServiceKey:bucket:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(deleteBucketServiceKey:bucket:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(deleteBucketServiceKey:bucket:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(deleteBucketServiceKey:bucket:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
-        [api deleteBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region completion:^(FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 3);
+        [api deleteBucketServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region sessionCredentials:arg_sessionCredentials completion:^(FlutterError *_Nullable error) {
           callback(wrapResult(nil, error));
         }];
       }];
@@ -1685,13 +1700,14 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getBucketAccelerateServiceKey:bucket:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketAccelerateServiceKey:bucket:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getBucketAccelerateServiceKey:bucket:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketAccelerateServiceKey:bucket:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
-        [api getBucketAccelerateServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 3);
+        [api getBucketAccelerateServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region sessionCredentials:arg_sessionCredentials completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1707,14 +1723,15 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(putBucketAccelerateServiceKey:bucket:region:enable:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketAccelerateServiceKey:bucket:region:enable:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(putBucketAccelerateServiceKey:bucket:region:enable:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketAccelerateServiceKey:bucket:region:enable:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
         NSNumber *arg_enable = GetNullableObjectAtIndex(args, 3);
-        [api putBucketAccelerateServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enable:arg_enable completion:^(FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 4);
+        [api putBucketAccelerateServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enable:arg_enable sessionCredentials:arg_sessionCredentials completion:^(FlutterError *_Nullable error) {
           callback(wrapResult(nil, error));
         }];
       }];
@@ -1730,13 +1747,14 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getBucketLocationServiceKey:bucket:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketLocationServiceKey:bucket:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getBucketLocationServiceKey:bucket:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketLocationServiceKey:bucket:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
-        [api getBucketLocationServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 3);
+        [api getBucketLocationServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region sessionCredentials:arg_sessionCredentials completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1752,13 +1770,14 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(getBucketVersioningServiceKey:bucket:region:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketVersioningServiceKey:bucket:region:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(getBucketVersioningServiceKey:bucket:region:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(getBucketVersioningServiceKey:bucket:region:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
-        [api getBucketVersioningServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 3);
+        [api getBucketVersioningServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region sessionCredentials:arg_sessionCredentials completion:^(NSNumber *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
       }];
@@ -1774,14 +1793,15 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
         binaryMessenger:binaryMessenger
         codec:CosServiceApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(putBucketVersioningServiceKey:bucket:region:enable:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketVersioningServiceKey:bucket:region:enable:completion:)", api);
+      NSCAssert([api respondsToSelector:@selector(putBucketVersioningServiceKey:bucket:region:enable:sessionCredentials:completion:)], @"CosServiceApi api (%@) doesn't respond to @selector(putBucketVersioningServiceKey:bucket:region:enable:sessionCredentials:completion:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_serviceKey = GetNullableObjectAtIndex(args, 0);
         NSString *arg_bucket = GetNullableObjectAtIndex(args, 1);
         NSString *arg_region = GetNullableObjectAtIndex(args, 2);
         NSNumber *arg_enable = GetNullableObjectAtIndex(args, 3);
-        [api putBucketVersioningServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enable:arg_enable completion:^(FlutterError *_Nullable error) {
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 4);
+        [api putBucketVersioningServiceKey:arg_serviceKey bucket:arg_bucket region:arg_region enable:arg_enable sessionCredentials:arg_sessionCredentials completion:^(FlutterError *_Nullable error) {
           callback(wrapResult(nil, error));
         }];
       }];
@@ -1854,9 +1874,56 @@ void CosServiceApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Cos
     }
   }
 }
+@interface CosTransferApiCodecReader : FlutterStandardReader
+@end
+@implementation CosTransferApiCodecReader
+- (nullable id)readValueOfType:(UInt8)type 
+{
+  switch (type) {
+    case 128:     
+      return [SessionQCloudCredentials fromList:[self readValue]];
+    
+    default:    
+      return [super readValueOfType:type];
+    
+  }
+}
+@end
+
+@interface CosTransferApiCodecWriter : FlutterStandardWriter
+@end
+@implementation CosTransferApiCodecWriter
+- (void)writeValue:(id)value 
+{
+  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+    [self writeByte:128];
+    [self writeValue:[value toList]];
+  } else 
+{
+    [super writeValue:value];
+  }
+}
+@end
+
+@interface CosTransferApiCodecReaderWriter : FlutterStandardReaderWriter
+@end
+@implementation CosTransferApiCodecReaderWriter
+- (FlutterStandardWriter *)writerWithData:(NSMutableData *)data {
+  return [[CosTransferApiCodecWriter alloc] initWithData:data];
+}
+- (FlutterStandardReader *)readerWithData:(NSData *)data {
+  return [[CosTransferApiCodecReader alloc] initWithData:data];
+}
+@end
+
+
 NSObject<FlutterMessageCodec> *CosTransferApiGetCodec() {
   static FlutterStandardMessageCodec *sSharedObject = nil;
-  sSharedObject = [FlutterStandardMessageCodec sharedInstance];
+  static dispatch_once_t sPred = 0;
+  dispatch_once(&sPred, ^{
+    CosTransferApiCodecReaderWriter *readerWriter = [[CosTransferApiCodecReaderWriter alloc] init];
+    sSharedObject = [FlutterStandardMessageCodec codecWithReaderWriter:readerWriter];
+  });
   return sSharedObject;
 }
 
@@ -1868,7 +1935,7 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         binaryMessenger:binaryMessenger
         codec:CosTransferApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:sessionCredentials:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:sessionCredentials:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_transferKey = GetNullableObjectAtIndex(args, 0);
@@ -1887,8 +1954,9 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 13);
         NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 14);
         NSNumber *arg_initMultipleUploadCallbackKey = GetNullableObjectAtIndex(args, 15);
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 16);
         FlutterError *error;
-        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit callbackParam:arg_callbackParam customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey error:&error];
+        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit callbackParam:arg_callbackParam customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey sessionCredentials:arg_sessionCredentials error:&error];
         callback(wrapResult(output, error));
       }];
     }
@@ -1903,7 +1971,7 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         binaryMessenger:binaryMessenger
         codec:CosTransferApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:sessionCredentials:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:sessionCredentials:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_transferKey = GetNullableObjectAtIndex(args, 0);
@@ -1918,8 +1986,9 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 9);
         NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 10);
         NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 11);
+        SessionQCloudCredentials *arg_sessionCredentials = GetNullableObjectAtIndex(args, 12);
         FlutterError *error;
-        NSString *output = [api downloadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region savePath:arg_savePath versionId:arg_versionId trafficLimit:arg_trafficLimit customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey error:&error];
+        NSString *output = [api downloadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region savePath:arg_savePath versionId:arg_versionId trafficLimit:arg_trafficLimit customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey sessionCredentials:arg_sessionCredentials error:&error];
         callback(wrapResult(output, error));
       }];
     }

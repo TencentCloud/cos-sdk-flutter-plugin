@@ -8,13 +8,13 @@ class CosService {
   final CosServiceApi cosApi = CosServiceApi();
 
   Future<Map<String?, String?>> headObject(String bucket, String cosPath,
-      {String? region, String? versionId}) {
-    return cosApi.headObject(serviceKey, bucket, region, cosPath, versionId);
+      {String? region, String? versionId, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.headObject(serviceKey, bucket, region, cosPath, versionId, sessionCredentials);
   }
 
   Future<void> deleteObject(String bucket, String cosPath,
-      {String? region, String? versionId}) {
-    return cosApi.deleteObject(serviceKey, bucket, region, cosPath, versionId);
+      {String? region, String? versionId, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.deleteObject(serviceKey, bucket, region, cosPath, versionId, sessionCredentials);
   }
 
   /// 获取get请求未签名链接
@@ -38,18 +38,18 @@ class CosService {
       int? signValidTime,
       bool? signHost,
       Map<String?, String?>? parameters,
-      String? region
+      String? region, SessionQCloudCredentials? sessionCredentials
       }
   ) {
-    return cosApi.getPresignedUrl(serviceKey, bucket, cosPath, signValidTime, signHost, parameters, region);
+    return cosApi.getPresignedUrl(serviceKey, bucket, cosPath, signValidTime, signHost, parameters, region, sessionCredentials);
   }
 
   Future<void> preBuildConnection(String bucket) {
     return cosApi.preBuildConnection(bucket, serviceKey);
   }
 
-  Future<ListAllMyBuckets> getService() {
-    return cosApi.getService(serviceKey);
+  Future<ListAllMyBuckets> getService({SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.getService(serviceKey,sessionCredentials);
   }
 
   Future<BucketContents> getBucket(String bucket,
@@ -58,9 +58,10 @@ class CosService {
       String? delimiter,
       String? encodingType,
       String? marker,
-      int? maxKeys}) {
+      int? maxKeys,
+      SessionQCloudCredentials? sessionCredentials}) {
     return cosApi.getBucket(serviceKey, bucket, region, prefix, delimiter,
-        encodingType, marker, maxKeys);
+        encodingType, marker, maxKeys, sessionCredentials);
   }
 
   Future<void> putBucket(String bucket,
@@ -69,39 +70,39 @@ class CosService {
       String? cosacl,
       String? readAccount,
       String? writeAccount,
-      String? readWriteAccount}) {
+      String? readWriteAccount, SessionQCloudCredentials? sessionCredentials}) {
     return cosApi.putBucket(serviceKey, bucket, region, enableMAZ, cosacl,
-        readAccount, writeAccount, readWriteAccount);
+        readAccount, writeAccount, readWriteAccount, sessionCredentials);
   }
 
-  Future<Map<String?, String?>> headBucket(String bucket, {String? region}) {
-    return cosApi.headBucket(serviceKey, bucket, region);
+  Future<Map<String?, String?>> headBucket(String bucket, {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.headBucket(serviceKey, bucket, region, sessionCredentials);
   }
 
-  Future<void> deleteBucket(String bucket, {String? region}) {
-    return cosApi.deleteBucket(serviceKey, bucket, region);
+  Future<void> deleteBucket(String bucket, {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.deleteBucket(serviceKey, bucket, region, sessionCredentials);
   }
 
-  Future<bool> getBucketAccelerate(String bucket, {String? region}) {
-    return cosApi.getBucketAccelerate(serviceKey, bucket, region);
+  Future<bool> getBucketAccelerate(String bucket, {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.getBucketAccelerate(serviceKey, bucket, region, sessionCredentials);
   }
 
   Future<void> putBucketAccelerate(String bucket, bool enable,
-      {String? region}) {
-    return cosApi.putBucketAccelerate(serviceKey, bucket, region, enable);
+      {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.putBucketAccelerate(serviceKey, bucket, region, enable, sessionCredentials);
   }
 
-  Future<String> getBucketLocation(String bucket, {String? region}) {
-    return cosApi.getBucketLocation(serviceKey, bucket, region);
+  Future<String> getBucketLocation(String bucket, {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.getBucketLocation(serviceKey, bucket, region, sessionCredentials);
   }
 
-  Future<bool> getBucketVersioning(String bucket, {String? region}) {
-    return cosApi.getBucketVersioning(serviceKey, bucket, region);
+  Future<bool> getBucketVersioning(String bucket, {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.getBucketVersioning(serviceKey, bucket, region, sessionCredentials);
   }
 
   Future<void> putBucketVersioning(String bucket, bool enable,
-      {String? region}) {
-    return cosApi.putBucketVersioning(serviceKey, bucket, region, enable);
+      {String? region, SessionQCloudCredentials? sessionCredentials}) {
+    return cosApi.putBucketVersioning(serviceKey, bucket, region, enable, sessionCredentials);
   }
 
   Future<bool> doesBucketExist(String bucket) {

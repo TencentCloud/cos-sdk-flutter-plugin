@@ -10,6 +10,7 @@ import '../../common/constant.dart';
 import '../../common/toast_utils.dart';
 import '../common/DnsConfig.dart';
 import '../common/res/colors.dart';
+import '../cos/fetch_credentials.dart';
 import '../routers/delegate.dart';
 import '../../common/utils.dart';
 import 'object_entity.dart';
@@ -63,7 +64,9 @@ class _ObjectListPageState extends State<ObjectListPage> {
           widget.bucketName,
           prefix: widget.folderPath,
           delimiter: "/",
-          maxKeys: 100);
+          maxKeys: 100,
+          sessionCredentials: await FetchCredentials.getSessionCredentials()
+      );
       _isTruncated = bucketContents.isTruncated;
       _marker = bucketContents.nextMarker;
       setState(() {
@@ -93,7 +96,9 @@ class _ObjectListPageState extends State<ObjectListPage> {
           prefix: widget.folderPath,
           delimiter: "/",
           marker: _marker,
-          maxKeys: 100);
+          maxKeys: 100,
+          sessionCredentials: await FetchCredentials.getSessionCredentials()
+      );
       _isTruncated = bucketContents.isTruncated;
       _marker = bucketContents.nextMarker;
       if (mounted) {
@@ -230,7 +235,7 @@ class _ObjectListPageState extends State<ObjectListPage> {
                           EasyLoading.show(status: '正在删除...');
                           CosService cosService = await getCosService();
                           await cosService.deleteObject(widget.bucketName,
-                              objectEntity.getContent()!.key);
+                              objectEntity.getContent()!.key, sessionCredentials: await FetchCredentials.getSessionCredentials());
                           EasyLoading.showSuccess(
                               "${objectEntity.getContent()!.key}已删除");
                           _refreshController.requestRefresh();

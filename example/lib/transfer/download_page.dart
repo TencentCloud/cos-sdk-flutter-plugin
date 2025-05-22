@@ -11,6 +11,7 @@ import '../common/res/colors.dart';
 import '../common/res/gaps.dart';
 import '../common/toast_utils.dart';
 import '../common/utils.dart';
+import '../cos/fetch_credentials.dart';
 
 class DownloadPage extends StatefulWidget {
   final String bucketName;
@@ -191,7 +192,8 @@ class _DownloadPageState extends State<DownloadPage> {
             _target = target;
           });
         }
-      });
+      }, sessionCredentials: await FetchCredentials.getSessionCredentials()
+      );
     } catch (e) {
       Toast.show(e.toString());
       if (kDebugMode) {

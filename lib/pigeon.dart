@@ -1468,6 +1468,9 @@ class _CosServiceApiCodec extends StandardMessageCodec {
     } else if (value is Owner) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
+    } else if (value is SessionQCloudCredentials) {
+      buffer.putUint8(134);
+      writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
     }
@@ -1494,6 +1497,9 @@ class _CosServiceApiCodec extends StandardMessageCodec {
       case 133:       
         return Owner.decode(readValue(buffer)!);
       
+      case 134:       
+        return SessionQCloudCredentials.decode(readValue(buffer)!);
+      
       default:
 
         return super.readValueOfType(type, buffer);
@@ -1512,12 +1518,12 @@ class CosServiceApi {
 
   static const MessageCodec<Object?> codec = _CosServiceApiCodec();
 
-  Future<Map<String?, String?>> headObject(String arg_serviceKey, String arg_bucket, String? arg_region, String arg_cosPath, String? arg_versionId) async {
+  Future<Map<String?, String?>> headObject(String arg_serviceKey, String arg_bucket, String? arg_region, String arg_cosPath, String? arg_versionId, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.headObject', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_cosPath, arg_versionId]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_cosPath, arg_versionId, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1539,12 +1545,12 @@ class CosServiceApi {
     }
   }
 
-  Future<void> deleteObject(String arg_serviceKey, String arg_bucket, String? arg_region, String arg_cosPath, String? arg_versionId) async {
+  Future<void> deleteObject(String arg_serviceKey, String arg_bucket, String? arg_region, String arg_cosPath, String? arg_versionId, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.deleteObject', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_cosPath, arg_versionId]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_cosPath, arg_versionId, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1588,12 +1594,12 @@ class CosServiceApi {
     }
   }
 
-  Future<String> getPresignedUrl(String arg_serviceKey, String arg_bucket, String arg_cosPath, int? arg_signValidTime, bool? arg_signHost, Map<String?, String?>? arg_parameters, String? arg_region) async {
+  Future<String> getPresignedUrl(String arg_serviceKey, String arg_bucket, String arg_cosPath, int? arg_signValidTime, bool? arg_signHost, Map<String?, String?>? arg_parameters, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getPresignedUrl', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_cosPath, arg_signValidTime, arg_signHost, arg_parameters, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_cosPath, arg_signValidTime, arg_signHost, arg_parameters, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1637,12 +1643,12 @@ class CosServiceApi {
     }
   }
 
-  Future<ListAllMyBuckets> getService(String arg_serviceKey) async {
+  Future<ListAllMyBuckets> getService(String arg_serviceKey, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getService', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1664,12 +1670,12 @@ class CosServiceApi {
     }
   }
 
-  Future<BucketContents> getBucket(String arg_serviceKey, String arg_bucket, String? arg_region, String? arg_prefix, String? arg_delimiter, String? arg_encodingType, String? arg_marker, int? arg_maxKeys) async {
+  Future<BucketContents> getBucket(String arg_serviceKey, String arg_bucket, String? arg_region, String? arg_prefix, String? arg_delimiter, String? arg_encodingType, String? arg_marker, int? arg_maxKeys, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getBucket', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_prefix, arg_delimiter, arg_encodingType, arg_marker, arg_maxKeys]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_prefix, arg_delimiter, arg_encodingType, arg_marker, arg_maxKeys, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1691,12 +1697,12 @@ class CosServiceApi {
     }
   }
 
-  Future<void> putBucket(String arg_serviceKey, String arg_bucket, String? arg_region, bool? arg_enableMAZ, String? arg_cosacl, String? arg_readAccount, String? arg_writeAccount, String? arg_readWriteAccount) async {
+  Future<void> putBucket(String arg_serviceKey, String arg_bucket, String? arg_region, bool? arg_enableMAZ, String? arg_cosacl, String? arg_readAccount, String? arg_writeAccount, String? arg_readWriteAccount, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.putBucket', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enableMAZ, arg_cosacl, arg_readAccount, arg_writeAccount, arg_readWriteAccount]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enableMAZ, arg_cosacl, arg_readAccount, arg_writeAccount, arg_readWriteAccount, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1713,12 +1719,12 @@ class CosServiceApi {
     }
   }
 
-  Future<Map<String?, String?>> headBucket(String arg_serviceKey, String arg_bucket, String? arg_region) async {
+  Future<Map<String?, String?>> headBucket(String arg_serviceKey, String arg_bucket, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.headBucket', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1740,12 +1746,12 @@ class CosServiceApi {
     }
   }
 
-  Future<void> deleteBucket(String arg_serviceKey, String arg_bucket, String? arg_region) async {
+  Future<void> deleteBucket(String arg_serviceKey, String arg_bucket, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.deleteBucket', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1762,12 +1768,12 @@ class CosServiceApi {
     }
   }
 
-  Future<bool> getBucketAccelerate(String arg_serviceKey, String arg_bucket, String? arg_region) async {
+  Future<bool> getBucketAccelerate(String arg_serviceKey, String arg_bucket, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getBucketAccelerate', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1789,12 +1795,12 @@ class CosServiceApi {
     }
   }
 
-  Future<void> putBucketAccelerate(String arg_serviceKey, String arg_bucket, String? arg_region, bool arg_enable) async {
+  Future<void> putBucketAccelerate(String arg_serviceKey, String arg_bucket, String? arg_region, bool arg_enable, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.putBucketAccelerate', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enable]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enable, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1811,12 +1817,12 @@ class CosServiceApi {
     }
   }
 
-  Future<String> getBucketLocation(String arg_serviceKey, String arg_bucket, String? arg_region) async {
+  Future<String> getBucketLocation(String arg_serviceKey, String arg_bucket, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getBucketLocation', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1838,12 +1844,12 @@ class CosServiceApi {
     }
   }
 
-  Future<bool> getBucketVersioning(String arg_serviceKey, String arg_bucket, String? arg_region) async {
+  Future<bool> getBucketVersioning(String arg_serviceKey, String arg_bucket, String? arg_region, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.getBucketVersioning', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1865,12 +1871,12 @@ class CosServiceApi {
     }
   }
 
-  Future<void> putBucketVersioning(String arg_serviceKey, String arg_bucket, String? arg_region, bool arg_enable) async {
+  Future<void> putBucketVersioning(String arg_serviceKey, String arg_bucket, String? arg_region, bool arg_enable, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosServiceApi.putBucketVersioning', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enable]) as List<Object?>?;
+        await channel.send(<Object?>[arg_serviceKey, arg_bucket, arg_region, arg_enable, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1964,6 +1970,31 @@ class CosServiceApi {
   }
 }
 
+class _CosTransferApiCodec extends StandardMessageCodec {
+  const _CosTransferApiCodec();
+  @override
+  void writeValue(WriteBuffer buffer, Object? value) {
+    if (value is SessionQCloudCredentials) {
+      buffer.putUint8(128);
+      writeValue(buffer, value.encode());
+    } else {
+      super.writeValue(buffer, value);
+    }
+  }
+
+  @override
+  Object? readValueOfType(int type, ReadBuffer buffer) {
+    switch (type) {
+      case 128:       
+        return SessionQCloudCredentials.decode(readValue(buffer)!);
+      
+      default:
+
+        return super.readValueOfType(type, buffer);
+      
+    }
+  }
+}
 
 class CosTransferApi {
   /// Constructor for [CosTransferApi].  The [binaryMessenger] named argument is
@@ -1973,14 +2004,14 @@ class CosTransferApi {
       : _binaryMessenger = binaryMessenger;
   final BinaryMessenger? _binaryMessenger;
 
-  static const MessageCodec<Object?> codec = StandardMessageCodec();
+  static const MessageCodec<Object?> codec = _CosTransferApiCodec();
 
-  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, String? arg_callbackParam, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey) async {
+  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, String? arg_callbackParam, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosTransferApi.upload', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_callbackParam, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_callbackParam, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -2002,12 +2033,12 @@ class CosTransferApi {
     }
   }
 
-  Future<String> download(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String arg_savePath, String? arg_versionId, int? arg_trafficLimit, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey) async {
+  Future<String> download(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String arg_savePath, String? arg_versionId, int? arg_trafficLimit, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, SessionQCloudCredentials? arg_sessionCredentials) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosTransferApi.download', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_savePath, arg_versionId, arg_trafficLimit, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_savePath, arg_versionId, arg_trafficLimit, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_sessionCredentials]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',

@@ -8,6 +8,15 @@ import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import '../config/config.dart';
 
 class FetchCredentials implements IFetchCredentials{
+  static Future<SessionQCloudCredentials?> getSessionCredentials() async {
+    if(TestConst().USE_CREDENTIAL){
+      return null;
+    } else {
+      FetchCredentials fetchCredentials = FetchCredentials();
+      return await fetchCredentials.fetchSessionCredentials();
+    }
+  }
+
   @override
   Future<SessionQCloudCredentials> fetchSessionCredentials() async {
     var httpClient = HttpClient();

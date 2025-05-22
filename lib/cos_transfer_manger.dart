@@ -33,7 +33,7 @@ class CosTransferManger {
       ResultListener? resultListener,
       StateCallBack? stateCallback,
       ProgressCallBack? progressCallBack,
-      InitMultipleUploadCallback? initMultipleUploadCallback }) async {
+      InitMultipleUploadCallback? initMultipleUploadCallback,SessionQCloudCredentials? sessionCredentials, }) async {
     if (filePath == null && byteArr == null) {
       throw IllegalArgumentException("filePath or byteArr cannot be empty");
     }
@@ -59,7 +59,7 @@ class CosTransferManger {
         resultCallbackKey,
         stateCallbackKey,
         progressCallbackKey,
-        initMultipleUploadCallbackKey);
+        initMultipleUploadCallbackKey,sessionCredentials);
 
     return TransferTask(_transferKey, taskId, _transferApi);
   }
@@ -72,7 +72,7 @@ class CosTransferManger {
       List<String?>? noSignHeaders,
       ResultListener? resultListener,
       StateCallBack? stateCallback,
-      ProgressCallBack? progressCallBack}) async {
+      ProgressCallBack? progressCallBack ,SessionQCloudCredentials?sessionCredentials,}) async {
     int? resultCallbackKey = _addResultListener(resultListener);
     int? stateCallbackKey = _addStateCallBack(stateCallback);
     int? progressCallbackKey = _addProgressCallBack(progressCallBack);
@@ -89,7 +89,7 @@ class CosTransferManger {
         noSignHeaders,
         resultCallbackKey,
         stateCallbackKey,
-        progressCallbackKey);
+        progressCallbackKey,sessionCredentials);
 
     return TransferTask(_transferKey, taskId, _transferApi);
   }

@@ -8,6 +8,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../common/constant.dart';
 import '../common/toast_utils.dart';
 import '../common/utils.dart';
+import '../cos/fetch_credentials.dart';
 import '../routers/delegate.dart';
 
 class BucketListPage extends StatefulWidget {
@@ -29,7 +30,7 @@ class _BucketListPageState extends State<BucketListPage> {
   void _onRefresh() async {
     try {
       //cos 获取桶列表
-      ListAllMyBuckets listAllMyBuckets = await _defaultService.getService();
+      ListAllMyBuckets listAllMyBuckets = await _defaultService.getService(sessionCredentials: await FetchCredentials.getSessionCredentials());
       setState(() {
         _items.clear();
         _items.addAll(listAllMyBuckets.buckets);
