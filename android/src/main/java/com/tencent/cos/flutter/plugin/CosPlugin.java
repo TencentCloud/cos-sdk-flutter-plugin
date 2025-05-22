@@ -54,6 +54,10 @@ import com.tencent.cos.xml.transfer.TransferManager;
 import com.tencent.cos.xml.utils.DigestUtils;
 import com.tencent.qcloud.core.auth.QCloudCredentialProvider;
 import com.tencent.qcloud.core.auth.ShortTimeCredentialProvider;
+import com.tencent.qcloud.core.logger.COSLogger;
+import com.tencent.qcloud.core.logger.LogCategory;
+import com.tencent.qcloud.core.logger.LogLevel;
+import com.tencent.qcloud.core.logger.channel.CosLogListener;
 import com.tencent.qcloud.core.task.TaskExecutors;
 
 import java.net.InetAddress;
@@ -82,6 +86,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     private final Map<String, CosXmlService> cosServices = new HashMap<>();
     private final Map<String, TransferManager> transferManagers = new HashMap<>();
     private final Map<String, COSXMLTask> taskMap = new HashMap<>();
+    private final Map<Long, CosLogListener> cosLogListenerMap = new HashMap<>();
 
     private QCloudCredentialProvider qCloudCredentialProvider = null;
     private Map<String, List<String>> dnsMap = null;
@@ -229,6 +234,121 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                 });
             }
         });
+    }
+
+    @Override
+    public void enableLogcat(@NonNull Boolean enable) {
+        COSLogger.enableLogcat(enable);
+    }
+
+    @Override
+    public void enableLogFile(@NonNull Boolean enable) {
+        COSLogger.enableLogFile(enable);
+    }
+
+    @Override
+    public void addLogListener(@NonNull Long key) {
+        CosLogListener listener = entity -> {
+            runMainThread(() ->
+                    {
+                        Pigeon.LogEntity pigeonLogEntity = new Pigeon.LogEntity.Builder()
+                                .setTimestamp(entity.getTimestamp())
+                                .setLevel(toPigeonLogLevel(entity.getLevel()))
+                                .setCategory(toPigeonLogCategory(entity.getCategory()))
+                                .setTag(entity.getTag())
+                                .setMessage(entity.getMessage())
+                                .setThreadName(entity.getThreadName())
+                                .setExtras(entity.getExtras())
+                                .setThrowable(entity.getThrowable() == null ? null : entity.getThrowable().toString())
+                                .build();
+                        flutterCosApi.onLog(key, pigeonLogEntity, getVoidReply());
+                    }
+            );
+        };
+        cosLogListenerMap.put(key, listener);
+        COSLogger.addLogListener(listener);
+    }
+
+    @Override
+    public void removeLogListener(@NonNull Long key) {
+        cosLogListenerMap.remove(key);
+    }
+
+    @Override
+    public void setMinLevel(@NonNull Pigeon.LogLevel minLevel) {
+        COSLogger.setMinLevel(toLogLevel(minLevel));
+    }
+
+    @Override
+    public void setLogcatMinLevel(@NonNull Pigeon.LogLevel minLevel) {
+        COSLogger.setLogcatMinLevel(toLogLevel(minLevel));
+    }
+
+    @Override
+    public void setFileMinLevel(@NonNull Pigeon.LogLevel minLevel) {
+        COSLogger.setFileMinLevel(toLogLevel(minLevel));
+    }
+
+    @Override
+    public void setClsMinLevel(@NonNull Pigeon.LogLevel minLevel) {
+        COSLogger.setClsMinLevel(toLogLevel(minLevel));
+    }
+
+    @Override
+    public void setDeviceID(@NonNull String deviceID) {
+        COSLogger.setDeviceID(deviceID);
+    }
+
+    @Override
+    public void setDeviceModel(@NonNull String deviceModel) {
+        COSLogger.setDeviceModel(deviceModel);
+    }
+
+    @Override
+    public void setAppVersion(@NonNull String appVersion) {
+        COSLogger.setAppVersion(appVersion);
+    }
+
+    @Override
+    public void setExtras(@NonNull Map<String, String> extras) {
+        COSLogger.setExtras(extras);
+    }
+
+    @Override
+    public void setLogFileEncryptionKey(@NonNull byte[] key, @NonNull byte[] iv) {
+        COSLogger.setLogFileEncryptionKey(key, iv);
+    }
+
+    @NonNull
+    @Override
+    public String getLogRootDir() {
+        return COSLogger.getLogRootDir();
+    }
+
+    @Override
+    public void setCLsChannelAnonymous(@NonNull String topicId, @NonNull String endpoint) {
+        COSLogger.setCLsChannel(topicId, endpoint);
+    }
+
+    @Override
+    public void setCLsChannelStaticKey(@NonNull String topicId, @NonNull String endpoint, @NonNull String secretId, @NonNull String secretKey) {
+        COSLogger.setCLsChannel(topicId, endpoint, secretId, secretKey);
+    }
+
+    @Override
+    public void setCLsChannelSessionCredential(@NonNull String topicId, @NonNull String endpoint) {
+        BridgeClsLifecycleCredentialProvider bridgeClsLifecycleCredentialProvider = new BridgeClsLifecycleCredentialProvider(flutterCosApi);
+        COSLogger.setCLsChannel(topicId, endpoint, bridgeClsLifecycleCredentialProvider);
+    }
+
+    @Override
+    public void addSensitiveRule(@NonNull String ruleName, @NonNull String regex) {
+        COSLogger.addSensitiveRule(ruleName, regex);
+    }
+
+    @Override
+    public void removeSensitiveRule(@NonNull String ruleName) {
+        COSLogger.removeSensitiveRule(ruleName);
     }
 
     @Override
@@ -849,6 +969,23 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         if (config.getAccelerate() != null) {
             serviceConfigBuilder.setAccelerate(config.getAccelerate());
         }
+        if(config.getCustomHeaders() != null){
+            for (String key : config.getCustomHeaders().keySet()){
+                if(!TextUtils.isEmpty(key)){
+                    String value = config.getCustomHeaders().get(key);
+                    if(!TextUtils.isEmpty(value)){
+                        serviceConfigBuilder.addHeader(key, value);
+                    }
+                }
+            }
+        }
+        if(config.getNoSignHeaders() != null){
+            for (String key : config.getNoSignHeaders()){
+                if(!TextUtils.isEmpty(key)) {
+                    serviceConfigBuilder.addNoSignHeaders(key);
+                }
+            }
+        }
         if (!TextUtils.isEmpty(config.getUserAgent())) {
             serviceConfigBuilder.setUserAgentExtended(config.getUserAgent());
         } else {
@@ -948,6 +1085,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             @Nullable String stroageClass,
             @Nullable Long trafficLimit,
             @Nullable String callbackParam,
+            @Nullable Map<String, String> customHeaders,
+            @Nullable List<String> noSignHeaders,
             @Nullable Long resultCallbackKey,
             @Nullable Long stateCallbackKey,
             @Nullable Long progressCallbackKey,
@@ -976,6 +1115,21 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
                 request.setRequestHeaders("x-cos-callback", callbackBase64, false);
             } catch (Exception ignored){}
         }
+        if(customHeaders != null){
+            for (String key : customHeaders.keySet()){
+                if(!TextUtils.isEmpty(key)){
+                    try {
+                        request.setRequestHeaders(key, customHeaders.get(key), false);
+                    } catch (CosXmlClientException ignored) {
+                    }
+                }
+            }
+        }
+        if(noSignHeaders != null){
+            for (String key : noSignHeaders){
+                request.addNoSignHeader(key);
+            }
+        }
         COSXMLUploadTask task = transferManager.upload(request, uploadId);
         setTaskListener(task, transferKey, resultCallbackKey, stateCallbackKey, progressCallbackKey, InitMultipleUploadCallbackKey);
         String taskKey = String.valueOf(task.hashCode());
@@ -993,6 +1147,8 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             @NonNull String savePath,
             @Nullable String versionId,
             @Nullable Long trafficLimit,
+            @Nullable Map<String, String> customHeaders,
+            @Nullable List<String> noSignHeaders,
             @Nullable Long resultCallbackKey,
             @Nullable Long stateCallbackKey,
             @Nullable Long progressCallbackKey
@@ -1010,6 +1166,21 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         }
         if (trafficLimit != null) {
             request.setTrafficLimit(trafficLimit);
+        }
+        if(customHeaders != null){
+            for (String key : customHeaders.keySet()){
+                if(!TextUtils.isEmpty(key)){
+                    try {
+                        request.setRequestHeaders(key, customHeaders.get(key), false);
+                    } catch (CosXmlClientException ignored) {
+                    }
+                }
+            }
+        }
+        if(noSignHeaders != null){
+            for (String key : noSignHeaders){
+                request.addNoSignHeader(key);
+            }
         }
         COSXMLDownloadTask task = transferManager.download(context, request);
         setTaskListener(task, transferKey, resultCallbackKey, stateCallbackKey, progressCallbackKey, null);
@@ -1186,5 +1357,50 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     private Pigeon.FlutterCosApi.Reply<Void> getVoidReply() {
         return reply -> {
         };
+    }
+
+    private LogLevel toLogLevel(Pigeon.LogLevel logLevel) {
+        switch (logLevel){
+            case DEBUG:
+                return LogLevel.DEBUG;
+            case INFO:
+                return LogLevel.INFO;
+            case WARN:
+                return LogLevel.WARN;
+            case ERROR:
+                return LogLevel.ERROR;
+            default:
+                return LogLevel.VERBOSE;
+        }
+    }
+
+    private Pigeon.LogLevel toPigeonLogLevel(LogLevel logLevel) {
+        switch (logLevel){
+            case DEBUG:
+                return Pigeon.LogLevel.DEBUG;
+            case INFO:
+                return Pigeon.LogLevel.INFO;
+            case WARN:
+                return Pigeon.LogLevel.WARN;
+            case ERROR:
+                return Pigeon.LogLevel.ERROR;
+            default:
+                return Pigeon.LogLevel.VERBOSE;
+        }
+    }
+
+    private Pigeon.LogCategory toPigeonLogCategory(LogCategory logCategory) {
+        switch (logCategory){
+            case RESULT:
+                return Pigeon.LogCategory.RESULT;
+            case NETWORK:
+                return Pigeon.LogCategory.NETWORK;
+            case PROBE:
+                return Pigeon.LogCategory.PROBE;
+            case ERROR:
+                return Pigeon.LogCategory.ERROR;
+            default:
+                return Pigeon.LogCategory.PROCESS;
+         }
     }
 }

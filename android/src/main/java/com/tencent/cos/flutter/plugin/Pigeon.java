@@ -23,6 +23,33 @@ import java.util.HashMap;
 @SuppressWarnings({"unused", "unchecked", "CodeBlock2Expr", "RedundantSuppression"})
 public class Pigeon {
 
+  /** 日志级别枚举 */
+  public enum LogLevel {
+    VERBOSE(0),
+    DEBUG(1),
+    INFO(2),
+    WARN(3),
+    ERROR(4);
+
+    private final int index;
+    private LogLevel(final int index) {
+      this.index = index;
+    }
+  }
+
+  public enum LogCategory {
+    PROCESS(0),
+    RESULT(1),
+    NETWORK(2),
+    PROBE(3),
+    ERROR(4);
+
+    private final int index;
+    private LogCategory(final int index) {
+      this.index = index;
+    }
+  }
+
   /** Generated class from Pigeon that represents data sent in messages. */
   public static class CosXmlServiceConfig {
     private @Nullable String region;
@@ -103,6 +130,18 @@ public class Pigeon {
       this.domainSwitch = setterArg;
     }
 
+    private @Nullable Map<String, String> customHeaders;
+    public @Nullable Map<String, String> getCustomHeaders() { return customHeaders; }
+    public void setCustomHeaders(@Nullable Map<String, String> setterArg) {
+      this.customHeaders = setterArg;
+    }
+
+    private @Nullable List<String> noSignHeaders;
+    public @Nullable List<String> getNoSignHeaders() { return noSignHeaders; }
+    public void setNoSignHeaders(@Nullable List<String> setterArg) {
+      this.noSignHeaders = setterArg;
+    }
+
     public static final class Builder {
       private @Nullable String region;
       public @NonNull Builder setRegion(@Nullable String setterArg) {
@@ -169,6 +208,16 @@ public class Pigeon {
         this.domainSwitch = setterArg;
         return this;
       }
+      private @Nullable Map<String, String> customHeaders;
+      public @NonNull Builder setCustomHeaders(@Nullable Map<String, String> setterArg) {
+        this.customHeaders = setterArg;
+        return this;
+      }
+      private @Nullable List<String> noSignHeaders;
+      public @NonNull Builder setNoSignHeaders(@Nullable List<String> setterArg) {
+        this.noSignHeaders = setterArg;
+        return this;
+      }
       public @NonNull CosXmlServiceConfig build() {
         CosXmlServiceConfig pigeonReturn = new CosXmlServiceConfig();
         pigeonReturn.setRegion(region);
@@ -184,11 +233,13 @@ public class Pigeon {
         pigeonReturn.setDnsCache(dnsCache);
         pigeonReturn.setAccelerate(accelerate);
         pigeonReturn.setDomainSwitch(domainSwitch);
+        pigeonReturn.setCustomHeaders(customHeaders);
+        pigeonReturn.setNoSignHeaders(noSignHeaders);
         return pigeonReturn;
       }
     }
     @NonNull ArrayList<Object> toList() {
-      ArrayList<Object> toListResult = new ArrayList<Object>(13);
+      ArrayList<Object> toListResult = new ArrayList<Object>(15);
       toListResult.add(region);
       toListResult.add(connectionTimeout);
       toListResult.add(socketTimeout);
@@ -202,6 +253,8 @@ public class Pigeon {
       toListResult.add(dnsCache);
       toListResult.add(accelerate);
       toListResult.add(domainSwitch);
+      toListResult.add(customHeaders);
+      toListResult.add(noSignHeaders);
       return toListResult;
     }
     static @NonNull CosXmlServiceConfig fromList(@NonNull ArrayList<Object> list) {
@@ -232,6 +285,10 @@ public class Pigeon {
       pigeonResult.setAccelerate((Boolean)accelerate);
       Object domainSwitch = list.get(12);
       pigeonResult.setDomainSwitch((Boolean)domainSwitch);
+      Object customHeaders = list.get(13);
+      pigeonResult.setCustomHeaders((Map<String, String>)customHeaders);
+      Object noSignHeaders = list.get(14);
+      pigeonResult.setNoSignHeaders((List<String>)noSignHeaders);
       return pigeonResult;
     }
   }
@@ -943,6 +1000,164 @@ public class Pigeon {
   }
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static class LogEntity {
+    private @NonNull Long timestamp;
+    public @NonNull Long getTimestamp() { return timestamp; }
+    public void setTimestamp(@NonNull Long setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"timestamp\" is null.");
+      }
+      this.timestamp = setterArg;
+    }
+
+    private @NonNull LogLevel level;
+    public @NonNull LogLevel getLevel() { return level; }
+    public void setLevel(@NonNull LogLevel setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"level\" is null.");
+      }
+      this.level = setterArg;
+    }
+
+    private @NonNull LogCategory category;
+    public @NonNull LogCategory getCategory() { return category; }
+    public void setCategory(@NonNull LogCategory setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"category\" is null.");
+      }
+      this.category = setterArg;
+    }
+
+    private @NonNull String tag;
+    public @NonNull String getTag() { return tag; }
+    public void setTag(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"tag\" is null.");
+      }
+      this.tag = setterArg;
+    }
+
+    private @NonNull String message;
+    public @NonNull String getMessage() { return message; }
+    public void setMessage(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"message\" is null.");
+      }
+      this.message = setterArg;
+    }
+
+    private @NonNull String threadName;
+    public @NonNull String getThreadName() { return threadName; }
+    public void setThreadName(@NonNull String setterArg) {
+      if (setterArg == null) {
+        throw new IllegalStateException("Nonnull field \"threadName\" is null.");
+      }
+      this.threadName = setterArg;
+    }
+
+    private @Nullable Map<String, String> extras;
+    public @Nullable Map<String, String> getExtras() { return extras; }
+    public void setExtras(@Nullable Map<String, String> setterArg) {
+      this.extras = setterArg;
+    }
+
+    private @Nullable String throwable;
+    public @Nullable String getThrowable() { return throwable; }
+    public void setThrowable(@Nullable String setterArg) {
+      this.throwable = setterArg;
+    }
+
+    /**Constructor is private to enforce null safety; use Builder. */
+    private LogEntity() {}
+    public static final class Builder {
+      private @Nullable Long timestamp;
+      public @NonNull Builder setTimestamp(@NonNull Long setterArg) {
+        this.timestamp = setterArg;
+        return this;
+      }
+      private @Nullable LogLevel level;
+      public @NonNull Builder setLevel(@NonNull LogLevel setterArg) {
+        this.level = setterArg;
+        return this;
+      }
+      private @Nullable LogCategory category;
+      public @NonNull Builder setCategory(@NonNull LogCategory setterArg) {
+        this.category = setterArg;
+        return this;
+      }
+      private @Nullable String tag;
+      public @NonNull Builder setTag(@NonNull String setterArg) {
+        this.tag = setterArg;
+        return this;
+      }
+      private @Nullable String message;
+      public @NonNull Builder setMessage(@NonNull String setterArg) {
+        this.message = setterArg;
+        return this;
+      }
+      private @Nullable String threadName;
+      public @NonNull Builder setThreadName(@NonNull String setterArg) {
+        this.threadName = setterArg;
+        return this;
+      }
+      private @Nullable Map<String, String> extras;
+      public @NonNull Builder setExtras(@Nullable Map<String, String> setterArg) {
+        this.extras = setterArg;
+        return this;
+      }
+      private @Nullable String throwable;
+      public @NonNull Builder setThrowable(@Nullable String setterArg) {
+        this.throwable = setterArg;
+        return this;
+      }
+      public @NonNull LogEntity build() {
+        LogEntity pigeonReturn = new LogEntity();
+        pigeonReturn.setTimestamp(timestamp);
+        pigeonReturn.setLevel(level);
+        pigeonReturn.setCategory(category);
+        pigeonReturn.setTag(tag);
+        pigeonReturn.setMessage(message);
+        pigeonReturn.setThreadName(threadName);
+        pigeonReturn.setExtras(extras);
+        pigeonReturn.setThrowable(throwable);
+        return pigeonReturn;
+      }
+    }
+    @NonNull ArrayList<Object> toList() {
+      ArrayList<Object> toListResult = new ArrayList<Object>(8);
+      toListResult.add(timestamp);
+      toListResult.add(level == null ? null : level.index);
+      toListResult.add(category == null ? null : category.index);
+      toListResult.add(tag);
+      toListResult.add(message);
+      toListResult.add(threadName);
+      toListResult.add(extras);
+      toListResult.add(throwable);
+      return toListResult;
+    }
+    static @NonNull LogEntity fromList(@NonNull ArrayList<Object> list) {
+      LogEntity pigeonResult = new LogEntity();
+      Object timestamp = list.get(0);
+      pigeonResult.setTimestamp((timestamp == null) ? null : ((timestamp instanceof Integer) ? (Integer)timestamp : (Long)timestamp));
+      Object level = list.get(1);
+      pigeonResult.setLevel(level == null ? null : LogLevel.values()[(int)level]);
+      Object category = list.get(2);
+      pigeonResult.setCategory(category == null ? null : LogCategory.values()[(int)category]);
+      Object tag = list.get(3);
+      pigeonResult.setTag((String)tag);
+      Object message = list.get(4);
+      pigeonResult.setMessage((String)message);
+      Object threadName = list.get(5);
+      pigeonResult.setThreadName((String)threadName);
+      Object extras = list.get(6);
+      pigeonResult.setExtras((Map<String, String>)extras);
+      Object throwable = list.get(7);
+      pigeonResult.setThrowable((String)throwable);
+      return pigeonResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static class Bucket {
     /** 存储桶的名称 */
     private @NonNull String name;
@@ -1518,6 +1733,25 @@ public class Pigeon {
     void registerDefaultTransferManger(@NonNull CosXmlServiceConfig config, @Nullable TransferConfig transferConfig, Result<String> result);
     void registerService(@NonNull String key, @NonNull CosXmlServiceConfig config, Result<String> result);
     void registerTransferManger(@NonNull String key, @NonNull CosXmlServiceConfig config, @Nullable TransferConfig transferConfig, Result<String> result);
+    void enableLogcat(@NonNull Boolean enable);
+    void enableLogFile(@NonNull Boolean enable);
+    void addLogListener(@NonNull Long key);
+    void removeLogListener(@NonNull Long key);
+    void setMinLevel(@NonNull LogLevel minLevel);
+    void setLogcatMinLevel(@NonNull LogLevel minLevel);
+    void setFileMinLevel(@NonNull LogLevel minLevel);
+    void setClsMinLevel(@NonNull LogLevel minLevel);
+    void setDeviceID(@NonNull String deviceID);
+    void setDeviceModel(@NonNull String deviceModel);
+    void setAppVersion(@NonNull String appVersion);
+    void setExtras(@NonNull Map<String, String> extras);
+    void setLogFileEncryptionKey(@NonNull byte[] key, @NonNull byte[] iv);
+    @NonNull String getLogRootDir();
+    void setCLsChannelAnonymous(@NonNull String topicId, @NonNull String endpoint);
+    void setCLsChannelStaticKey(@NonNull String topicId, @NonNull String endpoint, @NonNull String secretId, @NonNull String secretKey);
+    void setCLsChannelSessionCredential(@NonNull String topicId, @NonNull String endpoint);
+    void addSensitiveRule(@NonNull String ruleName, @NonNull String regex);
+    void removeSensitiveRule(@NonNull String ruleName);
 
     /** The codec used by CosApi. */
     static MessageCodec<Object> getCodec() {
@@ -1831,6 +2065,522 @@ public class Pigeon {
               ArrayList<Object> wrappedError = wrapError(exception);
               reply.reply(wrappedError);
             }
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.enableLogcat", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Boolean enableArg = (Boolean)args.get(0);
+              if (enableArg == null) {
+                throw new NullPointerException("enableArg unexpectedly null.");
+              }
+              api.enableLogcat(enableArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.enableLogFile", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Boolean enableArg = (Boolean)args.get(0);
+              if (enableArg == null) {
+                throw new NullPointerException("enableArg unexpectedly null.");
+              }
+              api.enableLogFile(enableArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.addLogListener", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Number keyArg = (Number)args.get(0);
+              if (keyArg == null) {
+                throw new NullPointerException("keyArg unexpectedly null.");
+              }
+              api.addLogListener((keyArg == null) ? null : keyArg.longValue());
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.removeLogListener", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Number keyArg = (Number)args.get(0);
+              if (keyArg == null) {
+                throw new NullPointerException("keyArg unexpectedly null.");
+              }
+              api.removeLogListener((keyArg == null) ? null : keyArg.longValue());
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setMinLevel", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              LogLevel minLevelArg = args.get(0) == null ? null : LogLevel.values()[(int)args.get(0)];
+              if (minLevelArg == null) {
+                throw new NullPointerException("minLevelArg unexpectedly null.");
+              }
+              api.setMinLevel(minLevelArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setLogcatMinLevel", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              LogLevel minLevelArg = args.get(0) == null ? null : LogLevel.values()[(int)args.get(0)];
+              if (minLevelArg == null) {
+                throw new NullPointerException("minLevelArg unexpectedly null.");
+              }
+              api.setLogcatMinLevel(minLevelArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setFileMinLevel", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              LogLevel minLevelArg = args.get(0) == null ? null : LogLevel.values()[(int)args.get(0)];
+              if (minLevelArg == null) {
+                throw new NullPointerException("minLevelArg unexpectedly null.");
+              }
+              api.setFileMinLevel(minLevelArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setClsMinLevel", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              LogLevel minLevelArg = args.get(0) == null ? null : LogLevel.values()[(int)args.get(0)];
+              if (minLevelArg == null) {
+                throw new NullPointerException("minLevelArg unexpectedly null.");
+              }
+              api.setClsMinLevel(minLevelArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setDeviceID", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String deviceIDArg = (String)args.get(0);
+              if (deviceIDArg == null) {
+                throw new NullPointerException("deviceIDArg unexpectedly null.");
+              }
+              api.setDeviceID(deviceIDArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setDeviceModel", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String deviceModelArg = (String)args.get(0);
+              if (deviceModelArg == null) {
+                throw new NullPointerException("deviceModelArg unexpectedly null.");
+              }
+              api.setDeviceModel(deviceModelArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setAppVersion", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String appVersionArg = (String)args.get(0);
+              if (appVersionArg == null) {
+                throw new NullPointerException("appVersionArg unexpectedly null.");
+              }
+              api.setAppVersion(appVersionArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setExtras", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              Map<String, String> extrasArg = (Map<String, String>)args.get(0);
+              if (extrasArg == null) {
+                throw new NullPointerException("extrasArg unexpectedly null.");
+              }
+              api.setExtras(extrasArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setLogFileEncryptionKey", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              byte[] keyArg = (byte[])args.get(0);
+              if (keyArg == null) {
+                throw new NullPointerException("keyArg unexpectedly null.");
+              }
+              byte[] ivArg = (byte[])args.get(1);
+              if (ivArg == null) {
+                throw new NullPointerException("ivArg unexpectedly null.");
+              }
+              api.setLogFileEncryptionKey(keyArg, ivArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.getLogRootDir", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              String output = api.getLogRootDir();
+              wrapped.add(0, output);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setCLsChannelAnonymous", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String topicIdArg = (String)args.get(0);
+              if (topicIdArg == null) {
+                throw new NullPointerException("topicIdArg unexpectedly null.");
+              }
+              String endpointArg = (String)args.get(1);
+              if (endpointArg == null) {
+                throw new NullPointerException("endpointArg unexpectedly null.");
+              }
+              api.setCLsChannelAnonymous(topicIdArg, endpointArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setCLsChannelStaticKey", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String topicIdArg = (String)args.get(0);
+              if (topicIdArg == null) {
+                throw new NullPointerException("topicIdArg unexpectedly null.");
+              }
+              String endpointArg = (String)args.get(1);
+              if (endpointArg == null) {
+                throw new NullPointerException("endpointArg unexpectedly null.");
+              }
+              String secretIdArg = (String)args.get(2);
+              if (secretIdArg == null) {
+                throw new NullPointerException("secretIdArg unexpectedly null.");
+              }
+              String secretKeyArg = (String)args.get(3);
+              if (secretKeyArg == null) {
+                throw new NullPointerException("secretKeyArg unexpectedly null.");
+              }
+              api.setCLsChannelStaticKey(topicIdArg, endpointArg, secretIdArg, secretKeyArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.setCLsChannelSessionCredential", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String topicIdArg = (String)args.get(0);
+              if (topicIdArg == null) {
+                throw new NullPointerException("topicIdArg unexpectedly null.");
+              }
+              String endpointArg = (String)args.get(1);
+              if (endpointArg == null) {
+                throw new NullPointerException("endpointArg unexpectedly null.");
+              }
+              api.setCLsChannelSessionCredential(topicIdArg, endpointArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.addSensitiveRule", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String ruleNameArg = (String)args.get(0);
+              if (ruleNameArg == null) {
+                throw new NullPointerException("ruleNameArg unexpectedly null.");
+              }
+              String regexArg = (String)args.get(1);
+              if (regexArg == null) {
+                throw new NullPointerException("regexArg unexpectedly null.");
+              }
+              api.addSensitiveRule(ruleNameArg, regexArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
+          });
+        } else {
+          channel.setMessageHandler(null);
+        }
+      }
+      {
+        BasicMessageChannel<Object> channel =
+            new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.CosApi.removeSensitiveRule", getCodec());
+        if (api != null) {
+          channel.setMessageHandler((message, reply) -> {
+            ArrayList wrapped = new ArrayList<>();
+            try {
+              ArrayList<Object> args = (ArrayList<Object>)message;
+              assert args != null;
+              String ruleNameArg = (String)args.get(0);
+              if (ruleNameArg == null) {
+                throw new NullPointerException("ruleNameArg unexpectedly null.");
+              }
+              api.removeSensitiveRule(ruleNameArg);
+              wrapped.add(0, null);
+            }
+            catch (Error | RuntimeException exception) {
+              ArrayList<Object> wrappedError = wrapError(exception);
+              wrapped = wrappedError;
+            }
+            reply.reply(wrapped);
           });
         } else {
           channel.setMessageHandler(null);
@@ -2664,8 +3414,8 @@ public class Pigeon {
   }
   /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
   public interface CosTransferApi {
-    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable String callbackParam, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey);
-    @NonNull String download(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @NonNull String savePath, @Nullable String versionId, @Nullable Long trafficLimit, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey);
+    @NonNull String upload(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @Nullable String filePath, @Nullable byte[] byteArr, @Nullable String uploadId, @Nullable String stroageClass, @Nullable Long trafficLimit, @Nullable String callbackParam, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey, @Nullable Long initMultipleUploadCallbackKey);
+    @NonNull String download(@NonNull String transferKey, @NonNull String bucket, @NonNull String cosPath, @Nullable String region, @NonNull String savePath, @Nullable String versionId, @Nullable Long trafficLimit, @Nullable Map<String, String> customHeaders, @Nullable List<String> noSignHeaders, @Nullable Long resultCallbackKey, @Nullable Long stateCallbackKey, @Nullable Long progressCallbackKey);
     void pause(@NonNull String taskId, @NonNull String transferKey);
     void resume(@NonNull String taskId, @NonNull String transferKey);
     void cancel(@NonNull String taskId, @NonNull String transferKey);
@@ -2703,11 +3453,13 @@ public class Pigeon {
               String stroageClassArg = (String)args.get(7);
               Number trafficLimitArg = (Number)args.get(8);
               String callbackParamArg = (String)args.get(9);
-              Number resultCallbackKeyArg = (Number)args.get(10);
-              Number stateCallbackKeyArg = (Number)args.get(11);
-              Number progressCallbackKeyArg = (Number)args.get(12);
-              Number initMultipleUploadCallbackKeyArg = (Number)args.get(13);
-              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), callbackParamArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue());
+              Map<String, String> customHeadersArg = (Map<String, String>)args.get(10);
+              List<String> noSignHeadersArg = (List<String>)args.get(11);
+              Number resultCallbackKeyArg = (Number)args.get(12);
+              Number stateCallbackKeyArg = (Number)args.get(13);
+              Number progressCallbackKeyArg = (Number)args.get(14);
+              Number initMultipleUploadCallbackKeyArg = (Number)args.get(15);
+              String output = api.upload(transferKeyArg, bucketArg, cosPathArg, regionArg, filePathArg, byteArrArg, uploadIdArg, stroageClassArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), callbackParamArg, customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue(), (initMultipleUploadCallbackKeyArg == null) ? null : initMultipleUploadCallbackKeyArg.longValue());
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {
@@ -2748,10 +3500,12 @@ public class Pigeon {
               }
               String versionIdArg = (String)args.get(5);
               Number trafficLimitArg = (Number)args.get(6);
-              Number resultCallbackKeyArg = (Number)args.get(7);
-              Number stateCallbackKeyArg = (Number)args.get(8);
-              Number progressCallbackKeyArg = (Number)args.get(9);
-              String output = api.download(transferKeyArg, bucketArg, cosPathArg, regionArg, savePathArg, versionIdArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue());
+              Map<String, String> customHeadersArg = (Map<String, String>)args.get(7);
+              List<String> noSignHeadersArg = (List<String>)args.get(8);
+              Number resultCallbackKeyArg = (Number)args.get(9);
+              Number stateCallbackKeyArg = (Number)args.get(10);
+              Number progressCallbackKeyArg = (Number)args.get(11);
+              String output = api.download(transferKeyArg, bucketArg, cosPathArg, regionArg, savePathArg, versionIdArg, (trafficLimitArg == null) ? null : trafficLimitArg.longValue(), customHeadersArg, noSignHeadersArg, (resultCallbackKeyArg == null) ? null : resultCallbackKeyArg.longValue(), (stateCallbackKeyArg == null) ? null : stateCallbackKeyArg.longValue(), (progressCallbackKeyArg == null) ? null : progressCallbackKeyArg.longValue());
               wrapped.add(0, output);
             }
             catch (Error | RuntimeException exception) {
@@ -2878,9 +3632,12 @@ public class Pigeon {
           return CosXmlServiceException.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)133:         
-          return STSCredentialScope.fromList((ArrayList<Object>) readValue(buffer));
+          return LogEntity.fromList((ArrayList<Object>) readValue(buffer));
         
         case (byte)134:         
+          return STSCredentialScope.fromList((ArrayList<Object>) readValue(buffer));
+        
+        case (byte)135:         
           return SessionQCloudCredentials.fromList((ArrayList<Object>) readValue(buffer));
         
         default:        
@@ -2910,12 +3667,16 @@ public class Pigeon {
         stream.write(132);
         writeValue(stream, ((CosXmlServiceException) value).toList());
       } else 
-      if (value instanceof STSCredentialScope) {
+      if (value instanceof LogEntity) {
         stream.write(133);
+        writeValue(stream, ((LogEntity) value).toList());
+      } else 
+      if (value instanceof STSCredentialScope) {
+        stream.write(134);
         writeValue(stream, ((STSCredentialScope) value).toList());
       } else 
       if (value instanceof SessionQCloudCredentials) {
-        stream.write(134);
+        stream.write(135);
         writeValue(stream, ((SessionQCloudCredentials) value).toList());
       } else 
 {
@@ -3002,6 +3763,22 @@ public class Pigeon {
           new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.initMultipleUploadCallback", getCodec());
       channel.send(new ArrayList<Object>(Arrays.asList(transferKeyArg, keyArg, bucketArg, cosKeyArg, uploadIdArg)), channelReply -> {
         callback.reply(null);
+      });
+    }
+    public void onLog(@NonNull Long keyArg, @NonNull LogEntity entityArg, Reply<Void> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.onLog", getCodec());
+      channel.send(new ArrayList<Object>(Arrays.asList(keyArg, entityArg)), channelReply -> {
+        callback.reply(null);
+      });
+    }
+    public void fetchClsSessionCredentials(Reply<SessionQCloudCredentials> callback) {
+      BasicMessageChannel<Object> channel =
+          new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterCosApi.fetchClsSessionCredentials", getCodec());
+      channel.send(null, channelReply -> {
+        @SuppressWarnings("ConstantConditions")
+        SessionQCloudCredentials output = (SessionQCloudCredentials)channelReply;
+        callback.reply(output);
       });
     }
   }

@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'tencentcloud_cos_sdk_plugin'
-  s.version          = '1.2.0'
+  s.version          = '1.2.3'
   s.summary          = 'Tencent COS Flutter Plugin SDK.'
   s.description      = <<-DESC
 Tencent COS Flutter Plugin SDK.
@@ -17,8 +17,8 @@ Tencent COS Flutter Plugin SDK.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'QCloudCOSXML','6.4.5'
-  s.platform = :ios, '9.0'
+  s.dependency 'QCloudCOSXML','6.4.7'
+  s.platform = :ios, '10.0'
   s.static_framework = true
 
   # Flutter.framework does not contain a i386 slice.

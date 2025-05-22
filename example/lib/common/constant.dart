@@ -44,5 +44,7 @@ class Constant {
   static CosXmlServiceConfig serviceConfig = CosXmlServiceConfig(
     region: TestConst().PERSIST_BUCKET_REGION,
     isDebuggable: true,
+    customHeaders: {"x-cos-meta-g1":"g1","x-cos-meta-g2":"g2"},
+    // noSignHeaders: ["Host"],
   );
 }

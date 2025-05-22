@@ -290,13 +290,15 @@ class _TestPageState extends State<TestPage> {
               textColor: Colors.white,
               onPressed: () async {
                 // 存储桶名称，由bucketname-appid 组成，appid必须填入，可以在COS控制台查看存储桶名称。 https://console.cloud.tencent.com/cos5/bucket
-                String bucket = "000000-1253960454";
+                String bucket = "0-a-1253960454";
                 // 对象在存储桶中的位置标识符，即对象键
-                String cosKey = "1.txt";
+                String cosKey = "sentences/Cambridge_IELTS_Series/0+Cambridge A16~IETLS_A16_T1_Part_2.mp3";
+                // String cosKey = "sentences/Cambridge_IELTS_Series/aaa.mp3";
+                // String cosKey = "test1.png";
                 try {
                   HashMap<String, String> parameters = HashMap();
-                  parameters["test1k"] = "test1v";
-                  parameters["test2k"] = "test2v";
+                  // parameters["test1k"] = "test1v";
+                  // parameters["test2k"] = "test2v";
                   String objectUrl = await Cos().getDefaultService().getPresignedUrl(bucket, cosKey, signValidTime: 500, signHost: false, parameters: parameters);
                   if (kDebugMode) {
                     print(objectUrl);

@@ -27,8 +27,47 @@ abstract class CosApi {
   String registerService(String key, CosXmlServiceConfig config);
 
   @async
-  String registerTransferManger(String key, CosXmlServiceConfig config,
-      TransferConfig? transferConfig);
+  String registerTransferManger(
+      String key, CosXmlServiceConfig config, TransferConfig? transferConfig);
+
+  void enableLogcat(bool enable);
+
+  void enableLogFile(bool enable);
+
+  void addLogListener(int key);
+
+  void removeLogListener(int key);
+
+  void setMinLevel(LogLevel minLevel);
+
+  void setLogcatMinLevel(LogLevel minLevel);
+
+  void setFileMinLevel(LogLevel minLevel);
+
+  void setClsMinLevel(LogLevel minLevel);
+
+  void setDeviceID(String deviceID);
+
+  void setDeviceModel(String deviceModel);
+
+  void setAppVersion(String appVersion);
+
+  void setExtras(Map<String, String> extras);
+
+  void setLogFileEncryptionKey(Uint8List key, Uint8List iv);
+
+  String getLogRootDir();
+
+  void setCLsChannelAnonymous(String topicId, String endpoint);
+
+  void setCLsChannelStaticKey(
+      String topicId, String endpoint, String secretId, String secretKey);
+
+  void setCLsChannelSessionCredential(String topicId, String endpoint);
+
+  void addSensitiveRule(String ruleName, String regex);
+
+  void removeSensitiveRule(String ruleName);
 }
 
 @HostApi()
@@ -52,8 +91,7 @@ abstract class CosServiceApi {
       int? signValidTime,
       bool? signHost,
       Map<String?, String?>? parameters,
-      String? region
-  );
+      String? region);
 
   @async
   void preBuildConnection(String bucket, String serviceKey);
@@ -88,36 +126,30 @@ abstract class CosServiceApi {
       String serviceKey, String bucket, String? region);
 
   @async
-  void deleteBucket(
-      String serviceKey, String bucket, String? region);
+  void deleteBucket(String serviceKey, String bucket, String? region);
 
   @async
-  bool getBucketAccelerate(
-      String serviceKey, String bucket, String? region);
+  bool getBucketAccelerate(String serviceKey, String bucket, String? region);
 
   @async
   void putBucketAccelerate(
       String serviceKey, String bucket, String? region, bool enable);
 
   @async
-  String getBucketLocation(
-      String serviceKey, String bucket, String? region);
+  String getBucketLocation(String serviceKey, String bucket, String? region);
 
   @async
-  bool getBucketVersioning(
-      String serviceKey, String bucket, String? region);
+  bool getBucketVersioning(String serviceKey, String bucket, String? region);
 
   @async
   void putBucketVersioning(
       String serviceKey, String bucket, String? region, bool enable);
 
   @async
-  bool doesBucketExist(
-      String serviceKey, String bucket);
+  bool doesBucketExist(String serviceKey, String bucket);
 
   @async
-  bool doesObjectExist(
-      String serviceKey, String bucket, String cosPath);
+  bool doesObjectExist(String serviceKey, String bucket, String cosPath);
 
   void cancelAll(String serviceKey);
 }
@@ -135,6 +167,8 @@ abstract class CosTransferApi {
     String? stroageClass,
     int? trafficLimit,
     String? callbackParam,
+    Map<String, String>? customHeaders,
+    List<String?>? noSignHeaders,
     int? resultCallbackKey,
     int? stateCallbackKey,
     int? progressCallbackKey,
@@ -149,6 +183,8 @@ abstract class CosTransferApi {
     String savePath,
     String? versionId,
     int? trafficLimit,
+    Map<String, String>? customHeaders,
+    List<String?>? noSignHeaders,
     int? resultCallbackKey,
     int? stateCallbackKey,
     int? progressCallbackKey,
@@ -167,7 +203,8 @@ abstract class FlutterCosApi {
   SessionQCloudCredentials fetchSessionCredentials();
 
   @async
-  SessionQCloudCredentials fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
+  SessionQCloudCredentials fetchScopeLimitCredentials(
+      List<STSCredentialScope?> stsCredentialScopes);
 
   /// 获取dns记录
   /// @param domain 域名
@@ -175,8 +212,8 @@ abstract class FlutterCosApi {
   @async
   List<String>? fetchDns(String domain);
 
-  void resultSuccessCallback(
-      String transferKey, int key, Map<String?, String?>? header, CosXmlResult? result);
+  void resultSuccessCallback(String transferKey, int key,
+      Map<String?, String?>? header, CosXmlResult? result);
 
   void resultFailCallback(
       String transferKey,
@@ -188,7 +225,13 @@ abstract class FlutterCosApi {
 
   void progressCallback(String transferKey, int key, int complete, int target);
 
-  void initMultipleUploadCallback(String transferKey, int key, String bucket, String cosKey, String uploadId);
+  void initMultipleUploadCallback(String transferKey, int key, String bucket,
+      String cosKey, String uploadId);
+
+  void onLog(int key, LogEntity entity);
+
+  @async
+  SessionQCloudCredentials fetchClsSessionCredentials();
 }
 
 class CosXmlServiceConfig {
@@ -205,7 +248,8 @@ class CosXmlServiceConfig {
   bool? dnsCache;
   bool? accelerate;
   bool? domainSwitch;
-//重试
+  Map<String?, String?>? customHeaders;
+  List<String?>? noSignHeaders;
 }
 
 class TransferConfig {
@@ -235,17 +279,22 @@ class CosXmlResult {
   late String? accessUrl;
   late CallbackResult? callbackResult;
 }
+
 class CallbackResult {
   /// Callback 是否成功。枚举值，支持 200、203。200表示上传成功、回调成功；203表示上传成功，回调失败
   late int status;
+
   /// Status为200时，说明上传成功、回调成功，返回 CallbackBody
   late String? callbackBody;
+
   /// Status为203时，说明Callback，返回 Error，说明回调失败信息
   late CallbackResultError? error;
 }
+
 class CallbackResultError {
   /// 回调失败信息的错误码，例如CallbackFailed
   late String? code;
+
   /// Callback 失败的错误信息
   late String? message;
 }
@@ -272,6 +321,37 @@ class Owner {
 
   /// 存储桶持有者的名字
   late String? disPlayName;
+}
+
+/// 日志级别枚举
+enum LogLevel { verbose, debug, info, warn, error }
+
+enum LogCategory { process, result, network, probe, error }
+
+class LogEntity {
+  // 日志时间戳（毫秒）
+  late int timestamp;
+
+  // 日志级别
+  late LogLevel level;
+
+  // 日志分类
+  late LogCategory category;
+
+  // 日志标签
+  late String tag;
+
+  // 日志消息内容
+  late String message;
+
+  // 记录日志的线程名称
+  late String threadName;
+
+  // 额外信息（可选）
+  late Map<String?, String?>? extras;
+
+  // 异常信息（可选）
+  late String? throwable;
 }
 
 class Bucket {

@@ -114,4 +114,14 @@ class ImplFlutterCosApi extends FlutterCosApi{
     }
     return jsonEncode(scopeList);
   }
+
+  @override
+  Future<SessionQCloudCredentials> fetchClsSessionCredentials() {
+    return Cos().getFetchCLsChannelCredentials().fetchCLsChannelSessionCredentials();
+  }
+
+  @override
+  void onLog(int key, LogEntity entity) {
+    Cos().getLogListeners()[key]?.call(entity);
+  }
 }

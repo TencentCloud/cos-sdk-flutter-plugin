@@ -95,3 +95,36 @@ class FetchScopeLimitCredentials implements IFetchScopeLimitCredentials{
   }
 }
 
+
+class CLSFetchCLsChannelCredentials implements IFetchCLsChannelCredentials{
+
+  @override
+  Future<SessionQCloudCredentials> fetchCLsChannelSessionCredentials() async {
+    var httpClient = HttpClient();
+    try {
+      var request = await httpClient.postUrl(Uri.parse(TestConst().CLS_CREDENTIAL_URL));
+
+      var response = await request.close();
+      if (response.statusCode == HttpStatus.OK) {
+        var json = await response.transform(utf8.decoder).join();
+        if (kDebugMode) {
+          print(json);
+        }
+        var data = jsonDecode(json);
+        return SessionQCloudCredentials(
+            secretId: data['credentials']['tmpSecretId'],
+            secretKey: data['credentials']['tmpSecretKey'],
+            token: data['credentials']['sessionToken'],
+            expiredTime: data['expiredTime']
+        );
+      } else {
+        throw ArgumentError();
+      }
+    } catch (exception) {
+      if (kDebugMode) {
+        print(exception);
+      }
+      throw ArgumentError();
+    }
+  }
+}

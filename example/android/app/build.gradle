@@ -44,6 +44,7 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -56,6 +57,12 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    implementation 'com.tencentcloudapi.cls:tencentcloud-cls-sdk-android:1.0.5'
+    implementation 'com.google.guava:guava:27.0.1-android'
+
 }
 
 flutter {

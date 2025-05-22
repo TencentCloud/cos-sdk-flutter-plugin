@@ -7,11 +7,72 @@
 #import <objc/runtime.h>
 #import "QCloudHttpDNS.h"
 #import "QCloudThreadSafeMutableDictionary.h"
-
+#import "QCloudCore/QCloudLogger.h"
+#import "QCloudCore/QCloudLogModel.h"
+#import "QCloudCore/QCloudCLSLoggerOutput.h"
+#import "QCloudCore/QCloudCustomLoggerOutput.h"
 static void *kQCloudDownloadRequestResultCallbackKey = &kQCloudDownloadRequestResultCallbackKey;
 static void *kQCloudDownloadRequestProgressCallbackKey = &kQCloudDownloadRequestProgressCallbackKey;
 static void *kQCloudDownloadRequestStateCallbackKey = &kQCloudDownloadRequestStateCallbackKey;
 static void *kQCloudDownloadRequestLocalDownloaded = &kQCloudDownloadRequestLocalDownloaded;
+
+@class QCloudLoggerCallBackOutput;
+@implementation QCloudServiceConfiguration (Headers)
+
++ (void)load{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Class class = [self class];
+        
+        SEL originalSelector = @selector(copyWithZone:);
+        SEL swizzledSelector = @selector(swizzled_copyWithZone:);
+        
+        Method originalMethod = class_getInstanceMethod(class, originalSelector);
+        Method swizzledMethod = class_getInstanceMethod(class, swizzledSelector);
+        
+        if (!originalMethod) {
+            NSLog(@"Original method copyWithZone: not found!");
+            return;
+        }
+        
+        BOOL didAddMethod = class_addMethod(class,
+                                            originalSelector,
+                                            method_getImplementation(swizzledMethod),
+                                            method_getTypeEncoding(swizzledMethod));
+        if (didAddMethod) {
+            class_replaceMethod(class,
+                                swizzledSelector,
+                                method_getImplementation(originalMethod),
+                                method_getTypeEncoding(originalMethod));
+        } else {
+            method_exchangeImplementations(originalMethod, swizzledMethod);
+        }
+    });
+}
+
+- (instancetype)swizzled_copyWithZone:(NSZone *)zone{
+    QCloudServiceConfiguration *config = [self swizzled_copyWithZone:zone];
+    config.customHeaders = self.customHeaders;
+    config.noSignHeaders = self.noSignHeaders;
+    return config;
+}
+
+- (void)setCustomHeaders:(NSDictionary *)customHeaders{
+    objc_setAssociatedObject(self, @"customHeaders", customHeaders, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+- (NSDictionary *)customHeaders {
+    return objc_getAssociatedObject(self, @"customHeaders");
+}
+
+- (void)setNoSignHeaders:(NSArray *)noSignHeaders{
+    objc_setAssociatedObject(self, @"noSignHeaders", noSignHeaders, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (NSArray *)noSignHeaders{
+    return objc_getAssociatedObject(self, @"noSignHeaders");
+}
+@end
+
 @implementation QCloudCOSXMLDownloadObjectRequest (DownloadObjectRequestExt)
 
 - (void)setStateCallbackKey:(NSNumber *)stateCallbackKey {
@@ -105,6 +166,8 @@ static void *kQCloudUploadRequestResmeData = &kQCloudUploadRequestResmeData;
     bool isScopeLimitCredential;
     bool isFetchDns;
 }
+
+@property (nonatomic,strong)NSMutableDictionary * logCallbackMap;
 @end
 
 @implementation CosPlugin
@@ -149,6 +212,14 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     flutterCosApi = [[FlutterCosApi new] initWithBinaryMessenger:[registrar messenger]];
 }
 
+
+- (NSMutableDictionary *)logCallbackMap{
+    if (!_logCallbackMap) {
+        _logCallbackMap = [NSMutableDictionary new];
+    }
+    return _logCallbackMap;
+}
+
 -(nonnull QCloudServiceConfiguration *)buildConfiguration:(nonnull CosXmlServiceConfig *)config{
     QCloudServiceConfiguration* configuration = [QCloudServiceConfiguration new];
     configuration.bridge = QCloudCOS_BRIDGE;
@@ -178,6 +249,8 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     if(config.accelerate && [config.accelerate boolValue]){
         endpoint.suffix = @"cos.accelerate.myqcloud.com";
     }
+    configuration.customHeaders = config.customHeaders;
+    configuration.noSignHeaders = config.noSignHeaders;
     // todo iOS不支持：HostFormat、SocketTimeout、port、IsDebuggable、SignInUrl、DnsCache、
     configuration.endpoint = endpoint;
     configuration.signatureProvider = signatureProvider;
@@ -634,7 +707,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
 }
 
 
-- (nullable NSString *)downloadTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region savePath:(nonnull NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)downloadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region savePath:(NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError *_Nullable *_Nonnull)error {
     return [self downloadInternalTransferKey:transferKey
                                       bucket:bucket
                                      cosPath:cosPath
@@ -642,6 +715,8 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                                     savePath:savePath
                                    versionId:versionId
                                 trafficLimit:trafficLimit
+                               customHeaders:customHeaders
+                               noSignHeaders:noSignHeaders
                            resultCallbackKey:resultCallbackKey
                             stateCallbackKey:stateCallbackKey
                          progressCallbackKey:progressCallbackKey
@@ -649,10 +724,15 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                                        error:error];
 }
 
-- (nullable NSString *)downloadInternalTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region savePath:(nonnull NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)downloadInternalTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region savePath:(nonnull NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     QCloudCOSTransferMangerService * transferManger = [self getQCloudCOSTransferMangerService:transferKey];
     QCloudCOSXMLDownloadObjectRequest *getObjectRequest = [[QCloudCOSXMLDownloadObjectRequest alloc] init];
+    getObjectRequest.resumeLocalProcess = YES;
     //支持断点下载
+    [getObjectRequest.customHeaders addEntriesFromDictionary:customHeaders];
+    if (noSignHeaders) {
+        getObjectRequest.payload = @{@"noSignHeaders":noSignHeaders};
+    }
     getObjectRequest.resumableDownload = true;
     getObjectRequest.bucket = bucket;
     getObjectRequest.object = cosPath;
@@ -668,7 +748,6 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }
     
     long long saveFileSize = [self fileSizeAtPath:savePath];
-    getObjectRequest.localDownloaded = [NSNumber numberWithLongLong:saveFileSize];
     
     getObjectRequest.resultCallbackKey = resultCallbackKey;
     getObjectRequest.progressCallbackKey = progressCallbackKey;
@@ -724,8 +803,8 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
         if(progressCallbackKey){
             [flutterCosApi progressCallbackTransferKey:transferKey
                                                    key:progressCallbackKey
-                                              complete:[NSNumber numberWithLongLong:((long long)totalBytesDownload + [getObjectRequest.localDownloaded longLongValue])]
-                                                target:[NSNumber numberWithLongLong:((long long)totalBytesExpectedToDownload + [getObjectRequest.localDownloaded longLongValue])]
+                                              complete:[NSNumber numberWithLongLong:((long long)totalBytesDownload)]
+                                                target:[NSNumber numberWithLongLong:((long long)totalBytesExpectedToDownload)]
                                             completion:^(NSError *_Nullable error) {}
             ];
         }
@@ -781,6 +860,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                    stroageClass:QCloudCOSStorageClassTransferToString([put storageClass])
                    trafficLimit:[NSNumber numberWithInteger:[put trafficLimit]]
                           callbackParam:[put customHeaders][@"x-cos-callback"]
+                        customHeaders:put.customHeaders                          noSignHeaders:nil
               resultCallbackKey:[put resultCallbackKey]
                stateCallbackKey:[put stateCallbackKey]
             progressCallbackKey:[put progressCallbackKey]
@@ -801,6 +881,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                          savePath:[[[request downloadingURL] filePathURL] path]
                         versionId:[request versionID]
                      trafficLimit:[NSNumber numberWithInteger:[request trafficLimit]]
+                            customHeaders:request.customHeaders                          noSignHeaders:nil
                 resultCallbackKey:[request resultCallbackKey]
                  stateCallbackKey:[request stateCallbackKey]
               progressCallbackKey:[request progressCallbackKey]
@@ -832,7 +913,7 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     [QCloudCOSTaskCache() removeObject:taskId];
 }
 
-- (nullable NSString *)uploadTransferKey:(nonnull NSString *)transferKey bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)uploadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError *_Nullable *_Nonnull)error {
     return [self uploadInternalTransferKey:transferKey
                                  resmeData:nil
                                     bucket:bucket
@@ -844,6 +925,8 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                               stroageClass:stroageClass
                               trafficLimit:trafficLimit
                              callbackParam:callbackParam
+                             customHeaders:customHeaders
+                             noSignHeaders:noSignHeaders
                          resultCallbackKey:resultCallbackKey
                           stateCallbackKey:stateCallbackKey
                        progressCallbackKey:progressCallbackKey
@@ -852,11 +935,15 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
                                      error:error];
 }
 
-- (nullable NSString *)uploadInternalTransferKey:(nonnull NSString *)transferKey resmeData:(nullable NSData *)resmeData bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
+- (nullable NSString *)uploadInternalTransferKey:(nonnull NSString *)transferKey resmeData:(nullable NSData *)resmeData bucket:(nonnull NSString *)bucket cosPath:(nonnull NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey taskKey:(nullable NSString *)taskKey error:(FlutterError * _Nullable __autoreleasing * _Nonnull)error {
     QCloudCOSTransferMangerService * transferManger = [self getQCloudCOSTransferMangerService:transferKey];
     QCloudCOSXMLUploadObjectRequest* put = nil;
     if(resmeData == nil){
         put = [QCloudCOSXMLUploadObjectRequest new];
+        [put.customHeaders addEntriesFromDictionary:customHeaders];
+        if (noSignHeaders) {
+            put.payload = @{@"noSignHeaders":noSignHeaders};
+        }
         put.bucket = bucket;
         put.object = cosPath;
         if(region){
@@ -1111,5 +1198,117 @@ QCloudThreadSafeMutableDictionary *QCloudCOSTaskCache() {
     }];
     dispatch_semaphore_wait(semp, dispatch_time(DISPATCH_TIME_NOW, 60 * NSEC_PER_SEC));
     return ip;
+}
+
+- (void)enableLogcatEnable:(NSNumber *)enable error:(FlutterError *_Nullable *_Nonnull)error{
+    if (enable.integerValue > 0) {
+        QCloudLogger.sharedLogger.logLevel = QCloudLogLevelVerbose;
+    }else{
+        QCloudLogger.sharedLogger.logLevel = QCloudLogLevelNone;
+    }
+}
+- (void)enableLogFileEnable:(NSNumber *)enable error:(FlutterError *_Nullable *_Nonnull)error{
+    if (enable.integerValue > 0) {
+        QCloudLogger.sharedLogger.logFileLevel = QCloudLogLevelVerbose;
+    }else{
+        QCloudLogger.sharedLogger.logFileLevel = QCloudLogLevelNone;
+    }
+}
+
+- (void)addLogListenerKey:(NSNumber *)key error:(FlutterError *_Nullable *_Nonnull)error{
+    @synchronized (self) {
+        QCloudCustomLoggerOutput * output = [[QCloudCustomLoggerOutput alloc]init];
+        output.callback = ^(QCloudLogModel * _Nonnull model, NSDictionary * _Nonnull extendInfo) {
+            double time = [model.date timeIntervalSince1970];
+            NSInteger timestamp = time * 1000;
+            LogEntity * entity = [LogEntity makeWithTimestamp:@(timestamp) level:6 - model.level category:model.category - 1 tag:model.tag message:model.message threadName:model.threadName extras:extendInfo throwable:nil];
+            [flutterCosApi onLogKey:key entity:entity completion:^(NSError * _Nullable error) {}];
+        };
+        [[QCloudLogger sharedLogger] addLogger:output];
+        [self.logCallbackMap setObject:output forKey:key.stringValue];
+    }
+}
+
+- (void)removeLogListenerKey:(NSNumber *)key error:(FlutterError *_Nullable *_Nonnull)error{
+    @synchronized (self) {
+        QCloudCustomLoggerOutput * output = [self.logCallbackMap objectForKey:key.stringValue];
+        [[QCloudLogger sharedLogger] removeLogger:output];
+    }
+}
+
+- (void)setMinLevelMinLevel:(LogLevel )minLevel error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].logLevel = 6 - minLevel;
+    [QCloudLogger sharedLogger].logClsLevel = 6 - minLevel;
+    [QCloudLogger sharedLogger].logFileLevel = 6 - minLevel;
+}
+- (void)setLogcatMinLevelMinLevel:(LogLevel )minLevel error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].logLevel = 6 - minLevel;
+}
+- (void)setFileMinLevelMinLevel:(LogLevel )minLevel error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].logFileLevel = 6 - minLevel;
+}
+- (void)setClsMinLevelMinLevel:(LogLevel )minLevel error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].logClsLevel = 6 - minLevel;
+                }
+- (void)setDeviceIDDeviceID:(NSString *)deviceID error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].deviceID = deviceID;
+}
+- (void)setDeviceModelDeviceModel:(NSString *)deviceModel error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].deviceModel = deviceModel;
+}
+- (void)setAppVersionAppVersion:(NSString *)appVersion error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].appVersion = appVersion;
+}
+- (void)setExtrasExtras:(NSDictionary<NSString *, NSString *> *)extras error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].extendInfo = extras;
+}
+- (void)setLogFileEncryptionKeyKey:(FlutterStandardTypedData *)key iv:(FlutterStandardTypedData *)iv error:(FlutterError *_Nullable *_Nonnull)error{
+    [QCloudLogger sharedLogger].aesKey = key.data;
+    [QCloudLogger sharedLogger].aesIv = iv.data;
+}
+- (void)setCLsChannelAnonymousTopicId:(NSString *)topicId endpoint:(NSString *)endpoint error:(FlutterError *_Nullable *_Nonnull)error{
+    QCloudCLSLoggerOutput * output = [[QCloudCLSLoggerOutput alloc]initWithTopicId:topicId endpoint:endpoint];
+    [[QCloudLogger sharedLogger]addLogger:output];
+}
+- (void)setCLsChannelStaticKeyTopicId:(NSString *)topicId endpoint:(NSString *)endpoint secretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error{
+    QCloudCLSLoggerOutput * output = [[QCloudCLSLoggerOutput alloc]initWithTopicId:topicId endpoint:endpoint];
+    [output setupPermanentCredentialsSecretId:secretId secretKey:secretKey];
+    [[QCloudLogger sharedLogger]addLogger:output];
+}
+- (void)setCLsChannelSessionCredentialTopicId:(NSString *)topicId endpoint:(NSString *)endpoint error:(FlutterError *_Nullable *_Nonnull)error{
+    QCloudCLSLoggerOutput * output = [[QCloudCLSLoggerOutput alloc]initWithTopicId:topicId endpoint:endpoint];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [output setupCredentialsRefreshBlock:^QCloudCredential * _Nonnull{
+            __block SessionQCloudCredentials * credentials = nil;
+            dispatch_semaphore_t semp = dispatch_semaphore_create(0);
+            [flutterCosApi fetchClsSessionCredentialsWithCompletion:^(SessionQCloudCredentials * _Nullable _credentials, NSError * _Nullable) {
+                credentials = _credentials;
+                dispatch_semaphore_signal(semp);
+            }];
+            dispatch_semaphore_wait(semp, DISPATCH_TIME_FOREVER);
+            QCloudCredential * credential = [QCloudCredential new];
+            credential.secretID = credentials.secretId;
+            credential.secretKey = credentials.secretKey;
+            credential.token = credentials.token;
+            if (credentials.expiredTime) {
+                credential.expirationDate = [NSDate dateWithTimeIntervalSince1970:[credentials.expiredTime integerValue]];
+            }
+            if (credentials.startTime) {
+                credential.startDate = [NSDate dateWithTimeIntervalSince1970:[credentials.startTime integerValue]];
+            }
+            return credential;
+        }];
+    });
+    [[QCloudLogger sharedLogger]addLogger:output];
+}
+- (void)addSensitiveRuleRuleName:(NSString *)ruleName regex:(NSString *)regex error:(FlutterError *_Nullable *_Nonnull)error{
+    NSLog(@"ios 不支持：addSensitiveRuleRuleName");
+}
+- (void)removeSensitiveRuleRuleName:(NSString *)ruleName error:(FlutterError *_Nullable *_Nonnull)error{
+    NSLog(@"ios 不支持：removeSensitiveRuleRuleName");
+}
+
+- (nullable NSString *)getLogRootDirWithError:(FlutterError *_Nullable *_Nonnull)error{
+    return [QCloudLogger sharedLogger].logDirctoryPath;
 }
 @end

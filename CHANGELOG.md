@@ -1,3 +1,13 @@
+## 1.2.3
+支持严格签名
+
+## 1.2.2
+增加日志相关功能
+
+## 1.2.1
+支持配置自定义header和不签名header
+完善Android端下载并发逻辑
+
 ## 1.2.0
 Android端gradle增加namespace
 

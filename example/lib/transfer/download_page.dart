@@ -144,6 +144,8 @@ class _DownloadPageState extends State<DownloadPage> {
       CosTransferManger cosTransferManger = await getTransferManger();
       _transferTask = await cosTransferManger.download(
           widget.bucketName, widget.fileKey, downliadPath,
+          customHeaders: {"x-cos-meta-a":"1","x-cos-meta-b":"2"},
+          // noSignHeaders: ["Host"],
           resultListener:
               ResultListener((header, result) {
                 if (kDebugMode) {

@@ -16,6 +16,10 @@ rootProject.allprojects {
     repositories {
         google()
         mavenCentral()
+        // 添加本地Maven仓库配置
+//        maven {
+//            url uri('/Users/jordanqin/QCloudAndroid/library/QCloudCosFlutter/local_repo')
+//        }
 //        flatDir { dirs project(":tencentcloud_cos_sdk_plugin").file("libs") }
     }
 }
@@ -44,6 +48,6 @@ dependencies {
 //    implementation(name: 'qcloud-foundation-1.5.55', ext: 'aar')
 //    implementation(name: 'cos-android-nobeacon-5.9.13', ext: 'aar')
 
-    implementation 'com.qcloud.cos:cos-android:5.9.35'
+    implementation 'com.qcloud.cos:cos-android:5.9.42'
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
 }

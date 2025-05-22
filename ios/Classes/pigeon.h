@@ -8,6 +8,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/// 日志级别枚举
+typedef NS_ENUM(NSUInteger, LogLevel) {
+  LogLevelVerbose = 0,
+  LogLevelDebug = 1,
+  LogLevelInfo = 2,
+  LogLevelWarn = 3,
+  LogLevelError = 4,
+};
+
+typedef NS_ENUM(NSUInteger, LogCategory) {
+  LogCategoryProcess = 0,
+  LogCategoryResult = 1,
+  LogCategoryNetwork = 2,
+  LogCategoryProbe = 3,
+  LogCategoryError = 4,
+};
+
 @class CosXmlServiceConfig;
 @class TransferConfig;
 @class STSCredentialScope;
@@ -18,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class CosXmlClientException;
 @class CosXmlServiceException;
 @class Owner;
+@class LogEntity;
 @class Bucket;
 @class ListAllMyBuckets;
 @class CommonPrefixes;
@@ -37,7 +55,9 @@ NS_ASSUME_NONNULL_BEGIN
     userAgent:(nullable NSString *)userAgent
     dnsCache:(nullable NSNumber *)dnsCache
     accelerate:(nullable NSNumber *)accelerate
-    domainSwitch:(nullable NSNumber *)domainSwitch;
+    domainSwitch:(nullable NSNumber *)domainSwitch
+    customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders
+    noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders;
 @property(nonatomic, copy, nullable) NSString * region;
 @property(nonatomic, strong, nullable) NSNumber * connectionTimeout;
 @property(nonatomic, strong, nullable) NSNumber * socketTimeout;
@@ -51,6 +71,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, strong, nullable) NSNumber * dnsCache;
 @property(nonatomic, strong, nullable) NSNumber * accelerate;
 @property(nonatomic, strong, nullable) NSNumber * domainSwitch;
+@property(nonatomic, strong, nullable) NSDictionary<NSString *, NSString *> * customHeaders;
+@property(nonatomic, strong, nullable) NSArray<NSString *> * noSignHeaders;
 @end
 
 @interface TransferConfig : NSObject
@@ -163,6 +185,27 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy) NSString * id;
 /// 存储桶持有者的名字
 @property(nonatomic, copy, nullable) NSString * disPlayName;
+@end
+
+@interface LogEntity : NSObject
+/// `init` unavailable to enforce nonnull fields, see the `make` class method.
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)makeWithTimestamp:(NSNumber *)timestamp
+    level:(LogLevel)level
+    category:(LogCategory)category
+    tag:(NSString *)tag
+    message:(NSString *)message
+    threadName:(NSString *)threadName
+    extras:(nullable NSDictionary<NSString *, NSString *> *)extras
+    throwable:(nullable NSString *)throwable;
+@property(nonatomic, strong) NSNumber * timestamp;
+@property(nonatomic, assign) LogLevel level;
+@property(nonatomic, assign) LogCategory category;
+@property(nonatomic, copy) NSString * tag;
+@property(nonatomic, copy) NSString * message;
+@property(nonatomic, copy) NSString * threadName;
+@property(nonatomic, strong, nullable) NSDictionary<NSString *, NSString *> * extras;
+@property(nonatomic, copy, nullable) NSString * throwable;
 @end
 
 @interface Bucket : NSObject
@@ -279,6 +322,26 @@ NSObject<FlutterMessageCodec> *CosApiGetCodec(void);
 - (void)registerDefaultTransferMangerConfig:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
 - (void)registerServiceKey:(NSString *)key config:(CosXmlServiceConfig *)config completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
 - (void)registerTransferMangerKey:(NSString *)key config:(CosXmlServiceConfig *)config transferConfig:(nullable TransferConfig *)transferConfig completion:(void(^)(NSString *_Nullable, FlutterError *_Nullable))completion;
+- (void)enableLogcatEnable:(NSNumber *)enable error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)enableLogFileEnable:(NSNumber *)enable error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)addLogListenerKey:(NSNumber *)key error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)removeLogListenerKey:(NSNumber *)key error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setMinLevelMinLevel:(LogLevel)minLevel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setLogcatMinLevelMinLevel:(LogLevel)minLevel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setFileMinLevelMinLevel:(LogLevel)minLevel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setClsMinLevelMinLevel:(LogLevel)minLevel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setDeviceIDDeviceID:(NSString *)deviceID error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setDeviceModelDeviceModel:(NSString *)deviceModel error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setAppVersionAppVersion:(NSString *)appVersion error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setExtrasExtras:(NSDictionary<NSString *, NSString *> *)extras error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setLogFileEncryptionKeyKey:(FlutterStandardTypedData *)key iv:(FlutterStandardTypedData *)iv error:(FlutterError *_Nullable *_Nonnull)error;
+/// @return `nil` only when `error != nil`.
+- (nullable NSString *)getLogRootDirWithError:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setCLsChannelAnonymousTopicId:(NSString *)topicId endpoint:(NSString *)endpoint error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setCLsChannelStaticKeyTopicId:(NSString *)topicId endpoint:(NSString *)endpoint secretId:(NSString *)secretId secretKey:(NSString *)secretKey error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)setCLsChannelSessionCredentialTopicId:(NSString *)topicId endpoint:(NSString *)endpoint error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)addSensitiveRuleRuleName:(NSString *)ruleName regex:(NSString *)regex error:(FlutterError *_Nullable *_Nonnull)error;
+- (void)removeSensitiveRuleRuleName:(NSString *)ruleName error:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *_Nullable api);
@@ -315,9 +378,9 @@ NSObject<FlutterMessageCodec> *CosTransferApiGetCodec(void);
 
 @protocol CosTransferApi
 /// @return `nil` only when `error != nil`.
-- (nullable NSString *)uploadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
+- (nullable NSString *)uploadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region filePath:(nullable NSString *)filePath byteArr:(nullable FlutterStandardTypedData *)byteArr uploadId:(nullable NSString *)uploadId stroageClass:(nullable NSString *)stroageClass trafficLimit:(nullable NSNumber *)trafficLimit callbackParam:(nullable NSString *)callbackParam customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey initMultipleUploadCallbackKey:(nullable NSNumber *)initMultipleUploadCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
 /// @return `nil` only when `error != nil`.
-- (nullable NSString *)downloadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region savePath:(NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
+- (nullable NSString *)downloadTransferKey:(NSString *)transferKey bucket:(NSString *)bucket cosPath:(NSString *)cosPath region:(nullable NSString *)region savePath:(NSString *)savePath versionId:(nullable NSString *)versionId trafficLimit:(nullable NSNumber *)trafficLimit customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders resultCallbackKey:(nullable NSNumber *)resultCallbackKey stateCallbackKey:(nullable NSNumber *)stateCallbackKey progressCallbackKey:(nullable NSNumber *)progressCallbackKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)pauseTaskId:(NSString *)taskId transferKey:(NSString *)transferKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)resumeTaskId:(NSString *)taskId transferKey:(NSString *)transferKey error:(FlutterError *_Nullable *_Nonnull)error;
 - (void)cancelTaskId:(NSString *)taskId transferKey:(NSString *)transferKey error:(FlutterError *_Nullable *_Nonnull)error;
@@ -341,5 +404,7 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec(void);
 - (void)stateCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key state:(NSString *)state completion:(void(^)(NSError *_Nullable))completion;
 - (void)progressCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key complete:(NSNumber *)complete target:(NSNumber *)target completion:(void(^)(NSError *_Nullable))completion;
 - (void)initMultipleUploadCallbackTransferKey:(NSString *)transferKey key:(NSNumber *)key bucket:(NSString *)bucket cosKey:(NSString *)cosKey uploadId:(NSString *)uploadId completion:(void(^)(NSError *_Nullable))completion;
+- (void)onLogKey:(NSNumber *)key entity:(LogEntity *)entity completion:(void(^)(NSError *_Nullable))completion;
+- (void)fetchClsSessionCredentialsWithCompletion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion;
 @end
 NS_ASSUME_NONNULL_END

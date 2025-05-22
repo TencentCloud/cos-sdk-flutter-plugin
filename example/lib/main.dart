@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'dart:math';
 import 'package:tencentcloud_cos_sdk_plugin/cos.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'common/DnsConfig.dart';
@@ -33,7 +35,21 @@ void main() async {
 
   await Cos().registerDefaultService(Constant.serviceConfig);
   await Cos().registerDefaultTransferManger(Constant.serviceConfig, TransferConfig());
-
+  await Cos().setAppVersion("flutter_1.0");
+  await Cos().setLogcatMinLevel(LogLevel.verbose);
+  await Cos().setDeviceID("flutter_deviceId");
+  await Cos().setDeviceModel("flutter_deviceModel");
+  await Cos().setExtras({"userId":"1"});
+  await Cos().setCLsChannelSessionCredential("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", CLSFetchCLsChannelCredentials());
+  // await Cos().setCLsChannelStaticKey("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", "","");
+  await Cos().addLogListener((log){
+    if (kDebugMode) {
+      print("LogListener");
+      print(log.message);
+    }
+  });
+  print("getLogRootDir");
+  print(await Cos().getLogRootDir());
   handleError(() => runApp(const MyApp()));
 }
 

@@ -73,6 +73,11 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
 + (nullable Owner *)nullableFromList:(NSArray *)list;
 - (NSArray *)toList;
 @end
+@interface LogEntity ()
++ (LogEntity *)fromList:(NSArray *)list;
++ (nullable LogEntity *)nullableFromList:(NSArray *)list;
+- (NSArray *)toList;
+@end
 @interface Bucket ()
 + (Bucket *)fromList:(NSArray *)list;
 + (nullable Bucket *)nullableFromList:(NSArray *)list;
@@ -112,7 +117,9 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     userAgent:(nullable NSString *)userAgent
     dnsCache:(nullable NSNumber *)dnsCache
     accelerate:(nullable NSNumber *)accelerate
-    domainSwitch:(nullable NSNumber *)domainSwitch {
+    domainSwitch:(nullable NSNumber *)domainSwitch
+    customHeaders:(nullable NSDictionary<NSString *, NSString *> *)customHeaders
+    noSignHeaders:(nullable NSArray<NSString *> *)noSignHeaders {
   CosXmlServiceConfig* pigeonResult = [[CosXmlServiceConfig alloc] init];
   pigeonResult.region = region;
   pigeonResult.connectionTimeout = connectionTimeout;
@@ -127,6 +134,8 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   pigeonResult.dnsCache = dnsCache;
   pigeonResult.accelerate = accelerate;
   pigeonResult.domainSwitch = domainSwitch;
+  pigeonResult.customHeaders = customHeaders;
+  pigeonResult.noSignHeaders = noSignHeaders;
   return pigeonResult;
 }
 + (CosXmlServiceConfig *)fromList:(NSArray *)list {
@@ -144,6 +153,8 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   pigeonResult.dnsCache = GetNullableObjectAtIndex(list, 10);
   pigeonResult.accelerate = GetNullableObjectAtIndex(list, 11);
   pigeonResult.domainSwitch = GetNullableObjectAtIndex(list, 12);
+  pigeonResult.customHeaders = GetNullableObjectAtIndex(list, 13);
+  pigeonResult.noSignHeaders = GetNullableObjectAtIndex(list, 14);
   return pigeonResult;
 }
 + (nullable CosXmlServiceConfig *)nullableFromList:(NSArray *)list { return (list) ? [CosXmlServiceConfig fromList:list] : nil; }
@@ -162,6 +173,8 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
     (self.dnsCache ?: [NSNull null]),
     (self.accelerate ?: [NSNull null]),
     (self.domainSwitch ?: [NSNull null]),
+    (self.customHeaders ?: [NSNull null]),
+    (self.noSignHeaders ?: [NSNull null]),
   ];
 }
 @end
@@ -439,6 +452,57 @@ static id GetNullableObjectAtIndex(NSArray* array, NSInteger key) {
   return @[
     (self.id ?: [NSNull null]),
     (self.disPlayName ?: [NSNull null]),
+  ];
+}
+@end
+
+@implementation LogEntity
++ (instancetype)makeWithTimestamp:(NSNumber *)timestamp
+    level:(LogLevel)level
+    category:(LogCategory)category
+    tag:(NSString *)tag
+    message:(NSString *)message
+    threadName:(NSString *)threadName
+    extras:(nullable NSDictionary<NSString *, NSString *> *)extras
+    throwable:(nullable NSString *)throwable {
+  LogEntity* pigeonResult = [[LogEntity alloc] init];
+  pigeonResult.timestamp = timestamp;
+  pigeonResult.level = level;
+  pigeonResult.category = category;
+  pigeonResult.tag = tag;
+  pigeonResult.message = message;
+  pigeonResult.threadName = threadName;
+  pigeonResult.extras = extras;
+  pigeonResult.throwable = throwable;
+  return pigeonResult;
+}
++ (LogEntity *)fromList:(NSArray *)list {
+  LogEntity *pigeonResult = [[LogEntity alloc] init];
+  pigeonResult.timestamp = GetNullableObjectAtIndex(list, 0);
+  NSAssert(pigeonResult.timestamp != nil, @"");
+  pigeonResult.level = [GetNullableObjectAtIndex(list, 1) integerValue];
+  pigeonResult.category = [GetNullableObjectAtIndex(list, 2) integerValue];
+  pigeonResult.tag = GetNullableObjectAtIndex(list, 3);
+  NSAssert(pigeonResult.tag != nil, @"");
+  pigeonResult.message = GetNullableObjectAtIndex(list, 4);
+  NSAssert(pigeonResult.message != nil, @"");
+  pigeonResult.threadName = GetNullableObjectAtIndex(list, 5);
+  NSAssert(pigeonResult.threadName != nil, @"");
+  pigeonResult.extras = GetNullableObjectAtIndex(list, 6);
+  pigeonResult.throwable = GetNullableObjectAtIndex(list, 7);
+  return pigeonResult;
+}
++ (nullable LogEntity *)nullableFromList:(NSArray *)list { return (list) ? [LogEntity fromList:list] : nil; }
+- (NSArray *)toList {
+  return @[
+    (self.timestamp ?: [NSNull null]),
+    @(self.level),
+    @(self.category),
+    (self.tag ?: [NSNull null]),
+    (self.message ?: [NSNull null]),
+    (self.threadName ?: [NSNull null]),
+    (self.extras ?: [NSNull null]),
+    (self.throwable ?: [NSNull null]),
   ];
 }
 @end
@@ -897,6 +961,391 @@ void CosApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<CosApi> *a
         [api registerTransferMangerKey:arg_key config:arg_config transferConfig:arg_transferConfig completion:^(NSString *_Nullable output, FlutterError *_Nullable error) {
           callback(wrapResult(output, error));
         }];
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.enableLogcat"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(enableLogcatEnable:error:)], @"CosApi api (%@) doesn't respond to @selector(enableLogcatEnable:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_enable = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api enableLogcatEnable:arg_enable error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.enableLogFile"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(enableLogFileEnable:error:)], @"CosApi api (%@) doesn't respond to @selector(enableLogFileEnable:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_enable = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api enableLogFileEnable:arg_enable error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.addLogListener"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(addLogListenerKey:error:)], @"CosApi api (%@) doesn't respond to @selector(addLogListenerKey:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_key = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api addLogListenerKey:arg_key error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.removeLogListener"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(removeLogListenerKey:error:)], @"CosApi api (%@) doesn't respond to @selector(removeLogListenerKey:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSNumber *arg_key = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api removeLogListenerKey:arg_key error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setMinLevel"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setMinLevelMinLevel:error:)], @"CosApi api (%@) doesn't respond to @selector(setMinLevelMinLevel:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        LogLevel arg_minLevel = [GetNullableObjectAtIndex(args, 0) integerValue];
+        FlutterError *error;
+        [api setMinLevelMinLevel:arg_minLevel error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setLogcatMinLevel"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setLogcatMinLevelMinLevel:error:)], @"CosApi api (%@) doesn't respond to @selector(setLogcatMinLevelMinLevel:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        LogLevel arg_minLevel = [GetNullableObjectAtIndex(args, 0) integerValue];
+        FlutterError *error;
+        [api setLogcatMinLevelMinLevel:arg_minLevel error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setFileMinLevel"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setFileMinLevelMinLevel:error:)], @"CosApi api (%@) doesn't respond to @selector(setFileMinLevelMinLevel:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        LogLevel arg_minLevel = [GetNullableObjectAtIndex(args, 0) integerValue];
+        FlutterError *error;
+        [api setFileMinLevelMinLevel:arg_minLevel error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setClsMinLevel"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setClsMinLevelMinLevel:error:)], @"CosApi api (%@) doesn't respond to @selector(setClsMinLevelMinLevel:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        LogLevel arg_minLevel = [GetNullableObjectAtIndex(args, 0) integerValue];
+        FlutterError *error;
+        [api setClsMinLevelMinLevel:arg_minLevel error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setDeviceID"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setDeviceIDDeviceID:error:)], @"CosApi api (%@) doesn't respond to @selector(setDeviceIDDeviceID:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_deviceID = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setDeviceIDDeviceID:arg_deviceID error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setDeviceModel"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setDeviceModelDeviceModel:error:)], @"CosApi api (%@) doesn't respond to @selector(setDeviceModelDeviceModel:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_deviceModel = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setDeviceModelDeviceModel:arg_deviceModel error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setAppVersion"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setAppVersionAppVersion:error:)], @"CosApi api (%@) doesn't respond to @selector(setAppVersionAppVersion:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_appVersion = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setAppVersionAppVersion:arg_appVersion error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setExtras"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setExtrasExtras:error:)], @"CosApi api (%@) doesn't respond to @selector(setExtrasExtras:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSDictionary<NSString *, NSString *> *arg_extras = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api setExtrasExtras:arg_extras error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setLogFileEncryptionKey"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setLogFileEncryptionKeyKey:iv:error:)], @"CosApi api (%@) doesn't respond to @selector(setLogFileEncryptionKeyKey:iv:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        FlutterStandardTypedData *arg_key = GetNullableObjectAtIndex(args, 0);
+        FlutterStandardTypedData *arg_iv = GetNullableObjectAtIndex(args, 1);
+        FlutterError *error;
+        [api setLogFileEncryptionKeyKey:arg_key iv:arg_iv error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.getLogRootDir"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(getLogRootDirWithError:)], @"CosApi api (%@) doesn't respond to @selector(getLogRootDirWithError:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        NSString *output = [api getLogRootDirWithError:&error];
+        callback(wrapResult(output, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setCLsChannelAnonymous"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setCLsChannelAnonymousTopicId:endpoint:error:)], @"CosApi api (%@) doesn't respond to @selector(setCLsChannelAnonymousTopicId:endpoint:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_topicId = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_endpoint = GetNullableObjectAtIndex(args, 1);
+        FlutterError *error;
+        [api setCLsChannelAnonymousTopicId:arg_topicId endpoint:arg_endpoint error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setCLsChannelStaticKey"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setCLsChannelStaticKeyTopicId:endpoint:secretId:secretKey:error:)], @"CosApi api (%@) doesn't respond to @selector(setCLsChannelStaticKeyTopicId:endpoint:secretId:secretKey:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_topicId = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_endpoint = GetNullableObjectAtIndex(args, 1);
+        NSString *arg_secretId = GetNullableObjectAtIndex(args, 2);
+        NSString *arg_secretKey = GetNullableObjectAtIndex(args, 3);
+        FlutterError *error;
+        [api setCLsChannelStaticKeyTopicId:arg_topicId endpoint:arg_endpoint secretId:arg_secretId secretKey:arg_secretKey error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.setCLsChannelSessionCredential"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(setCLsChannelSessionCredentialTopicId:endpoint:error:)], @"CosApi api (%@) doesn't respond to @selector(setCLsChannelSessionCredentialTopicId:endpoint:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_topicId = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_endpoint = GetNullableObjectAtIndex(args, 1);
+        FlutterError *error;
+        [api setCLsChannelSessionCredentialTopicId:arg_topicId endpoint:arg_endpoint error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.addSensitiveRule"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(addSensitiveRuleRuleName:regex:error:)], @"CosApi api (%@) doesn't respond to @selector(addSensitiveRuleRuleName:regex:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_ruleName = GetNullableObjectAtIndex(args, 0);
+        NSString *arg_regex = GetNullableObjectAtIndex(args, 1);
+        FlutterError *error;
+        [api addSensitiveRuleRuleName:arg_ruleName regex:arg_regex error:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [[FlutterBasicMessageChannel alloc]
+        initWithName:@"dev.flutter.pigeon.CosApi.removeSensitiveRule"
+        binaryMessenger:binaryMessenger
+        codec:CosApiGetCodec()];
+    if (api) {
+      NSCAssert([api respondsToSelector:@selector(removeSensitiveRuleRuleName:error:)], @"CosApi api (%@) doesn't respond to @selector(removeSensitiveRuleRuleName:error:)", api);
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        NSArray *args = message;
+        NSString *arg_ruleName = GetNullableObjectAtIndex(args, 0);
+        FlutterError *error;
+        [api removeSensitiveRuleRuleName:arg_ruleName error:&error];
+        callback(wrapResult(nil, error));
       }];
     }
     else {
@@ -1419,7 +1868,7 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         binaryMessenger:binaryMessenger
         codec:CosTransferApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(uploadTransferKey:bucket:cosPath:region:filePath:byteArr:uploadId:stroageClass:trafficLimit:callbackParam:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:initMultipleUploadCallbackKey:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_transferKey = GetNullableObjectAtIndex(args, 0);
@@ -1432,12 +1881,14 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         NSString *arg_stroageClass = GetNullableObjectAtIndex(args, 7);
         NSNumber *arg_trafficLimit = GetNullableObjectAtIndex(args, 8);
         NSString *arg_callbackParam = GetNullableObjectAtIndex(args, 9);
-        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 10);
-        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 11);
-        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 12);
-        NSNumber *arg_initMultipleUploadCallbackKey = GetNullableObjectAtIndex(args, 13);
+        NSDictionary<NSString *, NSString *> *arg_customHeaders = GetNullableObjectAtIndex(args, 10);
+        NSArray<NSString *> *arg_noSignHeaders = GetNullableObjectAtIndex(args, 11);
+        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 12);
+        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 13);
+        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 14);
+        NSNumber *arg_initMultipleUploadCallbackKey = GetNullableObjectAtIndex(args, 15);
         FlutterError *error;
-        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit callbackParam:arg_callbackParam resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey error:&error];
+        NSString *output = [api uploadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region filePath:arg_filePath byteArr:arg_byteArr uploadId:arg_uploadId stroageClass:arg_stroageClass trafficLimit:arg_trafficLimit callbackParam:arg_callbackParam customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey initMultipleUploadCallbackKey:arg_initMultipleUploadCallbackKey error:&error];
         callback(wrapResult(output, error));
       }];
     }
@@ -1452,7 +1903,7 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         binaryMessenger:binaryMessenger
         codec:CosTransferApiGetCodec()];
     if (api) {
-      NSCAssert([api respondsToSelector:@selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)", api);
+      NSCAssert([api respondsToSelector:@selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)], @"CosTransferApi api (%@) doesn't respond to @selector(downloadTransferKey:bucket:cosPath:region:savePath:versionId:trafficLimit:customHeaders:noSignHeaders:resultCallbackKey:stateCallbackKey:progressCallbackKey:error:)", api);
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         NSArray *args = message;
         NSString *arg_transferKey = GetNullableObjectAtIndex(args, 0);
@@ -1462,11 +1913,13 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
         NSString *arg_savePath = GetNullableObjectAtIndex(args, 4);
         NSString *arg_versionId = GetNullableObjectAtIndex(args, 5);
         NSNumber *arg_trafficLimit = GetNullableObjectAtIndex(args, 6);
-        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 7);
-        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 8);
-        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 9);
+        NSDictionary<NSString *, NSString *> *arg_customHeaders = GetNullableObjectAtIndex(args, 7);
+        NSArray<NSString *> *arg_noSignHeaders = GetNullableObjectAtIndex(args, 8);
+        NSNumber *arg_resultCallbackKey = GetNullableObjectAtIndex(args, 9);
+        NSNumber *arg_stateCallbackKey = GetNullableObjectAtIndex(args, 10);
+        NSNumber *arg_progressCallbackKey = GetNullableObjectAtIndex(args, 11);
         FlutterError *error;
-        NSString *output = [api downloadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region savePath:arg_savePath versionId:arg_versionId trafficLimit:arg_trafficLimit resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey error:&error];
+        NSString *output = [api downloadTransferKey:arg_transferKey bucket:arg_bucket cosPath:arg_cosPath region:arg_region savePath:arg_savePath versionId:arg_versionId trafficLimit:arg_trafficLimit customHeaders:arg_customHeaders noSignHeaders:arg_noSignHeaders resultCallbackKey:arg_resultCallbackKey stateCallbackKey:arg_stateCallbackKey progressCallbackKey:arg_progressCallbackKey error:&error];
         callback(wrapResult(output, error));
       }];
     }
@@ -1560,9 +2013,12 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
       return [CosXmlServiceException fromList:[self readValue]];
     
     case 133:     
-      return [STSCredentialScope fromList:[self readValue]];
+      return [LogEntity fromList:[self readValue]];
     
     case 134:     
+      return [STSCredentialScope fromList:[self readValue]];
+    
+    case 135:     
       return [SessionQCloudCredentials fromList:[self readValue]];
     
     default:    
@@ -1597,12 +2053,16 @@ void CosTransferApiSetup(id<FlutterBinaryMessenger> binaryMessenger, NSObject<Co
     [self writeByte:132];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[STSCredentialScope class]]) {
+  if ([value isKindOfClass:[LogEntity class]]) {
     [self writeByte:133];
     [self writeValue:[value toList]];
   } else 
-  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+  if ([value isKindOfClass:[STSCredentialScope class]]) {
     [self writeByte:134];
+    [self writeValue:[value toList]];
+  } else 
+  if ([value isKindOfClass:[SessionQCloudCredentials class]]) {
+    [self writeByte:135];
     [self writeValue:[value toList]];
   } else 
 {
@@ -1727,6 +2187,27 @@ NSObject<FlutterMessageCodec> *FlutterCosApiGetCodec() {
       codec:FlutterCosApiGetCodec()];
   [channel sendMessage:@[arg_transferKey ?: [NSNull null], arg_key ?: [NSNull null], arg_bucket ?: [NSNull null], arg_cosKey ?: [NSNull null], arg_uploadId ?: [NSNull null]] reply:^(id reply) {
     completion(nil);
+  }];
+}
+- (void)onLogKey:(NSNumber *)arg_key entity:(LogEntity *)arg_entity completion:(void(^)(NSError *_Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterCosApi.onLog"
+      binaryMessenger:self.binaryMessenger
+      codec:FlutterCosApiGetCodec()];
+  [channel sendMessage:@[arg_key ?: [NSNull null], arg_entity ?: [NSNull null]] reply:^(id reply) {
+    completion(nil);
+  }];
+}
+- (void)fetchClsSessionCredentialsWithCompletion:(void(^)(SessionQCloudCredentials *_Nullable, NSError *_Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterCosApi.fetchClsSessionCredentials"
+      binaryMessenger:self.binaryMessenger
+      codec:FlutterCosApiGetCodec()];
+  [channel sendMessage:nil reply:^(id reply) {
+    SessionQCloudCredentials *output = reply;
+    completion(output, nil);
   }];
 }
 @end

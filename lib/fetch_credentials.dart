@@ -7,3 +7,7 @@ abstract class IFetchCredentials{
 abstract class IFetchScopeLimitCredentials{
   Future<SessionQCloudCredentials> fetchScopeLimitCredentials(List<STSCredentialScope?> stsCredentialScopes);
 }
+
+abstract class IFetchCLsChannelCredentials{
+  Future<SessionQCloudCredentials> fetchCLsChannelSessionCredentials();
+}

@@ -9,6 +9,7 @@
 #import "pigeon.h"
 #import <QCloudCOSXML/QCloudCOSXML.h>
 #import <Flutter/Flutter.h>
+#import "CosPlugin.h"
 
 @implementation CosPluginSignatureProvider
 
@@ -30,6 +31,31 @@
 }
 
 - (void)signatureWithFields:(QCloudSignatureFields *)fileds request:(QCloudBizHTTPRequest *)request urlRequest:(NSMutableURLRequest *)urlRequst compelete:(QCloudHTTPAuthentationContinueBlock)continueBlock {
+    
+    if (request.runOnService.configuration.customHeaders) {
+        [request.runOnService.configuration.customHeaders enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+            if (![request.customHeaders.allKeys containsObject:key]) {
+                if (obj && key) {
+                    [urlRequst setValue:obj forHTTPHeaderField:key];
+                }
+            }
+        }];
+    }
+    
+    NSMutableArray * noSignHeaders = request.runOnService.configuration.noSignHeaders.mutableCopy?:[NSMutableArray new];
+    if (request.payload && request.payload[@"noSignHeaders"] && [request.payload[@"noSignHeaders"] isKindOfClass:NSArray.class]) {
+        NSArray * nosign = request.payload[@"noSignHeaders"];
+        [noSignHeaders addObjectsFromArray:nosign];
+    }
+    
+    NSArray * allSignHeaders = @[@"Cache-Control", @"Content-Disposition", @"Content-Encoding", @"Content-Length", @"Content-MD5", @"Content-Type", @"Expect", @"Expires", @"If-Match" , @"If-Modified-Since" , @"If-None-Match" , @"If-Unmodified-Since" , @"Origin" , @"Range" , @"transfer-encoding" ,@"Host",@"Pic-Operations",@"ci-process"];
+    
+    NSMutableArray * shouldSignHeaders = [NSMutableArray new];
+    [allSignHeaders enumerateObjectsUsingBlock:^(NSString *  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        if (![noSignHeaders containsObject:obj]) {
+            [shouldSignHeaders addObject:obj];;
+        }
+    }];
     // 永久秘钥
     if(self.secretId != nil && self.secretKey != nil && ![@"" isEqualToString:self.secretId] && ![@"" isEqualToString:self.secretKey]){
         QCloudCredential* credential = [QCloudCredential new];
@@ -42,6 +68,7 @@
         // 使用永久密钥计算签名
         QCloudAuthentationV5Creator* creator = [[QCloudAuthentationV5Creator alloc]
                                                 initWithCredential:credential];
+        creator.shouldSignedList = shouldSignHeaders;
         QCloudSignature* signature =  [creator signatureForData:urlRequst];
         continueBlock(signature, nil);
         return;
@@ -96,9 +123,12 @@
                 
                 QCloudAuthentationV5Creator* creator = [[QCloudAuthentationV5Creator alloc]
                                                         initWithCredential:credential];
+                creator.shouldSignedList = shouldSignHeaders;
                 QCloudSignature* signature =  [creator signatureForData:urlRequst];
                 continueBlock(signature, nil);
-            }
+            } else {
+                continueBlock(nil, error);
+        }
         }];
     } else {
         [self.credentialFenceQueue performAction:^(QCloudAuthentationCreator *creator,
@@ -107,6 +137,9 @@
                 continueBlock(nil, error);
             } else {
                 // 注意 这里不要对urlRequst 进行copy以及mutableCopy操作
+                if ([creator isKindOfClass:QCloudAuthentationV5Creator.class]) {
+                    ((QCloudAuthentationV5Creator *)creator).shouldSignedList = shouldSignHeaders;
+                }
                 QCloudSignature* signature =  [creator signatureForData:urlRequst];
                 continueBlock(signature, nil);
             }

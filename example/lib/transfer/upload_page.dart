@@ -275,6 +275,8 @@ class _UploadPageState extends State<UploadPage> {
           // byteArr: bytes,
           uploadId: _uploadId,
           // callbackParam: callbackParam,
+          customHeaders: {"x-cos-meta-a":"1","x-cos-meta-b":"2"},
+          // noSignHeaders: ["Host"],
           resultListener: ResultListener(successCallBack, failCallBack),
           stateCallback: stateCallback,
           progressCallBack: progressCallBack,

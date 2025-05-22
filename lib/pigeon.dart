@@ -7,6 +7,23 @@ import 'dart:typed_data' show Float64List, Int32List, Int64List, Uint8List;
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 import 'package:flutter/services.dart';
 
+/// 日志级别枚举
+enum LogLevel {
+  verbose,
+  debug,
+  info,
+  warn,
+  error,
+}
+
+enum LogCategory {
+  process,
+  result,
+  network,
+  probe,
+  error,
+}
+
 class CosXmlServiceConfig {
   CosXmlServiceConfig({
     this.region,
@@ -22,6 +39,8 @@ class CosXmlServiceConfig {
     this.dnsCache,
     this.accelerate,
     this.domainSwitch,
+    this.customHeaders,
+    this.noSignHeaders,
   });
 
   String? region;
@@ -50,6 +69,10 @@ class CosXmlServiceConfig {
 
   bool? domainSwitch;
 
+  Map<String?, String?>? customHeaders;
+
+  List<String?>? noSignHeaders;
+
   Object encode() {
     return <Object?>[
       region,
@@ -65,6 +88,8 @@ class CosXmlServiceConfig {
       dnsCache,
       accelerate,
       domainSwitch,
+      customHeaders,
+      noSignHeaders,
     ];
   }
 
@@ -84,6 +109,8 @@ class CosXmlServiceConfig {
       dnsCache: result[10] as bool?,
       accelerate: result[11] as bool?,
       domainSwitch: result[12] as bool?,
+      customHeaders: (result[13] as Map<Object?, Object?>?)?.cast<String?, String?>(),
+      noSignHeaders: (result[14] as List<Object?>?)?.cast<String?>(),
     );
   }
 }
@@ -404,6 +431,64 @@ class Owner {
     return Owner(
       id: result[0]! as String,
       disPlayName: result[1] as String?,
+    );
+  }
+}
+
+class LogEntity {
+  LogEntity({
+    required this.timestamp,
+    required this.level,
+    required this.category,
+    required this.tag,
+    required this.message,
+    required this.threadName,
+    this.extras,
+    this.throwable,
+  });
+
+  int timestamp;
+
+  LogLevel level;
+
+  LogCategory category;
+
+  String tag;
+
+  String message;
+
+  String threadName;
+
+  Map<String?, String?>? extras;
+
+  String? throwable;
+
+  Object encode() {
+    return <Object?>[
+      timestamp,
+      level.index,
+      category.index,
+      tag,
+      message,
+      threadName,
+      extras,
+      throwable,
+    ];
+  }
+
+  static LogEntity decode(Object result) {
+    result as List<Object?>;
+    return LogEntity(
+      timestamp: result[0]! as int,
+      level: LogLevel.values[result[1]! as int]
+,
+      category: LogCategory.values[result[2]! as int]
+,
+      tag: result[3]! as String,
+      message: result[4]! as String,
+      threadName: result[5]! as String,
+      extras: (result[6] as Map<Object?, Object?>?)?.cast<String?, String?>(),
+      throwable: result[7] as String?,
     );
   }
 }
@@ -934,6 +1019,429 @@ class CosApi {
       );
     } else {
       return (replyList[0] as String?)!;
+    }
+  }
+
+  Future<void> enableLogcat(bool arg_enable) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.enableLogcat', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_enable]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> enableLogFile(bool arg_enable) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.enableLogFile', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_enable]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> addLogListener(int arg_key) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.addLogListener', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_key]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> removeLogListener(int arg_key) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.removeLogListener', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_key]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setMinLevel(LogLevel arg_minLevel) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setMinLevel', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_minLevel.index]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setLogcatMinLevel(LogLevel arg_minLevel) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setLogcatMinLevel', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_minLevel.index]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setFileMinLevel(LogLevel arg_minLevel) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setFileMinLevel', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_minLevel.index]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setClsMinLevel(LogLevel arg_minLevel) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setClsMinLevel', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_minLevel.index]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setDeviceID(String arg_deviceID) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setDeviceID', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_deviceID]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setDeviceModel(String arg_deviceModel) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setDeviceModel', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_deviceModel]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setAppVersion(String arg_appVersion) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setAppVersion', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_appVersion]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setExtras(Map<String?, String?> arg_extras) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setExtras', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_extras]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setLogFileEncryptionKey(Uint8List arg_key, Uint8List arg_iv) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setLogFileEncryptionKey', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_key, arg_iv]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<String> getLogRootDir() async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.getLogRootDir', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(null) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else if (replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (replyList[0] as String?)!;
+    }
+  }
+
+  Future<void> setCLsChannelAnonymous(String arg_topicId, String arg_endpoint) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setCLsChannelAnonymous', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_topicId, arg_endpoint]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setCLsChannelStaticKey(String arg_topicId, String arg_endpoint, String arg_secretId, String arg_secretKey) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setCLsChannelStaticKey', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_topicId, arg_endpoint, arg_secretId, arg_secretKey]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> setCLsChannelSessionCredential(String arg_topicId, String arg_endpoint) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.setCLsChannelSessionCredential', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_topicId, arg_endpoint]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> addSensitiveRule(String arg_ruleName, String arg_regex) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.addSensitiveRule', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_ruleName, arg_regex]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<void> removeSensitiveRule(String arg_ruleName) async {
+    final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+        'dev.flutter.pigeon.CosApi.removeSensitiveRule', codec,
+        binaryMessenger: _binaryMessenger);
+    final List<Object?>? replyList =
+        await channel.send(<Object?>[arg_ruleName]) as List<Object?>?;
+    if (replyList == null) {
+      throw PlatformException(
+        code: 'channel-error',
+        message: 'Unable to establish connection on channel.',
+      );
+    } else if (replyList.length > 1) {
+      throw PlatformException(
+        code: replyList[0]! as String,
+        message: replyList[1] as String?,
+        details: replyList[2],
+      );
+    } else {
+      return;
     }
   }
 }
@@ -1467,12 +1975,12 @@ class CosTransferApi {
 
   static const MessageCodec<Object?> codec = StandardMessageCodec();
 
-  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, String? arg_callbackParam, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey) async {
+  Future<String> upload(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String? arg_filePath, Uint8List? arg_byteArr, String? arg_uploadId, String? arg_stroageClass, int? arg_trafficLimit, String? arg_callbackParam, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey, int? arg_initMultipleUploadCallbackKey) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosTransferApi.upload', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_callbackParam, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_filePath, arg_byteArr, arg_uploadId, arg_stroageClass, arg_trafficLimit, arg_callbackParam, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey, arg_initMultipleUploadCallbackKey]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1494,12 +2002,12 @@ class CosTransferApi {
     }
   }
 
-  Future<String> download(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String arg_savePath, String? arg_versionId, int? arg_trafficLimit, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey) async {
+  Future<String> download(String arg_transferKey, String arg_bucket, String arg_cosPath, String? arg_region, String arg_savePath, String? arg_versionId, int? arg_trafficLimit, Map<String?, String?>? arg_customHeaders, List<String?>? arg_noSignHeaders, int? arg_resultCallbackKey, int? arg_stateCallbackKey, int? arg_progressCallbackKey) async {
     final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
         'dev.flutter.pigeon.CosTransferApi.download', codec,
         binaryMessenger: _binaryMessenger);
     final List<Object?>? replyList =
-        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_savePath, arg_versionId, arg_trafficLimit, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey]) as List<Object?>?;
+        await channel.send(<Object?>[arg_transferKey, arg_bucket, arg_cosPath, arg_region, arg_savePath, arg_versionId, arg_trafficLimit, arg_customHeaders, arg_noSignHeaders, arg_resultCallbackKey, arg_stateCallbackKey, arg_progressCallbackKey]) as List<Object?>?;
     if (replyList == null) {
       throw PlatformException(
         code: 'channel-error',
@@ -1607,11 +2115,14 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
     } else if (value is CosXmlServiceException) {
       buffer.putUint8(132);
       writeValue(buffer, value.encode());
-    } else if (value is STSCredentialScope) {
+    } else if (value is LogEntity) {
       buffer.putUint8(133);
       writeValue(buffer, value.encode());
-    } else if (value is SessionQCloudCredentials) {
+    } else if (value is STSCredentialScope) {
       buffer.putUint8(134);
+      writeValue(buffer, value.encode());
+    } else if (value is SessionQCloudCredentials) {
+      buffer.putUint8(135);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -1637,9 +2148,12 @@ class _FlutterCosApiCodec extends StandardMessageCodec {
         return CosXmlServiceException.decode(readValue(buffer)!);
       
       case 133:       
-        return STSCredentialScope.decode(readValue(buffer)!);
+        return LogEntity.decode(readValue(buffer)!);
       
       case 134:       
+        return STSCredentialScope.decode(readValue(buffer)!);
+      
+      case 135:       
         return SessionQCloudCredentials.decode(readValue(buffer)!);
       
       default:
@@ -1671,6 +2185,10 @@ abstract class FlutterCosApi {
   void progressCallback(String transferKey, int key, int complete, int target);
 
   void initMultipleUploadCallback(String transferKey, int key, String bucket, String cosKey, String uploadId);
+
+  void onLog(int key, LogEntity entity);
+
+  Future<SessionQCloudCredentials> fetchClsSessionCredentials();
 
   static void setup(FlutterCosApi? api, {BinaryMessenger? binaryMessenger}) {
     {
@@ -1836,6 +2354,40 @@ abstract class FlutterCosApi {
           assert(arg_uploadId != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.initMultipleUploadCallback was null, expected non-null String.');
           api.initMultipleUploadCallback(arg_transferKey!, arg_key!, arg_bucket!, arg_cosKey!, arg_uploadId!);
           return;
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.FlutterCosApi.onLog', codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          assert(message != null,
+          'Argument for dev.flutter.pigeon.FlutterCosApi.onLog was null.');
+          final List<Object?> args = (message as List<Object?>?)!;
+          final int? arg_key = (args[0] as int?);
+          assert(arg_key != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.onLog was null, expected non-null int.');
+          final LogEntity? arg_entity = (args[1] as LogEntity?);
+          assert(arg_entity != null, 'Argument for dev.flutter.pigeon.FlutterCosApi.onLog was null, expected non-null LogEntity.');
+          api.onLog(arg_key!, arg_entity!);
+          return;
+        });
+      }
+    }
+    {
+      final BasicMessageChannel<Object?> channel = BasicMessageChannel<Object?>(
+          'dev.flutter.pigeon.FlutterCosApi.fetchClsSessionCredentials', codec,
+          binaryMessenger: binaryMessenger);
+      if (api == null) {
+        channel.setMessageHandler(null);
+      } else {
+        channel.setMessageHandler((Object? message) async {
+          // ignore message
+          final SessionQCloudCredentials output = await api.fetchClsSessionCredentials();
+          return output;
         });
       }
     }

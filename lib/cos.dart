@@ -11,8 +11,12 @@ import 'exceptions.dart';
 import 'fetch_credentials.dart';
 import 'impl_flutter_cos_api.dart';
 
+typedef OnLogCallBack = Function(LogEntity entity);
+
 class Cos {
   static const String defaultKey = "";
+
+  late OnLogCallBack onLogCallBack;
 
   final ImplFlutterCosApi flutterCosApi = ImplFlutterCosApi();
   Cos._internal() {
@@ -42,6 +46,16 @@ class Cos {
   late IFetchDns _iFetchDns;
   IFetchDns getFetchDns(){
     return _iFetchDns;
+  }
+
+  final Map<int, void Function(LogEntity)> _logListeners = HashMap();
+  Map<int, void Function(LogEntity)> getLogListeners(){
+    return _logListeners;
+  }
+
+  late IFetchCLsChannelCredentials _iFetchCLsChannelCredentials;
+  IFetchCLsChannelCredentials getFetchCLsChannelCredentials(){
+    return _iFetchCLsChannelCredentials;
   }
 
   /// 设置永久秘钥
@@ -189,5 +203,68 @@ class Cos {
     } else {
       throw IllegalArgumentException("$key transfer manger unregistered");
     }
+  }
+
+  Future<void> enableLogcat(bool enable) async {
+    return await _cosApi.enableLogcat(enable);
+  }
+  Future<void> enableLogFile(bool enable) async {
+    return await _cosApi.enableLogFile(enable);
+  }
+  Future<void> addLogListener(void Function(LogEntity) callback) async {
+    int key = callback.hashCode;
+    _logListeners[key] = callback;
+    return await _cosApi.addLogListener(key);
+  }
+  Future<void> removeLogListener(void Function(LogEntity) callback) async {
+    int key = callback.hashCode;
+    _logListeners.remove(key);
+    return await _cosApi.removeLogListener(key);
+  }
+  Future<void> setMinLevel(LogLevel minLevel) async {
+    return await _cosApi.setMinLevel(minLevel);
+  }
+  Future<void> setLogcatMinLevel(LogLevel minLevel) async {
+    return await _cosApi.setLogcatMinLevel(minLevel);
+  }
+  Future<void> setFileMinLevel(LogLevel minLevel) async {
+    return await _cosApi.setFileMinLevel(minLevel);
+  }
+  Future<void> setClsMinLevel(LogLevel minLevel) async {
+    return await _cosApi.setClsMinLevel(minLevel);
+  }
+  Future<void> setDeviceID(String deviceID) async {
+    return await _cosApi.setDeviceID(deviceID);
+  }
+  Future<void> setDeviceModel(String deviceModel) async {
+    return await _cosApi.setDeviceModel(deviceModel);
+  }
+  Future<void> setAppVersion(String appVersion) async {
+    return await _cosApi.setAppVersion(appVersion);
+  }
+  Future<void> setExtras(Map<String, String> extras) async {
+    return await _cosApi.setExtras(extras);
+  }
+  Future<void> setLogFileEncryptionKey(Uint8List key, Uint8List iv) async {
+    return await _cosApi.setLogFileEncryptionKey(key, iv);
+  }
+  Future<String> getLogRootDir() {
+    return _cosApi.getLogRootDir();
+  }
+  Future<void> setCLsChannelAnonymous(String topicId, String endpoint) async {
+    return await _cosApi.setCLsChannelAnonymous(topicId, endpoint);
+  }
+  Future<void> setCLsChannelStaticKey(String topicId, String endpoint,String secretId, String secretKey) async {
+    return await _cosApi.setCLsChannelStaticKey(topicId, endpoint, secretId, secretKey);
+  }
+  Future<void> setCLsChannelSessionCredential(String topicId, String endpoint, IFetchCLsChannelCredentials iFetchCLsChannelCredentials) async {
+    _iFetchCLsChannelCredentials = iFetchCLsChannelCredentials;
+    return await _cosApi.setCLsChannelSessionCredential(topicId, endpoint);
+  }
+  Future<void> addSensitiveRule(String ruleName, String regex) async {
+    return await _cosApi.addSensitiveRule(ruleName, regex);
+  }
+  Future<void> removeSensitiveRule(String ruleName) async {
+    return await _cosApi.removeSensitiveRule(ruleName);
   }
 }
