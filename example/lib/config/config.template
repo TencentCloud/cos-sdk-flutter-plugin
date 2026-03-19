@@ -5,6 +5,8 @@
 class TestConst {
   // 腾讯云APP ID
   late String COS_APP_ID="XXXXXXXX";
+  // 是否使用临时秘钥
+  late bool USE_CREDENTIAL = false;
   // 是否使用临时密钥请求 COS
   late bool USE_SESSION_TOKEN_CREDENTIAL = true;
   // 是否使用范围限制的临时密钥请求 COS
@@ -15,8 +17,10 @@ class TestConst {
   late String SECRET_KEY="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
   // STS 临时密钥服务器地址
   late String STS_URL = "https://stsservice.com/sts";
-   // STS 范围限制的临时密钥服务器地址
-   late String STS_SCOPE_LIMIT_URL = "https://stsservice.com/sts/scope";
+  // STS 范围限制的临时密钥服务器地址
+  late String STS_SCOPE_LIMIT_URL = "https://stsservice.com/sts/scope";
+  // CLS临时密钥服务器地址
+  late String CLS_CREDENTIAL_URL = "http://stsservice.com/sts/cls";
   // 存储桶所在地域
   late String PERSIST_BUCKET_REGION="ap-guangzhou";
 
