@@ -38,22 +38,22 @@ void main() async {
   await Cos().registerDefaultService(Constant.serviceConfig);
   await Cos().registerDefaultTransferManger(Constant.serviceConfig, TransferConfig());
   await Cos().enableLogcat(true);
-  await Cos().enableLogFile(true);
-  await Cos().setMinLevel(LogLevel.verbose);
-  await Cos().setAppVersion("flutter_1.0");
-  await Cos().setLogcatMinLevel(LogLevel.verbose);
-  await Cos().setDeviceID("flutter_deviceId");
-  await Cos().setDeviceModel("flutter_deviceModel");
-  await Cos().setExtras({"userId":"1"});
-  await Cos().setCLsChannelSessionCredential("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", CLSFetchCLsChannelCredentials());
+  // await Cos().enableLogFile(true);
+  // await Cos().setMinLevel(LogLevel.verbose);
+  // await Cos().setAppVersion("flutter_1.0");
+  // await Cos().setLogcatMinLevel(LogLevel.verbose);
+  // await Cos().setDeviceID("flutter_deviceId");
+  // await Cos().setDeviceModel("flutter_deviceModel");
+  // await Cos().setExtras({"userId":"1"});
+  // await Cos().setCLsChannelSessionCredential("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", CLSFetchCLsChannelCredentials());
   // await Cos().setCLsChannelStaticKey("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", "","");
-  loglistener(log) {
-    print(log.message);
-  }
-  await Cos().addLogListener(loglistener);
-  await Cos().removeLogListener(loglistener);
-  print("getLogRootDir");
-  print(await Cos().getLogRootDir());
+  // loglistener(log) {
+  //   print(log.message);
+  // }
+  // await Cos().addLogListener(loglistener);
+  // await Cos().removeLogListener(loglistener);
+  // print("getLogRootDir");
+  // print(await Cos().getLogRootDir());
 
 //   // 创建加密密钥和初始化向量
 //   final key = Uint8List.fromList([
