@@ -1,3 +1,14 @@
+## 1.3.0
+iOS端提供默认的signatureProvider，完善单次临时密钥的支持
+iOS端不再拦截QCloudNetworkErrorCodeCanceled，会在错误回调中回调
+
+## 1.2.9
+完善iOS端doesObjectExist和doesBucketExist的逻辑
+升级iOS SDK版本为6.5.5
+
+## 1.2.8
+完善iOS端单次临时密钥下noSignHeaders逻辑
+
 ## 1.2.7
 升级Android依赖为5.9.50，iOS为6.5.3
 
