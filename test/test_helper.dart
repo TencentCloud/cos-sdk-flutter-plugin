@@ -1,119 +1,21 @@
 // 测试辅助类：提供 Mock 原生 API 的能力
 //
 // 通过设置 Pigeon BasicMessageChannel 的 Mock Handler 来模拟原生 API 响应
-// Pigeon 为每个方法创建单独的 channel，格式为：'dev.flutter.pigeon.{ClassName}.{methodName}'
+// Pigeon 为每个方法创建单独的 channel，格式为：
+//   'dev.flutter.pigeon.{packageName}.{ClassName}.{methodName}'
+// 其中 packageName 由 pigeon.sh 的 --package_name 指定（本项目为
+// tencentcloud_cos_sdk_plugin）。pigeon v10.1.4 起 channel 名才包含包名段。
 
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 
-// ============== Pigeon 自定义 Codec 复制 ==============
-// 为了正确解码 Pigeon 发送的消息，我们需要使用与 pigeon.dart 中相同的 codec
-
-class _CosApiCodec extends StandardMessageCodec {
-  const _CosApiCodec();
-  @override
-  void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is CosXmlServiceConfig) {
-      buffer.putUint8(128);
-      writeValue(buffer, value.encode());
-    } else if (value is TransferConfig) {
-      buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    } else {
-      super.writeValue(buffer, value);
-    }
-  }
-
-  @override
-  Object? readValueOfType(int type, ReadBuffer buffer) {
-    switch (type) {
-      case 128:
-        return CosXmlServiceConfig.decode(readValue(buffer)!);
-      case 129:
-        return TransferConfig.decode(readValue(buffer)!);
-      default:
-        return super.readValueOfType(type, buffer);
-    }
-  }
-}
-
-class _CosServiceApiCodec extends StandardMessageCodec {
-  const _CosServiceApiCodec();
-  @override
-  void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is BucketContents) {
-      buffer.putUint8(128);
-      writeValue(buffer, value.encode());
-    } else if (value is CommonPrefixes) {
-      buffer.putUint8(129);
-      writeValue(buffer, value.encode());
-    } else if (value is Content) {
-      buffer.putUint8(130);
-      writeValue(buffer, value.encode());
-    } else if (value is Bucket) {
-      buffer.putUint8(131);
-      writeValue(buffer, value.encode());
-    } else if (value is ListAllMyBuckets) {
-      buffer.putUint8(132);
-      writeValue(buffer, value.encode());
-    } else if (value is Owner) {
-      buffer.putUint8(133);
-      writeValue(buffer, value.encode());
-    } else if (value is SessionQCloudCredentials) {
-      buffer.putUint8(134);
-      writeValue(buffer, value.encode());
-    } else {
-      super.writeValue(buffer, value);
-    }
-  }
-
-  @override
-  Object? readValueOfType(int type, ReadBuffer buffer) {
-    switch (type) {
-      case 128:
-        return BucketContents.decode(readValue(buffer)!);
-      case 129:
-        return CommonPrefixes.decode(readValue(buffer)!);
-      case 130:
-        return Content.decode(readValue(buffer)!);
-      case 131:
-        return Bucket.decode(readValue(buffer)!);
-      case 132:
-        return ListAllMyBuckets.decode(readValue(buffer)!);
-      case 133:
-        return Owner.decode(readValue(buffer)!);
-      case 134:
-        return SessionQCloudCredentials.decode(readValue(buffer)!);
-      default:
-        return super.readValueOfType(type, buffer);
-    }
-  }
-}
-
-class _CosTransferApiCodec extends StandardMessageCodec {
-  const _CosTransferApiCodec();
-  @override
-  void writeValue(WriteBuffer buffer, Object? value) {
-    if (value is SessionQCloudCredentials) {
-      buffer.putUint8(128);
-      writeValue(buffer, value.encode());
-    } else {
-      super.writeValue(buffer, value);
-    }
-  }
-
-  @override
-  Object? readValueOfType(int type, ReadBuffer buffer) {
-    switch (type) {
-      case 128:
-        return SessionQCloudCredentials.decode(readValue(buffer)!);
-      default:
-        return super.readValueOfType(type, buffer);
-    }
-  }
-}
+// ============== Codec 说明 ==============
+// 直接复用 pigeon 生成产物导出的 `pigeonChannelCodec`，不再手工复刻。
+// pigeon 25.x 起改为「每文件单一 codec」（type id 从 129 起、按声明序分配），
+// 与旧版「每个 Api 一个 codec、128 起、按类名字母序」不同。手工复刻会在每次
+// pigeon 升级或 IDL 增删数据类时静默失效，故统一引用生成产物。
 
 // ============== Mock Handler 设置函数 ==============
 
@@ -141,7 +43,7 @@ void _clearMockHandler(String channelName) {
 
 /// Mock CosApi 的所有 channel
 class MockCosApiChannels {
-  static const _codec = _CosApiCodec();
+  static const _codec = CosApi.pigeonChannelCodec;
   
   bool initWithPlainSecretCalled = false;
   bool initWithSessionCredentialCalled = false;
@@ -156,60 +58,60 @@ class MockCosApiChannels {
   
   void setup() {
     // initWithPlainSecret
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.initWithPlainSecret', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithPlainSecret', _codec, (args) async {
       initWithPlainSecretCalled = true;
       return null;
     });
     
     // initWithSessionCredential
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.initWithSessionCredential', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithSessionCredential', _codec, (args) async {
       initWithSessionCredentialCalled = true;
       return null;
     });
     
     // initWithScopeLimitCredential
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.initWithScopeLimitCredential', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithScopeLimitCredential', _codec, (args) async {
       initWithScopeLimitCredentialCalled = true;
       return null;
     });
     
     // initCustomerDNS
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.initCustomerDNS', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initCustomerDNS', _codec, (args) async {
       return null;
     });
     
     // initCustomerDNSFetch
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.initCustomerDNSFetch', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initCustomerDNSFetch', _codec, (args) async {
       return null;
     });
     
     // forceInvalidationCredential
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.forceInvalidationCredential', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.forceInvalidationCredential', _codec, (args) async {
       forceInvalidationCredentialCalled = true;
       return null;
     });
     
     // setCloseBeacon
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setCloseBeacon', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCloseBeacon', _codec, (args) async {
       return null;
     });
     
     // registerDefaultService
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.registerDefaultService', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerDefaultService', _codec, (args) async {
       registerDefaultServiceCalled = true;
       lastRegisteredKey = '';
       return '';
     });
     
     // registerDefaultTransferManger
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.registerDefaultTransferManger', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerDefaultTransferManger', _codec, (args) async {
       registerDefaultTransferMangerCalled = true;
       lastRegisteredKey = '';
       return '';
     });
     
     // registerService
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.registerService', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerService', _codec, (args) async {
       registerServiceCalled = true;
       final argList = args as List<Object?>;
       lastRegisteredKey = argList[0] as String? ?? '';
@@ -217,7 +119,7 @@ class MockCosApiChannels {
     });
     
     // registerTransferManger
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.registerTransferManger', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerTransferManger', _codec, (args) async {
       registerTransferMangerCalled = true;
       final argList = args as List<Object?>;
       lastRegisteredKey = argList[0] as String? ?? '';
@@ -225,133 +127,133 @@ class MockCosApiChannels {
     });
     
     // enableLogcat
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.enableLogcat', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.enableLogcat', _codec, (args) async {
       return null;
     });
     
     // enableLogFile
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.enableLogFile', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.enableLogFile', _codec, (args) async {
       return null;
     });
     
     // addLogListener
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.addLogListener', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.addLogListener', _codec, (args) async {
       return null;
     });
     
     // removeLogListener
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.removeLogListener', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.removeLogListener', _codec, (args) async {
       return null;
     });
     
     // setMinLevel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setMinLevel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setMinLevel', _codec, (args) async {
       return null;
     });
     
     // setLogcatMinLevel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setLogcatMinLevel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setLogcatMinLevel', _codec, (args) async {
       return null;
     });
     
     // setFileMinLevel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setFileMinLevel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setFileMinLevel', _codec, (args) async {
       return null;
     });
     
     // setClsMinLevel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setClsMinLevel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setClsMinLevel', _codec, (args) async {
       return null;
     });
     
     // setDeviceID
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setDeviceID', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setDeviceID', _codec, (args) async {
       return null;
     });
     
     // setDeviceModel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setDeviceModel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setDeviceModel', _codec, (args) async {
       return null;
     });
     
     // setAppVersion
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setAppVersion', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setAppVersion', _codec, (args) async {
       return null;
     });
     
     // setExtras
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setExtras', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setExtras', _codec, (args) async {
       return null;
     });
     
     // setLogFileEncryptionKey
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setLogFileEncryptionKey', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setLogFileEncryptionKey', _codec, (args) async {
       return null;
     });
     
     // getLogRootDir
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.getLogRootDir', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.getLogRootDir', _codec, (args) async {
       return '/mock/log/dir';
     });
     
     // setCLsChannelAnonymous
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setCLsChannelAnonymous', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelAnonymous', _codec, (args) async {
       return null;
     });
     
     // setCLsChannelStaticKey
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setCLsChannelStaticKey', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelStaticKey', _codec, (args) async {
       return null;
     });
     
     // setCLsChannelSessionCredential
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.setCLsChannelSessionCredential', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelSessionCredential', _codec, (args) async {
       return null;
     });
     
     // addSensitiveRule
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.addSensitiveRule', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.addSensitiveRule', _codec, (args) async {
       return null;
     });
     
     // removeSensitiveRule
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosApi.removeSensitiveRule', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.removeSensitiveRule', _codec, (args) async {
       return null;
     });
   }
   
   void tearDown() {
     final channels = [
-      'dev.flutter.pigeon.CosApi.initWithPlainSecret',
-      'dev.flutter.pigeon.CosApi.initWithSessionCredential',
-      'dev.flutter.pigeon.CosApi.initWithScopeLimitCredential',
-      'dev.flutter.pigeon.CosApi.initCustomerDNS',
-      'dev.flutter.pigeon.CosApi.initCustomerDNSFetch',
-      'dev.flutter.pigeon.CosApi.forceInvalidationCredential',
-      'dev.flutter.pigeon.CosApi.setCloseBeacon',
-      'dev.flutter.pigeon.CosApi.registerDefaultService',
-      'dev.flutter.pigeon.CosApi.registerDefaultTransferManger',
-      'dev.flutter.pigeon.CosApi.registerService',
-      'dev.flutter.pigeon.CosApi.registerTransferManger',
-      'dev.flutter.pigeon.CosApi.enableLogcat',
-      'dev.flutter.pigeon.CosApi.enableLogFile',
-      'dev.flutter.pigeon.CosApi.addLogListener',
-      'dev.flutter.pigeon.CosApi.removeLogListener',
-      'dev.flutter.pigeon.CosApi.setMinLevel',
-      'dev.flutter.pigeon.CosApi.setLogcatMinLevel',
-      'dev.flutter.pigeon.CosApi.setFileMinLevel',
-      'dev.flutter.pigeon.CosApi.setClsMinLevel',
-      'dev.flutter.pigeon.CosApi.setDeviceID',
-      'dev.flutter.pigeon.CosApi.setDeviceModel',
-      'dev.flutter.pigeon.CosApi.setAppVersion',
-      'dev.flutter.pigeon.CosApi.setExtras',
-      'dev.flutter.pigeon.CosApi.setLogFileEncryptionKey',
-      'dev.flutter.pigeon.CosApi.getLogRootDir',
-      'dev.flutter.pigeon.CosApi.setCLsChannelAnonymous',
-      'dev.flutter.pigeon.CosApi.setCLsChannelStaticKey',
-      'dev.flutter.pigeon.CosApi.setCLsChannelSessionCredential',
-      'dev.flutter.pigeon.CosApi.addSensitiveRule',
-      'dev.flutter.pigeon.CosApi.removeSensitiveRule',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithPlainSecret',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithSessionCredential',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initWithScopeLimitCredential',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initCustomerDNS',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.initCustomerDNSFetch',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.forceInvalidationCredential',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCloseBeacon',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerDefaultService',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerDefaultTransferManger',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerService',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.registerTransferManger',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.enableLogcat',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.enableLogFile',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.addLogListener',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.removeLogListener',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setMinLevel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setLogcatMinLevel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setFileMinLevel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setClsMinLevel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setDeviceID',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setDeviceModel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setAppVersion',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setExtras',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setLogFileEncryptionKey',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.getLogRootDir',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelAnonymous',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelStaticKey',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.setCLsChannelSessionCredential',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.addSensitiveRule',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosApi.removeSensitiveRule',
     ];
     for (final channel in channels) {
       _clearMockHandler(channel);
@@ -361,7 +263,7 @@ class MockCosApiChannels {
 
 /// Mock CosServiceApi 的所有 channel
 class MockCosServiceApiChannels {
-  static const _codec = _CosServiceApiCodec();
+  static const _codec = CosApi.pigeonChannelCodec;
   
   bool headObjectCalled = false;
   bool deleteObjectCalled = false;
@@ -379,37 +281,37 @@ class MockCosServiceApiChannels {
   
   void setup() {
     // headObject
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.headObject', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.headObject', _codec, (args) async {
       headObjectCalled = true;
       return <String?, String?>{'Content-Length': '1024', 'ETag': '"mock-etag"'};
     });
     
     // deleteObject
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.deleteObject', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.deleteObject', _codec, (args) async {
       deleteObjectCalled = true;
       return null;
     });
     
     // getObjectUrl
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getObjectUrl', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getObjectUrl', _codec, (args) async {
       getObjectUrlCalled = true;
       return 'https://bucket.cos.region.myqcloud.com/key';
     });
     
     // getPresignedUrl
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getPresignedUrl', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getPresignedUrl', _codec, (args) async {
       getPresignedUrlCalled = true;
       return 'https://bucket.cos.region.myqcloud.com/key?sign=mock';
     });
     
     // preBuildConnection
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.preBuildConnection', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.preBuildConnection', _codec, (args) async {
       preBuildConnectionCalled = true;
       return null;
     });
     
     // getService - 返回编码后的 ListAllMyBuckets
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getService', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getService', _codec, (args) async {
       getServiceCalled = true;
       return ListAllMyBuckets(
         owner: Owner(id: 'mock-owner-id', disPlayName: 'MockOwner'),
@@ -424,7 +326,7 @@ class MockCosServiceApiChannels {
     });
     
     // getBucket - 返回编码后的 BucketContents
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getBucket', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucket', _codec, (args) async {
       getBucketCalled = true;
       return BucketContents(
         name: 'test-bucket',
@@ -445,62 +347,62 @@ class MockCosServiceApiChannels {
     });
     
     // putBucket
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.putBucket', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucket', _codec, (args) async {
       putBucketCalled = true;
       return null;
     });
     
     // headBucket
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.headBucket', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.headBucket', _codec, (args) async {
       headBucketCalled = true;
       return <String?, String?>{'x-cos-bucket-region': 'ap-guangzhou'};
     });
     
     // deleteBucket
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.deleteBucket', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.deleteBucket', _codec, (args) async {
       deleteBucketCalled = true;
       return null;
     });
     
     // getBucketAccelerate
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getBucketAccelerate', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketAccelerate', _codec, (args) async {
       return true;
     });
     
     // putBucketAccelerate
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.putBucketAccelerate', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucketAccelerate', _codec, (args) async {
       return null;
     });
     
     // getBucketLocation
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getBucketLocation', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketLocation', _codec, (args) async {
       return 'ap-guangzhou';
     });
     
     // getBucketVersioning
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.getBucketVersioning', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketVersioning', _codec, (args) async {
       return true;
     });
     
     // putBucketVersioning
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.putBucketVersioning', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucketVersioning', _codec, (args) async {
       return null;
     });
     
     // doesBucketExist
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.doesBucketExist', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.doesBucketExist', _codec, (args) async {
       doesBucketExistCalled = true;
       return true;
     });
     
     // doesObjectExist
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.doesObjectExist', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.doesObjectExist', _codec, (args) async {
       doesObjectExistCalled = true;
       return true;
     });
     
     // cancelAll
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosServiceApi.cancelAll', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.cancelAll', _codec, (args) async {
       cancelAllCalled = true;
       return null;
     });
@@ -508,24 +410,24 @@ class MockCosServiceApiChannels {
   
   void tearDown() {
     final channels = [
-      'dev.flutter.pigeon.CosServiceApi.headObject',
-      'dev.flutter.pigeon.CosServiceApi.deleteObject',
-      'dev.flutter.pigeon.CosServiceApi.getObjectUrl',
-      'dev.flutter.pigeon.CosServiceApi.getPresignedUrl',
-      'dev.flutter.pigeon.CosServiceApi.preBuildConnection',
-      'dev.flutter.pigeon.CosServiceApi.getService',
-      'dev.flutter.pigeon.CosServiceApi.getBucket',
-      'dev.flutter.pigeon.CosServiceApi.putBucket',
-      'dev.flutter.pigeon.CosServiceApi.headBucket',
-      'dev.flutter.pigeon.CosServiceApi.deleteBucket',
-      'dev.flutter.pigeon.CosServiceApi.getBucketAccelerate',
-      'dev.flutter.pigeon.CosServiceApi.putBucketAccelerate',
-      'dev.flutter.pigeon.CosServiceApi.getBucketLocation',
-      'dev.flutter.pigeon.CosServiceApi.getBucketVersioning',
-      'dev.flutter.pigeon.CosServiceApi.putBucketVersioning',
-      'dev.flutter.pigeon.CosServiceApi.doesBucketExist',
-      'dev.flutter.pigeon.CosServiceApi.doesObjectExist',
-      'dev.flutter.pigeon.CosServiceApi.cancelAll',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.headObject',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.deleteObject',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getObjectUrl',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getPresignedUrl',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.preBuildConnection',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getService',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucket',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucket',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.headBucket',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.deleteBucket',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketAccelerate',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucketAccelerate',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketLocation',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.getBucketVersioning',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.putBucketVersioning',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.doesBucketExist',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.doesObjectExist',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosServiceApi.cancelAll',
     ];
     for (final channel in channels) {
       _clearMockHandler(channel);
@@ -535,7 +437,7 @@ class MockCosServiceApiChannels {
 
 /// Mock CosTransferApi 的所有 channel
 class MockCosTransferApiChannels {
-  static const _codec = _CosTransferApiCodec();
+  static const _codec = CosApi.pigeonChannelCodec;
   
   bool uploadCalled = false;
   bool downloadCalled = false;
@@ -545,31 +447,31 @@ class MockCosTransferApiChannels {
   
   void setup() {
     // upload
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosTransferApi.upload', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.upload', _codec, (args) async {
       uploadCalled = true;
       return 'mock-task-id';
     });
     
     // download
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosTransferApi.download', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.download', _codec, (args) async {
       downloadCalled = true;
       return 'mock-task-id';
     });
     
     // pause
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosTransferApi.pause', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.pause', _codec, (args) async {
       pauseCalled = true;
       return null;
     });
     
     // resume
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosTransferApi.resume', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.resume', _codec, (args) async {
       resumeCalled = true;
       return null;
     });
     
     // cancel
-    _setMockHandlerWithCodec('dev.flutter.pigeon.CosTransferApi.cancel', _codec, (args) async {
+    _setMockHandlerWithCodec('dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.cancel', _codec, (args) async {
       cancelCalled = true;
       return null;
     });
@@ -577,11 +479,11 @@ class MockCosTransferApiChannels {
   
   void tearDown() {
     final channels = [
-      'dev.flutter.pigeon.CosTransferApi.upload',
-      'dev.flutter.pigeon.CosTransferApi.download',
-      'dev.flutter.pigeon.CosTransferApi.pause',
-      'dev.flutter.pigeon.CosTransferApi.resume',
-      'dev.flutter.pigeon.CosTransferApi.cancel',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.upload',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.download',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.pause',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.resume',
+      'dev.flutter.pigeon.tencentcloud_cos_sdk_plugin.CosTransferApi.cancel',
     ];
     for (final channel in channels) {
       _clearMockHandler(channel);

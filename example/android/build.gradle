@@ -1,16 +1,5 @@
-buildscript {
-    ext.kotlin_version = '1.7.0'
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
-
+// AGP / Kotlin 插件版本已移至 settings.gradle 的 plugins block 声明，
+// 此处不再需要 buildscript classpath。
 allprojects {
     repositories {
         google()

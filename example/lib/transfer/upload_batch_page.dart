@@ -7,11 +7,11 @@ import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../common/constant.dart';
+import '../common/file_picker_utils.dart';
 import '../common/res/colors.dart';
 import '../common/res/gaps.dart';
 import '../common/toast_utils.dart';
@@ -62,10 +62,10 @@ class _UploadBatchPageState extends State<UploadBatchPage> {
       appBar: AppBar(title: const Text('批量上传'), actions: [
         TextButton(
             onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles();
-              if (result != null) {
+              String? path = await FilePickerUtils.pickSingleFilePath();
+              if (path != null) {
                 setState(() {
-                  _pickFilePathArr.add(result.files.single.path);
+                  _pickFilePathArr.add(path);
                   _pickFilePathArrString = _pickFilePathArr.join("\r\n");
                 });
               }

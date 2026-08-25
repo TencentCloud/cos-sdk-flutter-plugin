@@ -12,6 +12,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'common/constant.dart';
 import 'common/handle_error_utils.dart';
 import 'cos/fetch_credentials.dart';
+import 'test/transfer_verify_page.dart';
 
 void main() async {
   /// 确保初始化完成
@@ -37,7 +38,7 @@ void main() async {
 
   await Cos().registerDefaultService(Constant.serviceConfig);
   await Cos().registerDefaultTransferManger(Constant.serviceConfig, TransferConfig());
-  await Cos().enableLogcat(true);
+  // await Cos().enableLogcat(true);
   // await Cos().enableLogFile(true);
   // await Cos().setMinLevel(LogLevel.verbose);
   // await Cos().setAppVersion("flutter_1.0");
@@ -45,8 +46,8 @@ void main() async {
   // await Cos().setDeviceID("flutter_deviceId");
   // await Cos().setDeviceModel("flutter_deviceModel");
   // await Cos().setExtras({"userId":"1"});
-  // await Cos().setCLsChannelSessionCredential("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", CLSFetchCLsChannelCredentials());
-  // await Cos().setCLsChannelStaticKey("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", "","");
+  // // await Cos().setCLsChannelSessionCredential("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", CLSFetchCLsChannelCredentials());
+  // // await Cos().setCLsChannelStaticKey("5edf1c8b-160c-43d5-8506-0a8621a3fa73", "ap-guangzhou.cls.tencentcs.com", "","");
   // loglistener(log) {
   //   print(log.message);
   // }
@@ -73,6 +74,17 @@ void main() async {
 // // 调用设置日志文件加密密钥的方法
 //   await Cos().setLogFileEncryptionKey(key, iv);
 
+
+  // 传输链路自动验证开关（P3-7）：用 --dart-define=COS_VERIFY=1 启用，
+  // 启用时以验证页为首页，启动即自动跑完 byteArr 上传 / pause-resume-cancel /
+  // 下载等用例并 print 断言结果（前缀 COSVERIFY|），便于从 hilog 过滤判定。
+  // 默认关闭，不影响正常 example 使用。
+  const bool runTransferVerify =
+      bool.fromEnvironment('COS_VERIFY', defaultValue: false);
+  if (runTransferVerify) {
+    handleError(() => runApp(const MaterialApp(home: TransferVerifyPage())));
+    return;
+  }
 
   handleError(() => runApp(const MyApp()));
 }

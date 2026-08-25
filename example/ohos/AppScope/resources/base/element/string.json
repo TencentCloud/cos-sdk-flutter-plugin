@@ -1,0 +1,8 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "tencentcloud_cos_sdk_plugin_example"
+    }
+  ]
+}

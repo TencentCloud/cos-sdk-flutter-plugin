@@ -4,7 +4,9 @@ import 'package:tencentcloud_cos_sdk_plugin/cos_service.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+// 原先使用 modal_bottom_sheet 包，但它对 TargetPlatform 做穷尽 switch，
+// 而 HarmonyOS 版 Flutter 新增了 TargetPlatform.ohos，导致编译失败。
+// 此处用法与 Flutter 内置的 showModalBottomSheet 完全兼容，故改用内置实现。
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../common/constant.dart';
 import '../../common/toast_utils.dart';
@@ -204,7 +206,7 @@ class _ObjectListPageState extends State<ObjectListPage> {
           "创建时间：${Utils.toDateTimeString(objectEntity.getContent()!.lastModified)}\n大小：${Utils.readableStorageSize(objectEntity.getContent()!.size)}"),
       trailing: const Icon(Icons.more_horiz_rounded),
       isThreeLine: true,
-      onTap: () => showMaterialModalBottomSheet(
+      onTap: () => showModalBottomSheet(
           backgroundColor: Colors.white,
           context: context,
           builder: (context) => Material(

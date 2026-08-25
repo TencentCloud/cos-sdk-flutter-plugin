@@ -26,8 +26,10 @@ class FetchCredentials implements IFetchCredentials{
       var response = await request.close();
       if (response.statusCode == HttpStatus.OK) {
         var json = await response.transform(utf8.decoder).join();
+        // ⚠️ 不要打印 json 原文：它含 tmpSecretId / tmpSecretKey / sessionToken
+        // 明文，会进入本地日志、CI 日志与崩溃上报。只打印非敏感的元信息。
         if (kDebugMode) {
-          print(json);
+          print('fetched STS credentials, length=${json.length}');
         }
         var data = jsonDecode(json);
         return SessionQCloudCredentials(
@@ -65,8 +67,10 @@ class FetchScopeLimitCredentials implements IFetchScopeLimitCredentials{
       var response = await request.close();
       if (response.statusCode == HttpStatus.OK) {
         var json = await response.transform(utf8.decoder).join();
+        // ⚠️ 不要打印 json 原文：它含 tmpSecretId / tmpSecretKey / sessionToken
+        // 明文，会进入本地日志、CI 日志与崩溃上报。只打印非敏感的元信息。
         if (kDebugMode) {
-          print(json);
+          print('fetched STS credentials, length=${json.length}');
         }
         var data = jsonDecode(json);
         return SessionQCloudCredentials(
@@ -116,8 +120,10 @@ class CLSFetchCLsChannelCredentials implements IFetchCLsChannelCredentials{
       var response = await request.close();
       if (response.statusCode == HttpStatus.OK) {
         var json = await response.transform(utf8.decoder).join();
+        // ⚠️ 不要打印 json 原文：它含 tmpSecretId / tmpSecretKey / sessionToken
+        // 明文，会进入本地日志、CI 日志与崩溃上报。只打印非敏感的元信息。
         if (kDebugMode) {
-          print(json);
+          print('fetched STS credentials, length=${json.length}');
         }
         var data = jsonDecode(json);
         return SessionQCloudCredentials(

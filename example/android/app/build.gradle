@@ -1,14 +1,18 @@
+// 迁移自 legacy 的 `apply plugin` + `apply from: flutter.gradle` 写法，
+// 改用 declarative plugins block（Flutter 3.29+ 要求）。
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // flutter-gradle-plugin 必须在 Android 与 Kotlin 插件之后
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader('UTF-8') { reader ->
         localProperties.load(reader)
     }
-}
-
-def flutterRoot = localProperties.getProperty('flutter.sdk')
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -21,17 +25,25 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
-
 android {
-    compileSdkVersion flutter.compileSdkVersion
+    // AGP 8 要求显式声明 namespace（原先由 AndroidManifest 的 package 属性提供）。
+    // 必须与 AndroidManifest 原 package 值及 MainActivity 的包名一致，
+    // 否则 manifest 中 ".MainActivity" 的相对引用与 R 类包名都会解析错误。
+    // 注意它与 applicationId(com.tencent.cos_flutter_example) 故意不同，保持原样。
+    namespace "com.tencent.cos_example"
+    compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 
+    // Java 与 Kotlin 的 JVM target 必须一致，否则 Kotlin 2.x 会报
+    // "Inconsistent JVM-target compatibility"（Java 1.8 vs Kotlin 21）。
+    // 该问题在只编 Java 时不会暴露，引入 Kotlin 编译任务（如集成测试）后才出现。
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
@@ -39,7 +51,6 @@ android {
         applicationId "com.tencent.cos_flutter_example"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-//        minSdkVersion flutter.minSdkVersion
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()

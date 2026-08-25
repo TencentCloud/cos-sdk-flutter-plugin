@@ -1,3 +1,9 @@
+## 1.4.0
+支持 HarmonyOS NEXT（鸿蒙）平台
+不兼容变更：最低环境要求提高为 `Dart >= 3.0.0` / `Flutter >= 3.10.0`（原 2.15.0 / 2.5.0）
+iOS端修复主动暂停/取消被 FAILED 覆写的问题
+其他完善
+
 ## 1.3.0
 iOS端提供默认的signatureProvider，完善单次临时密钥的支持
 iOS端不再拦截QCloudNetworkErrorCodeCanceled，会在错误回调中回调

@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
                                    secretKey:(nullable NSString *)secretKey
                                    isScopeLimitCredential:(bool)isScopeLimitCredential;
 
+/// 把 pigeon 的 FlutterError 转成 NSError（FlutterError 并非 NSError 子类，详见实现处注释）。
++ (nullable NSError *)nsErrorFromFlutterError:(nullable FlutterError *)error;
+
 @property (nonatomic, strong, nonnull) QCloudCredentailFenceQueue* credentialFenceQueue;
 @property (nonatomic, strong, nonnull) FlutterCosApi* flutterCosApi;
 @property (nonatomic, copy, nullable) NSString* secretId;

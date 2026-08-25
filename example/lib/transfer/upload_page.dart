@@ -6,12 +6,12 @@ import 'package:tencentcloud_cos_sdk_plugin/cos_transfer_manger.dart';
 import 'package:tencentcloud_cos_sdk_plugin/enums.dart';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 import 'package:tencentcloud_cos_sdk_plugin/transfer_task.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 import '../common/DnsConfig.dart';
 import '../common/constant.dart';
+import '../common/file_picker_utils.dart';
 import '../common/res/colors.dart';
 import '../common/res/gaps.dart';
 import '../common/toast_utils.dart';
@@ -69,10 +69,10 @@ class _UploadPageState extends State<UploadPage> {
       appBar: AppBar(title: const Text('上传文件'), actions: [
         TextButton(
             onPressed: () async {
-              FilePickerResult? result = await FilePicker.platform.pickFiles();
-              if (result != null) {
+              String? path = await FilePickerUtils.pickSingleFilePath();
+              if (path != null) {
                 setState(() {
-                  _pickFilePath = result.files.single.path;
+                  _pickFilePath = path;
                 });
               }
             },
@@ -219,26 +219,31 @@ class _UploadPageState extends State<UploadPage> {
         }
       }
       //上传失败回调
-      failCallBack(clientException, serviceException) {
+      failCallBack(CosXmlClientException? clientException, CosXmlServiceException? serviceException) {
+        // pigeon 生成的异常类没有重写 toString，直接打印只会得到 "Instance of 'CosXmlClientException'"。
+        // 这里手动拼装字段，保证日志与 UI 都能看到具体的错误码/错误信息/details。
+        String uiMsg = "未知错误";
+        String logMsg = "未知错误";
+        if (clientException != null) {
+          uiMsg = "客户端异常 [${clientException.errorCode}] ${clientException.message ?? ''}";
+          logMsg = "CosXmlClientException{errorCode=${clientException.errorCode}, "
+              "message=${clientException.message}, details=${clientException.details}}";
+        } else if (serviceException != null) {
+          uiMsg = "服务端异常 [HTTP ${serviceException.statusCode}] "
+              "${serviceException.errorCode ?? ''} ${serviceException.errorMessage ?? ''}";
+          logMsg = "CosXmlServiceException{statusCode=${serviceException.statusCode}, "
+              "httpMsg=${serviceException.httpMsg}, requestId=${serviceException.requestId}, "
+              "errorCode=${serviceException.errorCode}, errorMessage=${serviceException.errorMessage}, "
+              "serviceName=${serviceException.serviceName}, details=${serviceException.details}}";
+        }
+        if (kDebugMode) {
+          print("aaa-failCallBack detail: $logMsg");
+        }
         if (mounted) {
-          if (clientException != null) {
-            setState(() {
-              _resultString = "错误信息：${clientException.toString()}";
-              _resultColor = Colours.red;
-            });
-            if (kDebugMode) {
-              print(clientException);
-            }
-          }
-          if (serviceException != null) {
-            setState(() {
-              _resultString = "错误信息：${serviceException.toString()}";
-              _resultColor = Colours.red;
-            });
-            if (kDebugMode) {
-              print(serviceException);
-            }
-          }
+          setState(() {
+            _resultString = "错误信息：$uiMsg";
+            _resultColor = Colours.red;
+          });
         }
       }
       //上传状态回调
@@ -251,6 +256,12 @@ class _UploadPageState extends State<UploadPage> {
       }
       //上传进度回调
       progressCallBack(complete, target) {
+        // 断网/SDK 异常场景下 native 可能回传非法值（target<=0、complete<0），
+        // 直接赋给 UI 会导致 _complete/_target 计算出 NaN/Infinity，
+        // 进而触发 'Unsupported operation: Infinity or NaN toInt' 与 RenderFlex 溢出。
+        if (target == null || target <= 0 || complete == null || complete < 0) {
+          return;
+        }
         if (mounted) {
           setState(() {
             _complete = complete;
@@ -271,18 +282,25 @@ class _UploadPageState extends State<UploadPage> {
       //     "\"callbackHost\": \"xx.xx.xx.xx\", " +
       //     "\"callbackBody\": \"bucket=\${bucket}&object=\${object}&etag=\${etag}&test=test_123\", " +
       //     "\"callbackBodyType\": \"application/x-www-form-urlencoded\" }";
+
+      SessionQCloudCredentials? sessionCredentials = await FetchCredentials.getSessionCredentials();
+      // 不要打印 token 原文（敏感信息会进日志），只确认是否取到
+      if (kDebugMode) {
+        print("sessionCredentials fetched: ${sessionCredentials != null}");
+      }
+
       _transferTask = await cosTransferManger.upload(widget.bucketName, cosPath,
           filePath: _pickFilePath,
           // byteArr: bytes,
           uploadId: _uploadId,
           // callbackParam: callbackParam,
-          customHeaders: {"x-cos-meta-a":"1","x-cos-meta-b":"2"},
+          // customHeaders: {"x-cos-meta-a":"1","x-cos-meta-b":"2"},
           // noSignHeaders: ["Host"],
           resultListener: ResultListener(successCallBack, failCallBack),
           stateCallback: stateCallback,
           progressCallBack: progressCallBack,
           initMultipleUploadCallback: initMultipleUploadCallback,
-          sessionCredentials: await FetchCredentials.getSessionCredentials()
+          sessionCredentials: sessionCredentials
       );
     } catch (e) {
       Toast.show(e.toString());
@@ -293,7 +311,7 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   String _getProgressString() {
-    if (_complete == null || _target == null) {
+    if (_complete == null || _target == null || _target! <= 0) {
       return "";
     }
 
@@ -301,10 +319,16 @@ class _UploadPageState extends State<UploadPage> {
   }
 
   double _getProgress() {
-    if (_complete == null || _target == null) {
+    if (_complete == null || _target == null || _target! <= 0) {
       return 0;
     }
 
-    return _complete! / _target!;
+    final double v = _complete! / _target!;
+    if (v.isNaN || v.isInfinite) {
+      return 0;
+    }
+    if (v < 0) return 0;
+    if (v > 1) return 1;
+    return v;
   }
 }

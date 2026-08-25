@@ -34,8 +34,13 @@ class Utils {
     } else if(Platform.isIOS) {
       Directory appDocDir = await getApplicationDocumentsDirectory();
       return appDocDir.path;
+    } else if (Platform.operatingSystem == 'ohos') {
+      // 鸿蒙上 path_provider 没有实现（调用 getApplicationDocumentsDirectory 会抛
+      // MissingPluginException），改用应用沙箱的固定可写目录。
+      // el2/base/haps/entry/files 是 entry 模块的私有可写目录，与验证页一致。
+      return '/data/storage/el2/base/haps/entry/files';
     } else {
-      throw UnsupportedError("Only Android and iOS are supported");
+      throw UnsupportedError("Only Android, iOS and HarmonyOS are supported");
     }
   }
 }

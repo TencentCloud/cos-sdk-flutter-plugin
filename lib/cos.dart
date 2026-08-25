@@ -20,7 +20,7 @@ class Cos {
 
   final ImplFlutterCosApi flutterCosApi = ImplFlutterCosApi();
   Cos._internal() {
-    FlutterCosApi.setup(flutterCosApi);
+    FlutterCosApi.setUp(flutterCosApi);
   }
 
   factory Cos() => _instance;

@@ -13,6 +13,37 @@
 
 @implementation CosPluginSignatureProvider
 
+/// 把 pigeon 的 FlutterError 转成 NSError。
+///
+/// pigeon 25.x 起 FlutterApi 回调的错误类型由 NSError* 变为 FlutterError*，
+/// 而 FlutterError 继承自 NSObject（**不是** NSError 子类）：它没有 domain/userInfo，
+/// 且 code 是 NSString* 而非 NSInteger。QCloud 的 continueBlock 要求 NSError*，
+/// 直接传 FlutterError* 不仅类型不符，后续对其取 .domain/.userInfo 还会
+/// 触发 unrecognized selector 崩溃，故必须显式转换。
+///
+/// code 固定用 QCloudNetworkErrorCodeCredentialNotReady(10001)，而不是
+/// [error.code integerValue]：pigeon 的 code 是 "channel-error"/"error" 这类
+/// 非数字字符串，取 integerValue 恒为 0，既不可用于判断、也与 Android 不一致
+/// （Android 同路径用 ClientErrorCode.INVALID_CREDENTIALS，见
+/// BridgeCredentialProvider.java）。10001 亦是 QCloud 自身签名失败时使用的码。
+/// 原始字符串 code 保留在 userInfo 中，便于排查。
++ (nullable NSError *)nsErrorFromFlutterError:(nullable FlutterError *)error {
+    if (error == nil) {
+        return nil;
+    }
+    NSMutableDictionary * userInfo = [NSMutableDictionary dictionary];
+    if (error.message) {
+        userInfo[NSLocalizedDescriptionKey] = error.message;
+    }
+    userInfo[@"FlutterErrorCode"] = error.code;
+    if (error.details) {
+        userInfo[@"FlutterErrorDetails"] = error.details;
+    }
+    return [NSError errorWithDomain:kQCloudNetworkDomain
+                               code:QCloudNetworkErrorCodeCredentialNotReady
+                           userInfo:userInfo];
+}
+
 + (instancetype)makeWithFlutterCosApi:(nonnull FlutterCosApi *)flutterCosApi
                              secretId:(nullable NSString *)secretId
                             secretKey:(nullable NSString *)secretKey
@@ -56,6 +87,18 @@
             [shouldSignHeaders addObject:obj];;
         }
     }];
+
+    // 如果 request 的 payload 中携带了单次临时密钥，优先使用它来签名
+    QCloudCredential* payloadCredential = request.payload[@"NewQCloudCredential"];
+    if(payloadCredential != nil){
+        QCloudAuthentationV5Creator* creator = [[QCloudAuthentationV5Creator alloc]
+                                                initWithCredential:payloadCredential];
+        creator.shouldSignedList = shouldSignHeaders;
+        QCloudSignature* signature =  [creator signatureForData:urlRequst];
+        continueBlock(signature, nil);
+        return;
+    }
+    
     // 永久秘钥
     if(self.secretId != nil && self.secretKey != nil && ![@"" isEqualToString:self.secretId] && ![@"" isEqualToString:self.secretKey]){
         QCloudCredential* credential = [QCloudCredential new];
@@ -104,7 +147,7 @@
         }
         
         [self.flutterCosApi fetchScopeLimitCredentialsStsCredentialScopes:stsScopesArray
-                                                               completion:^(SessionQCloudCredentials * _Nullable credentials, NSError * _Nullable error) {
+                                                               completion:^(SessionQCloudCredentials * _Nullable credentials, FlutterError * _Nullable error) {
             if(credentials != nil){
                 QCloudCredential* credential = [QCloudCredential new];
                 // 临时密钥 SecretId
@@ -119,7 +162,8 @@
                 /** 强烈建议返回服务器时间作为签名的开始时间, 用来避免由于用户手机本地时间偏差过大导致的签名不正确(参数startTime和expiredTime单位为秒)
                  */
                 credential.startDate = [NSDate dateWithTimeIntervalSince1970: [[credentials startTime] doubleValue]]; // 单位是秒
-                credential.expirationDate = [NSDate dateWithTimeIntervalSince1970: [[credentials expiredTime] doubleValue]];// 单位是秒
+                // expiredTime 在 IDL 中是非空 int，pigeon 25.x 起为裸 NSInteger，不能再发 doubleValue 消息
+                credential.expirationDate = [NSDate dateWithTimeIntervalSince1970: (double)[credentials expiredTime]];// 单位是秒
                 
                 QCloudAuthentationV5Creator* creator = [[QCloudAuthentationV5Creator alloc]
                                                         initWithCredential:credential];
@@ -127,7 +171,7 @@
                 QCloudSignature* signature =  [creator signatureForData:urlRequst];
                 continueBlock(signature, nil);
             } else {
-                continueBlock(nil, error);
+                continueBlock(nil, [CosPluginSignatureProvider nsErrorFromFlutterError:error]);
         }
         }];
     } else {
@@ -162,7 +206,7 @@
 
 - (void)fenceQueue:(QCloudCredentailFenceQueue *)queue requestCreatorWithContinue:(QCloudCredentailFenceQueueContinue)continueBlock {
     //这里同步从◊后台服务器获取临时密钥，强烈建议将获取临时密钥的逻辑放在这里，最大程度上保证密钥的可用性
-    [self.flutterCosApi fetchSessionCredentialsWithCompletion:^(SessionQCloudCredentials *_Nullable credentials, NSError *_Nullable error) {
+    [self.flutterCosApi fetchSessionCredentialsWithCompletion:^(SessionQCloudCredentials *_Nullable credentials, FlutterError *_Nullable error) {
         if(credentials != nil){
             QCloudCredential* credential = [QCloudCredential new];
             // 临时密钥 SecretId
@@ -177,11 +221,18 @@
             /** 强烈建议返回服务器时间作为签名的开始时间, 用来避免由于用户手机本地时间偏差过大导致的签名不正确(参数startTime和expiredTime单位为秒)
              */
             credential.startDate = [NSDate dateWithTimeIntervalSince1970: [[credentials startTime] doubleValue]]; // 单位是秒
-            credential.expirationDate = [NSDate dateWithTimeIntervalSince1970: [[credentials expiredTime] doubleValue]];// 单位是秒
-            
+            // expiredTime 在 IDL 中是非空 int，pigeon 25.x 起为裸 NSInteger，不能再发 doubleValue 消息
+            credential.expirationDate = [NSDate dateWithTimeIntervalSince1970: (double)[credentials expiredTime]];// 单位是秒
+
             QCloudAuthentationV5Creator* creator = [[QCloudAuthentationV5Creator alloc]
                                                     initWithCredential:credential];
             continueBlock(creator, nil);
+        } else {
+            // 修复既有缺陷：原先 credentials 为 nil 时不调用 continueBlock，
+            // 请求要一直卡到 QCloudCredentailFenceQueue 的 120s 超时才报一个
+            // 笼统错误（且该超时定时器挂在 main runloop 上，主线程被阻塞时
+            // 可能根本不触发）。这里显式回传错误，做到快速失败并保留原始信息。
+            continueBlock(nil, [CosPluginSignatureProvider nsErrorFromFlutterError:error]);
         }
     }
     ];

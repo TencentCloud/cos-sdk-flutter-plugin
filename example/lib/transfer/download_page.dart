@@ -158,26 +158,31 @@ class _DownloadPageState extends State<DownloadPage> {
                     _resultColor = Colours.text_gray;
                   });
                 }
-              }, (clientException, serviceException) {
+              }, (CosXmlClientException? clientException, CosXmlServiceException? serviceException) {
+                // pigeon 生成的异常类没有重写 toString，直接打印只会得到 "Instance of 'CosXmlClientException'"。
+                // 手动拼装字段，让 UI 与日志都能看到具体的错误码/错误信息/details。
+                String uiMsg = "未知错误";
+                String logMsg = "未知错误";
+                if (clientException != null) {
+                  uiMsg = "客户端异常 [${clientException.errorCode}] ${clientException.message ?? ''}";
+                  logMsg = "CosXmlClientException{errorCode=${clientException.errorCode}, "
+                      "message=${clientException.message}, details=${clientException.details}}";
+                } else if (serviceException != null) {
+                  uiMsg = "服务端异常 [HTTP ${serviceException.statusCode}] "
+                      "${serviceException.errorCode ?? ''} ${serviceException.errorMessage ?? ''}";
+                  logMsg = "CosXmlServiceException{statusCode=${serviceException.statusCode}, "
+                      "httpMsg=${serviceException.httpMsg}, requestId=${serviceException.requestId}, "
+                      "errorCode=${serviceException.errorCode}, errorMessage=${serviceException.errorMessage}, "
+                      "serviceName=${serviceException.serviceName}, details=${serviceException.details}}";
+                }
+                if (kDebugMode) {
+                  print("download failCallBack detail: $logMsg");
+                }
                 if (mounted) {
-                  if (clientException != null) {
-                    setState(() {
-                      _resultString = "错误信息：${clientException.toString()}";
-                      _resultColor = Colours.red;
-                    });
-                    if (kDebugMode) {
-                      print(clientException);
-                    }
-                  }
-                  if (serviceException != null) {
-                    setState(() {
-                      _resultString = "错误信息：${serviceException.toString()}";
-                      _resultColor = Colours.red;
-                    });
-                    if (kDebugMode) {
-                      print(serviceException);
-                    }
-                  }
+                  setState(() {
+                    _resultString = "错误信息：$uiMsg";
+                    _resultColor = Colours.red;
+                  });
                 }
           }), stateCallback: (state) {
         if (mounted) {
@@ -186,6 +191,10 @@ class _DownloadPageState extends State<DownloadPage> {
           });
         }
       }, progressCallBack: (complete, target) {
+        // 断网/SDK 异常场景下 native 可能回传非法值，防止产生 NaN/Infinity 。
+        if (target == null || target <= 0 || complete == null || complete < 0) {
+          return;
+        }
         if (mounted) {
           setState(() {
             _complete = complete;
@@ -203,7 +212,7 @@ class _DownloadPageState extends State<DownloadPage> {
   }
 
   String _getProgressString() {
-    if (_complete == null || _target == null) {
+    if (_complete == null || _target == null || _target! <= 0) {
       return "";
     }
 
@@ -211,10 +220,16 @@ class _DownloadPageState extends State<DownloadPage> {
   }
 
   double _getProgress() {
-    if (_complete == null || _target == null) {
+    if (_complete == null || _target == null || _target! <= 0) {
       return 0;
     }
 
-    return _complete! / _target!;
+    final double v = _complete! / _target!;
+    if (v.isNaN || v.isInfinite) {
+      return 0;
+    }
+    if (v < 0) return 0;
+    if (v > 1) return 1;
+    return v;
   }
 }

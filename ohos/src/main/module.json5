@@ -1,0 +1,11 @@
+{
+  "module": {
+    "name": "tencentcloud_cos_sdk_plugin",
+    "type": "har",
+    "deviceTypes": [
+      "default",
+      "tablet",
+      "2in1"
+    ]
+  }
+}

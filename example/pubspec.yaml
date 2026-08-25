@@ -31,15 +31,28 @@ dependencies:
 #  tencentcloud_cos_sdk_plugin:
 #    git: https://github.com/TencentCloud/cos-sdk-flutter-plugin.git
 
-  flutter_easyloading: ^3.0.5
-  pull_to_refresh: ^2.0.0
-  file_picker: ^6.1.1
-  modal_bottom_sheet: ^3.0.0-pre
-  intl: ^0.17.0
-  path_provider: ^2.1.2
+  flutter_easyloading: 3.0.5
+  pull_to_refresh: 2.0.0
+  # 6.1.1 的 Android 侧仍引用已被移除的 Flutter v1 embedding
+  # （PluginRegistry.Registrar），在当前 Flutter 版本下无法编译，故升级。
+  file_picker: ^8.1.2
+  # 已移除 modal_bottom_sheet：它对 TargetPlatform 做穷尽 switch，
+  # 而 HarmonyOS 版 Flutter 新增了 TargetPlatform.ohos 枚举值，导致编译失败。
+  # example 中仅用到 showMaterialModalBottomSheet，已改用 Flutter 内置的
+  # showModalBottomSheet（参数兼容）。
+  intl: 0.17.0
+  path_provider: 2.1.2
+
+dependency_overrides:
+  flutter_spinkit: 5.2.1
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+
+  # 三端一致性集成测试（integration_test/cos_consistency_test.dart）。
+  # 用它而不是截图验证：能在真机/模拟器跑，断言结果直接回传终端。
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to

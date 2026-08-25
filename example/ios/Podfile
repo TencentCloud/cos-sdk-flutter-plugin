@@ -1,5 +1,5 @@
 # Uncomment this line to define a global platform for your project
-# platform :ios, '12.0'
+# platform :ios, '13.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -38,5 +38,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    # integration_test 会引入 Swift；CocoaPods 要求至少一个集成该 pod 的 target
+    # 显式声明 SWIFT_VERSION，否则报
+    # "tencentcloud_cos_sdk_plugin does not specify a Swift version"。
+    # 插件本身是纯 ObjC，这里只是满足 CocoaPods 的校验。
+    target.build_configurations.each do |config|
+      config.build_settings['SWIFT_VERSION'] = '5.0'
+    end
   end
 end

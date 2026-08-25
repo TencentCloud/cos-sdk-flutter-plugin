@@ -1,0 +1,11 @@
+{
+  "name": "tencentcloud_cos_sdk_plugin",
+  "version": "1.4.0",
+  "description": "Tencent Cloud Flutter Plugin COS SDK - HarmonyOS implementation.",
+  "main": "index.ets",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ohos/flutter_ohos": "file:./har/flutter.har",
+    "@tencentcloud/cos": "1.2.5"
+  }
+}

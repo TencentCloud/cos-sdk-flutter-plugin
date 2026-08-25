@@ -1,12 +1,13 @@
 name: tencentcloud_cos_sdk_plugin
 description: Tencent Cloud Flutter Plugin COS SDK.
-version: 1.2.7
+version: 1.4.0
 homepage: https://cloud.tencent.com/document/product/436/86294
 repository: https://github.com/TencentCloud/cos-sdk-flutter-plugin
 
+# 注意：1.4.0 起 SDK 下界由 dart>=2.15.0/flutter>=2.5.0 抬升至 dart>=3.0.0/flutter>=3.10.0。
 environment:
-  sdk: ">=2.15.0 <4.0.0"
-  flutter: ">=2.5.0"
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
 
 dependencies:
   flutter:
@@ -17,7 +18,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-  pigeon: ^4.2.2
+  # 使用 CPF-Flutter fork 的 pigeon：官方 pigeon 无 ArkTS(鸿蒙) 生成器。
+  # 该 fork 保留 java/objc 生成器，可一次生成 Dart/Java/ObjC/ArkTS 四端。
+  # 分支名为 pigeon-v25.3.2-ohos-1.0.1，但包内 pubspec 自称 version: 25.5.0（上游对应版本存疑，以本 ref 为准）。
+  # 仅为开发期代码生成工具，不进入运行时依赖，其自身 Dart ^3.6.0 要求不影响终端用户。
+  pigeon:
+    git:
+      url: "https://gitcode.com/CPF-Flutter/flutter_packages.git"
+      path: "packages/pigeon"
+      ref: pigeon-v25.3.2-ohos-1.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -40,6 +49,8 @@ flutter:
         package: com.tencent.cos.flutter.plugin
         pluginClass: CosPlugin
       ios:
+        pluginClass: CosPlugin
+      ohos:
         pluginClass: CosPlugin
 
   # To add assets to your plugin package, add an assets section, like this:

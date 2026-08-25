@@ -1,18 +1,28 @@
 // Mock 文件：用于单元测试中模拟原生 API
-// 
+//
 // 这个文件提供了 Pigeon 生成的原生 API 的 Mock 实现，
 // 使得我们可以在不依赖 Android/iOS 设备的情况下运行单元测试。
-// 
+//
 // 注意：此文件不是测试文件，而是测试辅助文件。
-// @dart=2.15
 
 library mock_cos_api;
+
+import 'package:flutter/services.dart' show BinaryMessenger;
 
 import 'dart:typed_data';
 import 'package:tencentcloud_cos_sdk_plugin/pigeon.dart';
 
 /// Mock CosApi - 模拟 COS 核心 API
 class MockCosApi implements CosApi {
+  // pigeon 25.x 起，生成类的内部字段由私有 `_binaryMessenger` 改为公开
+  // `pigeonVar_binaryMessenger` / `pigeonVar_messageChannelSuffix`，
+  // 因此 implements 的 Mock 必须显式实现。Mock 不走真实通道，给默认值即可。
+  @override
+  final BinaryMessenger? pigeonVar_binaryMessenger = null;
+
+  @override
+  final String pigeonVar_messageChannelSuffix = '';
+
   bool initWithPlainSecretCalled = false;
   bool initWithSessionCredentialCalled = false;
   bool initWithScopeLimitCredentialCalled = false;
@@ -136,6 +146,12 @@ class MockCosApi implements CosApi {
 
 /// Mock CosServiceApi - 模拟 COS Service API
 class MockCosServiceApi implements CosServiceApi {
+  @override
+  final BinaryMessenger? pigeonVar_binaryMessenger = null;
+
+  @override
+  final String pigeonVar_messageChannelSuffix = '';
+
   // 记录调用情况
   bool headObjectCalled = false;
   bool deleteObjectCalled = false;
@@ -326,6 +342,12 @@ class MockCosServiceApi implements CosServiceApi {
 
 /// Mock CosTransferApi - 模拟传输 API
 class MockCosTransferApi implements CosTransferApi {
+  @override
+  final BinaryMessenger? pigeonVar_binaryMessenger = null;
+
+  @override
+  final String pigeonVar_messageChannelSuffix = '';
+
   bool uploadCalled = false;
   bool downloadCalled = false;
   bool pauseCalled = false;

@@ -98,9 +98,9 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         context = flutterPluginBinding.getApplicationContext();
-        Pigeon.CosApi.setup(flutterPluginBinding.getBinaryMessenger(), this);
-        Pigeon.CosServiceApi.setup(flutterPluginBinding.getBinaryMessenger(), this);
-        Pigeon.CosTransferApi.setup(flutterPluginBinding.getBinaryMessenger(), this);
+        Pigeon.CosApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
+        Pigeon.CosServiceApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
+        Pigeon.CosTransferApi.setUp(flutterPluginBinding.getBinaryMessenger(), this);
         flutterCosApi = new Pigeon.FlutterCosApi(flutterPluginBinding.getBinaryMessenger());
         CosXmlBaseService.BRIDGE = "Flutter";
 
@@ -340,7 +340,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
+    public void deleteObject(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull String cosPath, @Nullable String versionId, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(
                 bucket, cosPath);
@@ -354,7 +354,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         service.deleteObjectAsync(deleteObjectRequest, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -409,12 +409,12 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void preBuildConnection(@NonNull String bucket, @NonNull String serviceKey, Pigeon.Result<Void> result) {
+    public void preBuildConnection(@NonNull String bucket, @NonNull String serviceKey, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         service.preBuildConnectionAsync(bucket, new CosXmlResultSimpleListener() {
             @Override
             public void onSuccess() {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -577,7 +577,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
 
     @Override
     public void putBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Boolean enableMAZ,
-                          @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
+                          @Nullable String cosacl, @Nullable String readAccount, @Nullable String writeAccount, @Nullable String readWriteAccount, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketRequest request = new PutBucketRequest(bucket);
         if (region != null) {
@@ -602,7 +602,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         service.putBucketAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -651,7 +651,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
+    public void deleteBucket(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         DeleteBucketRequest request = new DeleteBucketRequest(bucket);
         if (region != null) {
@@ -661,7 +661,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         service.deleteBucketAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -715,7 +715,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
+    public void putBucketAccelerate(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketAccelerateRequest request = new PutBucketAccelerateRequest(bucket, enable);
         if (region != null) {
@@ -725,7 +725,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         service.putBucketAccelerateAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -812,7 +812,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
     }
 
     @Override
-    public void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.Result<Void> result) {
+    public void putBucketVersioning(@NonNull String serviceKey, @NonNull String bucket, @Nullable String region, @NonNull Boolean enable, @Nullable Pigeon.SessionQCloudCredentials sessionCredentials, Pigeon.VoidResult result) {
         CosXmlService service = getCosXmlService(serviceKey);
         PutBucketVersioningRequest request = new PutBucketVersioningRequest(bucket);
         request.setEnableVersion(enable);
@@ -823,7 +823,7 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         service.putBucketVersionAsync(request, new CosXmlResultListener() {
             @Override
             public void onSuccess(CosXmlRequest cosXmlRequest, CosXmlResult cosXmlResult) {
-                result.success(null);
+                result.success();
             }
 
             @Override
@@ -980,8 +980,21 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
             cosXmlService.addCustomerDNSFetch(domain -> {
                 CompletableFuture<List<String>> future = new CompletableFuture<>();
                 //此处调用有可能不是在主线程中 需要切换到主线程 因为调用flutter只能在主线程
+                // pigeon 25.x 起回调类型由 Reply<T>（单方法，可用 lambda）改为
+                // NullableResult<T>（success/error 双方法）。这里显式实现 error 分支，
+                // 让 Flutter 侧异常能立即结束等待，而不是白等满 60 秒超时。
                 runMainThread(() ->
-                        flutterCosApi.fetchDns(domain, future::complete)
+                        flutterCosApi.fetchDns(domain, new Pigeon.NullableResult<List<String>>() {
+                            @Override
+                            public void success(@Nullable List<String> result) {
+                                future.complete(result);
+                            }
+
+                            @Override
+                            public void error(@NonNull Throwable error) {
+                                future.completeExceptionally(error);
+                            }
+                        })
                 );
                 List<InetAddress> inetAddresses = new ArrayList<>();
                 try {
@@ -1151,33 +1164,44 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         return taskKey;
     }
 
+    /**
+     * 取任务；任务已终结（成功/失败后从 taskMap 移除）时返回 null 并打日志。
+     *
+     * 对已终结的任务调用 pause/resume/cancel 原先会抛裸 IllegalArgumentException
+     * （无错误消息），Flutter 侧表现为一个难以定位的 PlatformException ——
+     * 用户在传输刚完成的瞬间点"取消"就会遇到。
+     * iOS 与鸿蒙对此都是静默返回，这里与之对齐：这类操作应当是幂等的。
+     */
+    @Nullable
+    private COSXMLTask getTaskOrLogAbsent(@NonNull String taskId, @NonNull String action) {
+        COSXMLTask task = taskMap.get(taskId);
+        if (task == null) {
+            Log.i(TAG, taskId + " request canceled or ended, ignore " + action);
+        }
+        return task;
+    }
+
     @Override
     public void pause(@NonNull String taskId, @NonNull String transferKey) {
-        COSXMLTask task = taskMap.get(taskId);
+        COSXMLTask task = getTaskOrLogAbsent(taskId, "pause");
         if (task != null) {
             task.pause();
-        } else {
-            throw new IllegalArgumentException();
         }
     }
 
     @Override
     public void resume(@NonNull String taskId, @NonNull String transferKey) {
-        COSXMLTask task = taskMap.get(taskId);
+        COSXMLTask task = getTaskOrLogAbsent(taskId, "resume");
         if (task != null) {
             task.resume();
-        } else {
-            throw new IllegalArgumentException();
         }
     }
 
     @Override
     public void cancel(@NonNull String taskId, @NonNull String transferKey) {
-        COSXMLTask task = taskMap.get(taskId);
+        COSXMLTask task = getTaskOrLogAbsent(taskId, "cancel");
         if (task != null) {
             task.cancel();
-        } else {
-            throw new IllegalArgumentException();
         }
     }
 
@@ -1316,8 +1340,24 @@ public class CosPlugin implements FlutterPlugin, Pigeon.CosApi, Pigeon.CosServic
         mainHandler.post(runnable);
     }
 
-    private Pigeon.FlutterCosApi.Reply<Void> getVoidReply() {
-        return reply -> {
+    /**
+     * FlutterApi 回调的空结果处理器。
+     *
+     * pigeon 25.x 起，FlutterApi 侧返回 void 的方法回调类型由 {@code Reply<Void>}
+     * 改为 {@code VoidResult}（success 无参，并新增 error 分支）。
+     * 这些回调（进度/状态/日志等）是「通知型」调用，Flutter 侧的失败不影响原生流程，
+     * 故这里沿用原有语义：成功忽略，失败仅打日志，不向上抛。
+     */
+    private Pigeon.VoidResult getVoidReply() {
+        return new Pigeon.VoidResult() {
+            @Override
+            public void success() {
+            }
+
+            @Override
+            public void error(@NonNull Throwable error) {
+                Log.e(TAG, "flutter api callback failed: " + error);
+            }
         };
     }
 

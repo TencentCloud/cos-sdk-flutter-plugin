@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'tencentcloud_cos_sdk_plugin'
-  s.version          = '1.2.7'
+  s.version          = '1.4.0'
   s.summary          = 'Tencent COS Flutter Plugin SDK.'
   s.description      = <<-DESC
 Tencent COS Flutter Plugin SDK.
@@ -17,10 +17,14 @@ Tencent COS Flutter Plugin SDK.
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
-  s.dependency 'QCloudCOSXML','6.5.3'
+  s.dependency 'QCloudCOSXML','6.5.5'
   s.platform = :ios, '10.0'
   s.static_framework = true
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
+  # 本插件源码是纯 ObjC，但当宿主工程引入含 Swift 的 pod（如 integration_test）时，
+  # CocoaPods 会要求每个 pod 都能确定 Swift 版本，否则报
+  # "does not specify a Swift version"。这里显式声明以免阻塞集成测试。
+  s.swift_version = '5.0'
 end
